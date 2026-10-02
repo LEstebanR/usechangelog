@@ -1,6 +1,11 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Inter, Space_Grotesk } from "next/font/google";
 import "./globals.css";
+
+const spaceGrotesk = Space_Grotesk({
+  variable: "--font-space-grotesk",
+  subsets: ["latin"],
+});
 
 const inter = Inter({
   variable: "--font-inter",
@@ -8,14 +13,18 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "UseChangelog",
-  description: "Changelog and product announcements for small teams.",
+  title: "UseChangelog — Tell your users what shipped",
+  description:
+    "A public changelog and an in-app widget for indie hackers and small product teams.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="en" className={`${inter.variable} h-full antialiased`}>
-      <body className="min-h-full flex flex-col">{children}</body>
+    <html
+      lang="en"
+      className={`${spaceGrotesk.variable} ${inter.variable} antialiased`}
+    >
+      <body>{children}</body>
     </html>
   );
 }
