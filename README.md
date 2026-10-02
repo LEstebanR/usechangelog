@@ -15,4 +15,6 @@ Open http://localhost:3000.
 
 ## Deploy
 
-Production (Vercel): _pending_
+Production (Vercel): https://usechangelog-xi.vercel.app
+
+Every pull request gets its own Vercel preview deployment.
