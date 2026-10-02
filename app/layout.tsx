@@ -1,6 +1,13 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Fraunces, Inter } from "next/font/google";
 import "./globals.css";
+
+const fraunces = Fraunces({
+  variable: "--font-fraunces",
+  subsets: ["latin"],
+  axes: ["opsz", "SOFT"],
+  style: ["normal", "italic"],
+});
 
 const inter = Inter({
   variable: "--font-inter",
@@ -8,14 +15,18 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "UseChangelog",
-  description: "Changelog and product announcements for small teams.",
+  title: "UseChangelog — Tell your users what shipped",
+  description:
+    "A public changelog and an in-app widget for indie hackers and small product teams.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="en" className={`${inter.variable} h-full antialiased`}>
-      <body className="min-h-full flex flex-col">{children}</body>
+    <html
+      lang="en"
+      className={`${fraunces.variable} ${inter.variable} antialiased`}
+    >
+      <body>{children}</body>
     </html>
   );
 }
