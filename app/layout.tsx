@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Funnel_Display, Instrument_Sans } from "next/font/google";
+import { brand, hero } from "./content";
 import "./globals.css";
 
 const funnelDisplay = Funnel_Display({
@@ -12,18 +13,19 @@ const instrumentSans = Instrument_Sans({
   subsets: ["latin"],
 });
 
+const title = `${brand} — ${hero.headline.replace(/\.$/, "")}`;
 const description =
   "A public changelog and an in-app widget for indie hackers and small product teams.";
 
 export const metadata: Metadata = {
   // Production URL until usechangelog.com is connected.
   metadataBase: new URL("https://usechangelog-xi.vercel.app"),
-  title: "UseChangelog — Tell your users what shipped",
+  title,
   description,
   openGraph: {
     type: "website",
-    siteName: "UseChangelog",
-    title: "UseChangelog — Tell your users what shipped",
+    siteName: brand,
+    title,
     description,
   },
   twitter: {

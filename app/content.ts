@@ -8,15 +8,27 @@ export type Post = {
   body: string;
 };
 
+export const brand = "UseChangelog";
+
+// Sample public page used across the hero, steps and example.
+export const publicPath = "usechangelog.com/acme";
+
 export const hero = {
   headline: "Tell your users what shipped.",
   subhead:
     "UseChangelog gives your product a public changelog and an in-app widget. Write a post once, and people see it on your site and inside your app.",
   primaryCta: { label: "Get started", href: "#get-started" },
   secondaryCta: { label: "See a changelog", href: "#changelog" },
+  facts: [
+    { term: "Setup", value: "One script tag" },
+    { term: "Editor", value: "Markdown" },
+    { term: "Tags", value: "New, Improved, Fixed" },
+    { term: "Public page", value: publicPath },
+  ],
 };
 
 export const problem = {
+  label: "The problem",
   title: "Your release notes are buried.",
   intro:
     "Most small teams already write down what they ship. The trouble is where it ends up.",
@@ -38,20 +50,35 @@ export const problem = {
     "So users miss what you built, and support keeps answering questions about features that shipped last month.",
 };
 
-export const steps = [
-  {
-    title: "Write a post",
-    text: "Use a plain Markdown editor. Tag it New, Improved or Fixed, then publish.",
-  },
-  {
-    title: "Get a public page",
-    text: "Every post lands on a clean public changelog at usechangelog.com/your-product. Link to it from your docs and emails.",
-  },
-  {
-    title: "Embed the widget",
-    text: "Add one script tag. Your app gets a small “What’s new” panel with your latest posts.",
-  },
-];
+export const how = {
+  label: "How it works",
+  title: "Three steps from release to readers.",
+  steps: [
+    {
+      title: "Write a post",
+      text: "Use a plain Markdown editor. Tag it New, Improved or Fixed, then publish.",
+      detail: "Markdown editor",
+    },
+    {
+      title: "Get a public page",
+      text: "Every post lands on a clean public changelog at usechangelog.com/your-product. Link to it from your docs and emails.",
+      detail: publicPath,
+    },
+    {
+      title: "Embed the widget",
+      text: "Add one script tag. Your app gets a small “What’s new” panel with your latest posts.",
+      detail: "widget.js",
+    },
+  ],
+};
+
+export const example = {
+  label: "Example",
+  title: "What your readers see.",
+  aside:
+    "A public page with every post dated and tagged. Here is a sample for a product called Acme.",
+  product: "Acme",
+};
 
 export const posts: Post[] = [
   {
@@ -83,7 +110,10 @@ export const posts: Post[] = [
   },
 ];
 
+export const shippedPosts = posts.filter((post) => post.tag !== "Coming soon");
+
 export const widget = {
+  label: "Widget",
   title: "One line in your app.",
   text: "Paste the snippet before the closing body tag. A “What’s new” panel then shows your latest posts inside your app.",
   snippet: `<script
@@ -95,18 +125,28 @@ export const widget = {
   note: "Preview only. The widget isn’t live yet.",
 };
 
-export const audiences = [
-  {
-    title: "Indie hackers",
-    text: "You ship every week and you’re the whole team. Posting an update should take two minutes, not an afternoon.",
-  },
-  {
-    title: "Small product teams",
-    text: "Product, design and engineering publish from one place, in one voice, without a release-management process.",
-  },
-];
+export const audience = {
+  label: "Who it’s for",
+  title: "Made for teams of one to twenty.",
+  groups: [
+    {
+      title: "Indie hackers",
+      text: "You ship every week and you’re the whole team. Posting an update should take two minutes, not an afternoon.",
+    },
+    {
+      title: "Small product teams",
+      text: "Product, design and engineering publish from one place, in one voice, without a release-management process.",
+    },
+  ],
+};
+
+export const closing = {
+  label: "Next",
+  title: "Start your changelog.",
+  plan: "Publishing is part of a monthly plan. Pricing will be shared at launch.",
+  status: "Sign-up isn’t open yet. We’re building the first version.",
+};
 
 export const footer = {
-  name: "UseChangelog",
   year: 2026,
 };

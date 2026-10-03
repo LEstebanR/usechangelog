@@ -1,85 +1,97 @@
 import {
-  audiences,
+  audience,
+  brand,
+  closing,
+  example,
   footer,
   hero,
+  how,
   posts,
   problem,
-  steps,
+  publicPath,
+  shippedPosts,
   widget,
 } from "./content";
 import { Latest } from "./latest";
 import { Reveal } from "./reveal";
+import { SectionLabel } from "./section-label";
 import { Tag, tagDots } from "./tag";
 import type { CSSProperties } from "react";
 
 const delay = (ms: number) => ({ "--delay": `${ms}ms` }) as CSSProperties;
+// One rhythm for every list that reveals item by item.
+const stagger = (i: number) => delay(i * 120);
 
-const stepDetails = ["Markdown editor", "usechangelog.com/acme", "widget.js"];
+const container = "mx-auto w-full max-w-6xl px-5 sm:px-8";
+const h2 =
+  "text-balance font-display font-medium tracking-[-0.025em] text-3xl leading-[1.1] md:text-[2.6rem]";
+const h2Small =
+  "text-balance font-display font-medium tracking-[-0.025em] text-3xl leading-tight md:text-4xl";
 
-type NodeKind = "entry" | "next";
+const navLinks = [
+  { href: "#how", label: "How it works" },
+  { href: "#changelog", label: "Example" },
+  { href: "#widget", label: "Widget" },
+];
 
-const nodeStyles: Record<NodeKind, string> = {
-  entry: "border border-blue bg-canvas",
-  next: "border border-dashed border-blue bg-canvas",
-};
-
-// Section labels carry a small square from the brand mark: outlined for
-// sections, dashed for what's next (the filled one belongs to the hero feed).
-function SpineLabel({
-  kind,
+// Places content on columns 4–12 of the 12-column grid, like section headings.
+function Indented({
   children,
   className = "",
 }: {
-  kind: NodeKind;
   children: React.ReactNode;
   className?: string;
 }) {
   return (
-    <p
-      className={`flex items-center gap-2.5 font-display text-sm font-medium text-blue ${className}`}
-    >
-      <span
-        aria-hidden="true"
-        className={`size-2 shrink-0 ${nodeStyles[kind]}`}
-      />
-      {children}
-    </p>
+    <div className={`md:grid md:grid-cols-12 ${className}`}>
+      <div className="min-w-0 md:col-span-9 md:col-start-4">{children}</div>
+    </div>
   );
 }
 
-const container = "mx-auto w-full max-w-6xl px-5 sm:px-8";
-const h2 =
-  "text-balance font-display text-3xl font-medium leading-[1.1] tracking-[-0.025em] md:text-[2.6rem]";
-
-function SectionHead({
-  label,
+function Section({
   id,
+  label,
   title,
   aside,
-  node = "entry",
+  marker,
+  small = false,
+  className = "border-t border-hairline",
+  padding = "py-20 md:py-28",
+  children,
 }: {
-  label: string;
   id: string;
+  label: string;
   title: string;
   aside?: string;
-  node?: NodeKind;
+  marker?: "outline" | "dashed";
+  small?: boolean;
+  className?: string;
+  padding?: string;
+  children: React.ReactNode;
 }) {
+  const titleId = `${id}-title`;
   return (
-    <div className="grid gap-y-6 md:grid-cols-12">
-      <SpineLabel kind={node} className="md:col-span-3 md:pt-2">
-        {label}
-      </SpineLabel>
-      <div className="md:col-span-9">
-        <h2 id={id} className={`${h2} max-w-2xl`}>
-          {title}
-        </h2>
-        {aside && (
-          <p className="mt-5 max-w-xl text-lg leading-relaxed text-graphite">
-            {aside}
-          </p>
-        )}
+    <section id={id} aria-labelledby={titleId} className={className}>
+      <div className={`${container} ${padding}`}>
+        <div className="grid gap-y-6 md:grid-cols-12">
+          <SectionLabel marker={marker} className="md:col-span-3 md:pt-2">
+            {label}
+          </SectionLabel>
+          <div className="md:col-span-9">
+            <h2 id={titleId} className={`${small ? h2Small : h2} max-w-2xl`}>
+              {title}
+            </h2>
+            {aside && (
+              <p className="mt-5 max-w-xl text-lg leading-relaxed text-graphite">
+                {aside}
+              </p>
+            )}
+          </div>
+        </div>
+        {children}
       </div>
-    </div>
+    </section>
   );
 }
 
@@ -90,14 +102,16 @@ function Grid() {
       className="pointer-events-none absolute inset-0 -z-10"
     >
       {/* Below md the grid sits in the gutter so text never starts on a line. */}
-      <div className="mx-auto grid h-full w-full max-w-6xl grid-cols-4 px-2 md:grid-cols-12 md:px-8">
-        {Array.from({ length: 12 }, (_, i) => (
-          <span
-            key={i}
-            style={delay(i === 0 ? 0 : 200 + i * 45)}
-            className={`motion-draw border-l border-gridline ${i === 3 ? "border-r border-r-gridline md:border-r-0" : ""} ${i === 11 ? "md:border-r md:border-r-gridline" : ""} ${i >= 4 ? "hidden md:block" : ""}`}
-          />
-        ))}
+      <div className="mx-auto h-full w-full max-w-6xl px-2 md:px-8">
+        <div className="grid h-full grid-cols-4 border-r border-gridline md:grid-cols-12 max-md:[&>:nth-child(n+5)]:hidden">
+          {Array.from({ length: 12 }, (_, i) => (
+            <span
+              key={i}
+              style={delay(i === 0 ? 0 : 200 + i * 45)}
+              className="motion-draw border-l border-gridline"
+            />
+          ))}
+        </div>
       </div>
     </div>
   );
@@ -118,7 +132,7 @@ export default function Home() {
 
       <header className="sticky top-0 z-40 border-b border-hairline bg-canvas">
         <div
-          className={`${container} flex items-center justify-between gap-6 py-4`}
+          className={`${container} flex h-(--header-h) items-center justify-between gap-6`}
         >
           <a
             href="#"
@@ -130,27 +144,18 @@ export default function Home() {
               <span style={delay(600)} className="motion-light bg-blue-soft" />
               <span style={delay(750)} className="motion-light bg-blue-soft" />
             </span>
-            <span translate="no">UseChangelog</span>
+            <span translate="no">{brand}</span>
           </a>
           <nav aria-label="Main" className="flex items-center gap-8 text-sm">
-            <a
-              href="#how"
-              className="hidden text-graphite hover:text-ink md:inline"
-            >
-              How it works
-            </a>
-            <a
-              href="#changelog"
-              className="hidden text-graphite hover:text-ink md:inline"
-            >
-              Example
-            </a>
-            <a
-              href="#widget"
-              className="hidden text-graphite hover:text-ink md:inline"
-            >
-              Widget
-            </a>
+            {navLinks.map((link) => (
+              <a
+                key={link.href}
+                href={link.href}
+                className="hidden text-graphite hover:text-ink md:inline"
+              >
+                {link.label}
+              </a>
+            ))}
             <a
               href={hero.primaryCta.href}
               className="motion-press border border-ink px-4 py-2 font-medium transition-colors hover:bg-ink hover:text-canvas"
@@ -169,14 +174,17 @@ export default function Home() {
               style={delay(700)}
               className="motion-rise order-last mt-8 md:order-none md:col-span-3 md:mt-0 md:pt-4 md:pr-10"
             >
-              <Latest posts={posts.filter((p) => p.tag !== "Coming soon")} />
+              <Latest
+                label={`Latest from ${example.product}`}
+                posts={shippedPosts}
+              />
             </div>
             <div className="md:col-span-9">
               <h1
                 style={delay(250)}
-                className="motion-rise text-balance font-display text-[2.75rem] font-medium leading-[1.02] tracking-[-0.03em] sm:text-6xl md:text-[5.25rem]"
+                className="motion-lift text-balance font-display text-[2.75rem] font-medium leading-[1.02] tracking-[-0.03em] sm:text-6xl md:text-[5.25rem]"
               >
-                Tell your users what shipped.
+                {hero.headline}
               </h1>
               <p
                 style={delay(370)}
@@ -208,43 +216,33 @@ export default function Home() {
             style={delay(610)}
             className="motion-rise mt-20 grid grid-cols-2 border-y border-hairline md:mt-28 md:grid-cols-4"
           >
-            {[
-              ["Setup", "One script tag"],
-              ["Editor", "Markdown"],
-              ["Tags", "New, Improved, Fixed"],
-              ["Public page", "usechangelog.com/acme"],
-            ].map(([term, value], i) => (
+            {hero.facts.map((fact, i) => (
               <div
-                key={term}
+                key={fact.term}
                 className={`py-5 pr-4 ${i % 2 === 1 ? "pl-4 md:pl-0" : ""} ${i < 2 ? "border-b border-hairline md:border-b-0" : ""}`}
               >
-                <dt className="text-sm text-graphite">{term}</dt>
+                <dt className="text-sm text-graphite">{fact.term}</dt>
                 <dd className="mt-1 font-display text-base font-medium [overflow-wrap:anywhere]">
-                  {value}
+                  {fact.value}
                 </dd>
               </div>
             ))}
           </dl>
         </div>
 
-        {/* Problem */}
-        <section
-          aria-labelledby="problem-title"
-          className="border-t border-hairline"
+        <Section
+          id="problem"
+          label={problem.label}
+          title={problem.title}
+          aside={problem.intro}
         >
-          <div className={`${container} py-20 md:py-28`}>
-            <SectionHead
-              label="The problem"
-              id="problem-title"
-              title={problem.title}
-              aside={problem.intro}
-            />
-            <ul className="mt-14 grid border-t border-ink md:ml-[25%] md:grid-cols-3">
+          <Indented className="mt-14">
+            <ul className="grid border-t border-ink md:grid-cols-3">
               {problem.places.map((place, i) => (
                 <li
                   key={place.name}
                   data-reveal
-                  style={delay(i * 110)}
+                  style={stagger(i)}
                   className="border-b border-hairline py-6 md:border-b-0 md:pr-8"
                 >
                   <h3 className="font-display text-xl font-medium">
@@ -258,136 +256,106 @@ export default function Home() {
             </ul>
             <p
               data-reveal
-              className="mt-10 max-w-2xl border-l-2 border-blue pl-5 text-lg leading-relaxed md:ml-[25%]"
+              className="mt-10 max-w-2xl border-l-2 border-blue pl-5 text-lg leading-relaxed"
             >
               {problem.outcome}
             </p>
-          </div>
-        </section>
+          </Indented>
+        </Section>
 
-        {/* How it works */}
-        <section
-          id="how"
-          aria-labelledby="how-title"
-          className="border-t border-hairline"
-        >
-          <div className={`${container} py-20 md:py-28`}>
-            <SectionHead
-              label="How it works"
-              id="how-title"
-              title="Three steps from release to readers."
-            />
-            <ol className="mt-14 grid border border-hairline bg-canvas md:grid-cols-3">
-              {steps.map((step, i) => (
-                <li
-                  key={step.title}
-                  data-reveal
-                  style={delay(i * 120)}
-                  className="flex flex-col border-hairline p-6 not-last:border-b md:p-8 md:not-last:border-b-0 md:not-last:border-r"
-                >
-                  <span className="font-display text-sm tabular-nums text-blue">
-                    {i + 1}/3
-                  </span>
-                  <h3 className="mt-8 font-display text-2xl font-medium tracking-tight">
-                    {step.title}
-                  </h3>
-                  <p className="mt-3 flex-1 leading-relaxed text-graphite">
-                    {step.text}
-                  </p>
-                  <p className="mt-8 border-t border-hairline pt-4 font-display text-sm text-graphite">
-                    {stepDetails[i]}
-                  </p>
-                </li>
-              ))}
-            </ol>
-          </div>
-        </section>
+        <Section id="how" label={how.label} title={how.title}>
+          <ol className="mt-14 grid border border-hairline bg-canvas md:grid-cols-3">
+            {how.steps.map((step, i) => (
+              <li
+                key={step.title}
+                data-reveal
+                style={stagger(i)}
+                className="flex flex-col border-hairline p-6 not-last:border-b md:p-8 md:not-last:border-b-0 md:not-last:border-r"
+              >
+                <span className="font-display text-sm tabular-nums text-blue">
+                  {i + 1}/{how.steps.length}
+                </span>
+                <h3 className="mt-8 font-display text-2xl font-medium tracking-tight">
+                  {step.title}
+                </h3>
+                <p className="mt-3 flex-1 leading-relaxed text-graphite">
+                  {step.text}
+                </p>
+                <p className="mt-8 border-t border-hairline pt-4 font-display text-sm text-graphite">
+                  {step.detail}
+                </p>
+              </li>
+            ))}
+          </ol>
+        </Section>
 
-        {/* Example changelog */}
-        <section
+        <Section
           id="changelog"
-          aria-labelledby="changelog-title"
+          label={example.label}
+          title={example.title}
+          aside={example.aside}
           className="border-t border-hairline bg-blue-wash/85"
         >
-          <div className={`${container} py-20 md:py-28`}>
-            <SectionHead
-              label="Example"
-              id="changelog-title"
-              title="What your readers see."
-              aside="A public page with every post dated and tagged. Here is a sample for a product called Acme."
-            />
-            <div className="mt-14 border border-ink bg-canvas">
-              <div className="flex flex-wrap items-baseline justify-between gap-2 border-b border-ink px-5 py-4 md:px-8">
-                <p className="font-display text-lg font-medium">
-                  Acme / Changelog
-                </p>
-                <p className="font-display text-sm text-graphite">
-                  usechangelog.com/acme
-                </p>
-              </div>
-              <div
-                aria-hidden="true"
-                className="hidden grid-cols-12 border-b border-hairline px-8 py-3 text-sm text-graphite md:grid"
-              >
-                <span className="col-span-2">Date</span>
-                <span className="col-span-2">Type</span>
-                <span className="col-span-8">Entry</span>
-              </div>
-              <div className="divide-y divide-hairline">
-                {posts.map((post, i) => {
-                  const soon = post.tag === "Coming soon";
-                  return (
-                    <article
-                      key={post.title}
-                      data-reveal
-                      style={delay(i * 130)}
-                      className={`grid gap-3 px-5 py-7 md:grid-cols-12 md:gap-0 md:px-8 ${soon ? "bg-wash" : ""}`}
-                    >
-                      <div className="flex items-center gap-3 md:contents">
-                        <div className="font-display text-sm tabular-nums text-graphite md:col-span-2 md:pt-1">
-                          {post.dateTime ? (
-                            <time dateTime={post.dateTime}>{post.date}</time>
-                          ) : (
-                            post.date
-                          )}
-                        </div>
-                        <div className="md:col-span-2 md:pt-0.5">
-                          <Tag tag={post.tag} />
-                        </div>
-                      </div>
-                      <div className="md:col-span-8">
-                        <h3 className="font-display text-xl font-medium tracking-tight md:text-2xl">
-                          {post.title}
-                        </h3>
-                        <p className="mt-2 max-w-2xl leading-relaxed text-graphite">
-                          {post.body}
-                        </p>
-                      </div>
-                    </article>
-                  );
-                })}
-              </div>
+          <div className="mt-14 border border-ink bg-canvas">
+            <div className="flex flex-wrap items-baseline justify-between gap-2 border-b border-ink px-5 py-4 md:px-8">
+              <p className="font-display text-lg font-medium">
+                {example.product} / Changelog
+              </p>
+              <p className="font-display text-sm text-graphite">{publicPath}</p>
+            </div>
+            <div
+              aria-hidden="true"
+              className="hidden grid-cols-12 border-b border-hairline px-8 py-3 text-sm text-graphite md:grid"
+            >
+              <span className="col-span-2">Date</span>
+              <span className="col-span-2">Type</span>
+              <span className="col-span-8">Entry</span>
+            </div>
+            <div className="divide-y divide-hairline">
+              {posts.map((post, i) => (
+                <article
+                  key={post.title}
+                  data-reveal
+                  style={stagger(i)}
+                  className={`grid gap-3 px-5 py-7 md:grid-cols-12 md:gap-0 md:px-8 ${post.tag === "Coming soon" ? "bg-wash" : ""}`}
+                >
+                  <div className="flex items-center gap-3 md:contents">
+                    <div className="font-display text-sm tabular-nums text-graphite md:col-span-2 md:pt-1">
+                      {post.dateTime ? (
+                        <time dateTime={post.dateTime}>{post.date}</time>
+                      ) : (
+                        post.date
+                      )}
+                    </div>
+                    <div className="md:col-span-2 md:pt-0.5">
+                      <Tag tag={post.tag} />
+                    </div>
+                  </div>
+                  <div className="md:col-span-8">
+                    <h3 className="font-display text-xl font-medium tracking-tight md:text-2xl">
+                      {post.title}
+                    </h3>
+                    <p className="mt-2 max-w-2xl leading-relaxed text-graphite">
+                      {post.body}
+                    </p>
+                  </div>
+                </article>
+              ))}
             </div>
           </div>
-        </section>
+        </Section>
 
-        {/* Widget */}
-        <section
+        <Section
           id="widget"
-          aria-labelledby="widget-title"
-          className="border-t border-hairline"
+          label={widget.label}
+          title={widget.title}
+          aside={widget.text}
         >
-          <div className={`${container} py-20 md:py-28`}>
-            <SectionHead
-              label="Widget"
-              id="widget-title"
-              title={widget.title}
-              aside={widget.text}
-            />
-            <div className="mt-14 grid gap-6 md:ml-[25%] lg:grid-cols-9">
+          <Indented className="mt-14">
+            <div className="grid grid-cols-1 gap-6 lg:grid-cols-9">
               <figure
                 data-reveal
-                className="min-w-0 border border-hairline bg-wash lg:col-span-5"
+                className="border border-hairline bg-wash lg:col-span-5"
               >
                 <figcaption className="flex items-center justify-between border-b border-hairline px-5 py-3 text-sm text-graphite">
                   <span>Embed snippet</span>
@@ -413,7 +381,7 @@ export default function Home() {
                   <span className="font-display font-medium">What’s new</span>
                 </div>
                 <div className="divide-y divide-hairline">
-                  {posts.slice(0, 2).map((post) => (
+                  {shippedPosts.slice(0, 2).map((post) => (
                     <div key={post.title} className="flex gap-3 px-4 py-4">
                       <span
                         className={`mt-1.5 size-2 shrink-0 ${tagDots[post.tag]}`}
@@ -434,80 +402,58 @@ export default function Home() {
                 </p>
               </div>
             </div>
-            <p className="mt-6 text-sm text-graphite md:ml-[25%]">
-              {widget.note}
-            </p>
-          </div>
-        </section>
+            <p className="mt-6 text-sm text-graphite">{widget.note}</p>
+          </Indented>
+        </Section>
 
-        {/* Audience */}
-        <section
-          aria-labelledby="audience-title"
-          className="border-t border-hairline"
-        >
-          <div className={`${container} py-20 md:py-28`}>
-            <SectionHead
-              label="Who it’s for"
-              id="audience-title"
-              title="Made for teams of one to twenty."
-            />
-            <div className="mt-14 grid border-t border-ink md:ml-[25%] md:grid-cols-2">
-              {audiences.map((a, i) => (
+        <Section id="audience" label={audience.label} title={audience.title}>
+          <Indented className="mt-14">
+            <div className="grid border-t border-ink md:grid-cols-2">
+              {audience.groups.map((group, i) => (
                 <div
-                  key={a.title}
+                  key={group.title}
                   data-reveal
-                  style={delay(i * 120)}
+                  style={stagger(i)}
                   className={`py-6 ${i === 0 ? "border-b border-hairline md:border-b-0 md:pr-8" : "md:pl-8"}`}
                 >
                   <h3 className="font-display text-2xl font-medium tracking-tight">
-                    {a.title}
+                    {group.title}
                   </h3>
-                  <p className="mt-3 leading-relaxed text-graphite">{a.text}</p>
+                  <p className="mt-3 leading-relaxed text-graphite">
+                    {group.text}
+                  </p>
                 </div>
               ))}
             </div>
-          </div>
-        </section>
+          </Indented>
+        </Section>
 
-        {/* Closing CTA */}
-        <section
+        <Section
           id="get-started"
-          aria-labelledby="get-started-title"
+          label={closing.label}
+          title={closing.title}
+          aside={closing.plan}
+          marker="dashed"
+          small
           className="border-t border-ink"
+          padding="py-16 md:py-20"
         >
-          <div
-            className={`${container} grid gap-y-6 py-16 md:grid-cols-12 md:py-20`}
-          >
-            <SpineLabel kind="next" className="md:col-span-3 md:pt-2">
-              Next
-            </SpineLabel>
-            <div className="md:col-span-9">
-              <h2
-                id="get-started-title"
-                className="text-balance font-display text-3xl font-medium leading-tight tracking-[-0.025em] md:text-4xl"
+          <Indented className="mt-8">
+            <div className="flex flex-wrap items-center gap-x-6 gap-y-4">
+              <button
+                type="button"
+                disabled
+                aria-describedby="signup-status"
+                className="cursor-not-allowed border border-hairline bg-wash px-6 py-3.5 font-medium text-graphite"
               >
-                Start your changelog.
-              </h2>
-              <p className="mt-4 max-w-xl text-lg leading-relaxed text-graphite">
-                Publishing is part of a monthly plan. Pricing will be shared at
-                launch.
+                {hero.primaryCta.label}
+              </button>
+              <p id="signup-status" className="text-graphite">
+                {closing.status}
               </p>
-              <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-4">
-                <button
-                  type="button"
-                  disabled
-                  aria-describedby="signup-status"
-                  className="cursor-not-allowed border border-hairline bg-wash px-6 py-3.5 font-medium text-graphite"
-                >
-                  {hero.primaryCta.label}
-                </button>
-                <p id="signup-status" className="text-graphite">
-                  Sign-up isn’t open yet. We’re building the first version.
-                </p>
-              </div>
             </div>
-          </div>
-        </section>
+          </Indented>
+        </Section>
       </main>
 
       <footer className="border-t border-hairline bg-canvas">
@@ -515,10 +461,10 @@ export default function Home() {
           className={`${container} flex flex-col gap-2 py-8 text-sm text-graphite sm:flex-row sm:items-center sm:justify-between`}
         >
           <span translate="no" className="font-display font-medium text-ink">
-            {footer.name}
+            {brand}
           </span>
           <span className="tabular-nums">
-            © {footer.year} {footer.name}
+            © {footer.year} {brand}
           </span>
         </div>
       </footer>

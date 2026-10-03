@@ -18,10 +18,14 @@
   --font-sans: var(--font-instrument-sans), system-ui, sans-serif;
 }
 
+:root {
+  --header-h: 4.5rem;
+}
+
 html {
   scroll-behavior: smooth;
   /* Keeps anchors and focused elements clear of the sticky header. */
-  scroll-padding-top: 5.5rem;
+  scroll-padding-top: calc(var(--header-h) + 1rem);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -61,6 +65,13 @@ body {
 @keyframes uc-rise {
   from {
     opacity: 0;
+    transform: translateY(var(--rise, 18px));
+  }
+}
+
+/* Transform only, so the headline stays visible for LCP. */
+@keyframes uc-lift {
+  from {
     transform: translateY(18px);
   }
 }
@@ -83,13 +94,6 @@ body {
   }
 }
 
-@keyframes uc-swap {
-  from {
-    opacity: 0;
-    transform: translateY(12px);
-  }
-}
-
 @keyframes uc-light {
   from {
     background-color: var(--color-hairline);
@@ -99,6 +103,11 @@ body {
 @media (prefers-reduced-motion: no-preference) {
   .motion-rise {
     animation: uc-rise 800ms var(--ease-out) both;
+    animation-delay: var(--delay, 0ms);
+  }
+
+  .motion-lift {
+    animation: uc-lift 800ms var(--ease-out) both;
     animation-delay: var(--delay, 0ms);
   }
 
@@ -118,7 +127,14 @@ body {
   }
 
   .motion-swap {
-    animation: uc-swap 600ms var(--ease-out) both;
+    --rise: 12px;
+    animation: uc-rise 600ms var(--ease-out) both;
+  }
+
+  .latest-feed:hover .motion-progress,
+  .latest-feed:focus-within .motion-progress,
+  .motion-progress[data-paused] {
+    animation-play-state: paused;
   }
 
   .motion-press {
