@@ -89,7 +89,8 @@ function Grid() {
       aria-hidden="true"
       className="pointer-events-none absolute inset-0 -z-10"
     >
-      <div className={`${container} grid h-full grid-cols-4 md:grid-cols-12`}>
+      {/* Below md the grid sits in the gutter so text never starts on a line. */}
+      <div className="mx-auto grid h-full w-full max-w-6xl grid-cols-4 px-2 md:grid-cols-12 md:px-8">
         {Array.from({ length: 12 }, (_, i) => (
           <span
             key={i}
