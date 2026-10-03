@@ -14,8 +14,8 @@
   --color-green-wash: #eaf5ef;
   --color-clay: #9a3f12;
   --color-clay-wash: #fbefe7;
-  --font-display: var(--font-geist), system-ui, sans-serif;
-  --font-sans: var(--font-inter), system-ui, sans-serif;
+  --font-display: var(--font-funnel-display), system-ui, sans-serif;
+  --font-sans: var(--font-instrument-sans), system-ui, sans-serif;
 }
 
 html {
@@ -75,6 +75,19 @@ body {
   }
 }
 
+@keyframes uc-progress {
+  from {
+    transform: scaleX(0);
+  }
+}
+
+@keyframes uc-swap {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+}
+
 @keyframes uc-light {
   from {
     background-color: var(--color-hairline);
@@ -96,6 +109,14 @@ body {
   .motion-light {
     animation: uc-light 500ms var(--ease-out) both;
     animation-delay: var(--delay, 0ms);
+  }
+
+  .motion-progress {
+    animation: uc-progress 4200ms linear both;
+  }
+
+  .motion-swap {
+    animation: uc-swap 600ms var(--ease-out) both;
   }
 
   .motion-press {
@@ -122,11 +143,6 @@ body {
     transform-origin: top right;
   }
 
-  .reveal-ready [data-reveal="node"] {
-    transform: scale(0);
-    transition-duration: 500ms;
-  }
-
   .reveal-ready [data-reveal][data-inview] {
     opacity: 1;
     transform: none;
@@ -134,6 +150,10 @@ body {
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .motion-progress {
+    visibility: hidden;
+  }
+
   .motion-rise {
     animation: uc-fade 400ms ease-out both;
     animation-delay: var(--delay, 0ms);

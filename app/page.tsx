@@ -6,68 +6,41 @@ import {
   problem,
   steps,
   widget,
-  type PostTag,
 } from "./content";
+import { Latest } from "./latest";
 import { Reveal } from "./reveal";
+import { Tag, tagDots } from "./tag";
 import type { CSSProperties } from "react";
 
 const delay = (ms: number) => ({ "--delay": `${ms}ms` }) as CSSProperties;
 
-const tagStyles: Record<PostTag, string> = {
-  New: "border-blue bg-blue text-canvas",
-  Improved: "border-green/40 bg-green-wash text-green",
-  Fixed: "border-clay/40 bg-clay-wash text-clay",
-  "Coming soon": "border-dashed border-graphite text-graphite",
-};
-
-const tagDots: Record<PostTag, string> = {
-  New: "bg-blue",
-  Improved: "bg-green",
-  Fixed: "bg-clay",
-  "Coming soon": "border border-dashed border-graphite",
-};
-
 const stepDetails = ["Markdown editor", "usechangelog.com/acme", "widget.js"];
 
-function Tag({ tag }: { tag: PostTag }) {
-  return (
-    <span
-      className={`inline-block whitespace-nowrap border px-2 py-0.5 font-display text-[0.72rem] font-medium uppercase tracking-wider ${tagStyles[tag]}`}
-    >
-      {tag}
-    </span>
-  );
-}
-
-type NodeKind = "latest" | "entry" | "next";
+type NodeKind = "entry" | "next";
 
 const nodeStyles: Record<NodeKind, string> = {
-  latest: "bg-blue",
   entry: "border border-blue bg-canvas",
   next: "border border-dashed border-blue bg-canvas",
 };
 
-// A square on the first grid line: the page reads as a changelog of itself.
+// Section labels carry a small square from the brand mark: outlined for
+// sections, dashed for what's next (the filled one belongs to the hero feed).
 function SpineLabel({
   kind,
   children,
   className = "",
-  style,
 }: {
   kind: NodeKind;
   children: React.ReactNode;
   className?: string;
-  style?: CSSProperties;
 }) {
   return (
     <p
-      style={style}
-      className={`relative pl-5 font-display text-sm font-medium text-blue ${className}`}
+      className={`flex items-center gap-2.5 font-display text-sm font-medium text-blue ${className}`}
     >
       <span
         aria-hidden="true"
-        data-reveal={kind === "latest" ? undefined : "node"}
-        className={`absolute -left-1 top-1.5 size-[9px] ${nodeStyles[kind]}`}
+        className={`size-2 shrink-0 ${nodeStyles[kind]}`}
       />
       {children}
     </p>
@@ -121,7 +94,7 @@ function Grid() {
           <span
             key={i}
             style={delay(i === 0 ? 0 : 200 + i * 45)}
-            className={`motion-draw border-l ${i === 0 ? "border-blue/50" : "border-gridline"} ${i === 3 ? "border-r border-r-gridline md:border-r-0" : ""} ${i === 11 ? "md:border-r md:border-r-gridline" : ""} ${i >= 4 ? "hidden md:block" : ""}`}
+            className={`motion-draw border-l border-gridline ${i === 3 ? "border-r border-r-gridline md:border-r-0" : ""} ${i === 11 ? "md:border-r md:border-r-gridline" : ""} ${i >= 4 ? "hidden md:block" : ""}`}
           />
         ))}
       </div>
@@ -191,14 +164,12 @@ export default function Home() {
         {/* Hero */}
         <div className={`${container} pb-20 pt-16 md:pb-28 md:pt-24`}>
           <div className="grid gap-y-6 md:grid-cols-12">
-            <SpineLabel
-              kind="latest"
-              style={delay(150)}
-              className="motion-rise md:col-span-3 md:pt-4"
+            <div
+              style={delay(700)}
+              className="motion-rise order-last mt-8 md:order-none md:col-span-3 md:mt-0 md:pt-4 md:pr-10"
             >
-              Changelog &amp;
-              <br className="hidden md:block" /> product announcements
-            </SpineLabel>
+              <Latest posts={posts.filter((p) => p.tag !== "Coming soon")} />
+            </div>
             <div className="md:col-span-9">
               <h1
                 style={delay(250)}
