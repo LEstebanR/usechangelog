@@ -17,9 +17,9 @@ const tagStyles: Record<PostTag, string> = {
 };
 
 const stepDetails = [
-  "Markdown · tags · scheduling",
-  "acme.usechangelog.com",
-  "widget.js · 9 KB",
+  "Markdown · tags",
+  "usechangelog.com/acme",
+  "widget.js",
 ];
 
 function Tag({ tag }: { tag: PostTag }) {
@@ -34,7 +34,7 @@ function Tag({ tag }: { tag: PostTag }) {
 
 const container = "mx-auto w-full max-w-6xl px-5 sm:px-8";
 const h2 =
-  "font-display text-3xl font-medium leading-[1.1] tracking-[-0.025em] md:text-[2.6rem]";
+  "text-balance font-display text-3xl font-medium leading-[1.1] tracking-[-0.025em] md:text-[2.6rem]";
 
 function SectionHead({
   index,
@@ -117,7 +117,7 @@ export default function Home() {
               <span className="bg-blue/40" />
               <span className="bg-blue/40" />
             </span>
-            UseChangelog
+            <span translate="no">UseChangelog</span>
           </a>
           <nav aria-label="Main" className="flex items-center gap-8 text-sm">
             <a href="#how" className="hidden text-graphite hover:text-ink md:inline">
@@ -154,7 +154,7 @@ export default function Home() {
               <br className="hidden md:block" /> product announcements
             </p>
             <div className="md:col-span-9">
-              <h1 className="font-display text-[2.75rem] font-medium leading-[1.02] tracking-[-0.035em] sm:text-6xl md:text-[5.25rem]">
+              <h1 className="text-balance font-display text-[2.75rem] font-medium leading-[1.02] tracking-[-0.035em] sm:text-6xl md:text-[5.25rem]">
                 Tell your users what shipped.
               </h1>
               <p className="mt-8 max-w-xl text-lg leading-relaxed text-graphite md:text-xl">
@@ -182,7 +182,7 @@ export default function Home() {
               ["Setup", "One script tag"],
               ["Editor", "Markdown"],
               ["Tags", "New · Improved · Fixed"],
-              ["Feed", "Public page + RSS"],
+              ["Public page", "usechangelog.com/acme"],
             ].map(([term, value], i) => (
               <div
                 key={term}
@@ -290,7 +290,7 @@ export default function Home() {
                   Acme / Changelog
                 </p>
                 <p className="font-display text-sm text-graphite">
-                  acme.usechangelog.com
+                  usechangelog.com/acme
                 </p>
               </div>
               <div
@@ -362,13 +362,13 @@ export default function Home() {
                   aria-label="Widget embed snippet"
                   className="overflow-x-auto p-5 font-mono text-[0.82rem] leading-relaxed"
                 >
-                  <code>{widget.snippet}</code>
+                  <code translate="no">{widget.snippet}</code>
                 </pre>
               </figure>
 
               <div
                 role="img"
-                aria-label="Mock of the What's new widget, showing two unread posts"
+                aria-label="Mock of the What’s new widget, showing two unread posts"
                 className="border border-ink bg-canvas lg:col-span-4"
               >
                 <div className="flex items-center justify-between border-b border-ink px-4 py-3">
@@ -432,20 +432,34 @@ export default function Home() {
         </section>
 
         {/* Closing CTA */}
-        <section aria-label="Get started" className="border-t border-ink">
+        <section
+          id="get-started"
+          aria-labelledby="get-started-title"
+          className="scroll-mt-6 border-t border-ink"
+        >
           <div
-            className={`${container} grid gap-8 py-16 md:grid-cols-12 md:items-center md:py-20`}
+            className={`${container} grid py-16 md:grid-cols-12 md:py-20`}
           >
-            <p className="font-display text-3xl font-medium leading-tight tracking-[-0.025em] md:col-span-8 md:col-start-4 md:text-4xl">
-              Start your changelog today.
-            </p>
-            <div className="md:col-span-1 md:flex md:justify-end">
-              <a
-                href={hero.primaryCta.href}
-                className="inline-block whitespace-nowrap bg-blue px-6 py-3.5 font-medium text-canvas transition-colors hover:bg-ink"
+            <div className="md:col-span-9 md:col-start-4">
+              <h2
+                id="get-started-title"
+                className="text-balance font-display text-3xl font-medium leading-tight tracking-[-0.025em] md:text-4xl"
               >
-                {hero.primaryCta.label}
-              </a>
+                Start your changelog.
+              </h2>
+              <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-4">
+                <button
+                  type="button"
+                  disabled
+                  aria-describedby="signup-status"
+                  className="cursor-not-allowed border border-hairline bg-wash px-6 py-3.5 font-medium text-graphite"
+                >
+                  {hero.primaryCta.label}
+                </button>
+                <p id="signup-status" className="text-graphite">
+                  Sign-up isn’t open yet. We’re building the first version.
+                </p>
+              </div>
             </div>
           </div>
         </section>
@@ -455,7 +469,7 @@ export default function Home() {
         <div
           className={`${container} flex flex-col gap-2 py-8 text-sm text-graphite sm:flex-row sm:items-center sm:justify-between`}
         >
-          <span className="font-display font-medium text-ink">
+          <span translate="no" className="font-display font-medium text-ink">
             {footer.name}
           </span>
           <span className="tabular-nums">

@@ -8,7 +8,7 @@
   --color-hairline: #e4e7ec;
   --color-gridline: #f0f2f5;
   --color-blue: #1d3a8f;
-  --font-display: var(--font-space-grotesk), system-ui, sans-serif;
+  --font-display: var(--font-geist), system-ui, sans-serif;
   --font-sans: var(--font-inter), system-ui, sans-serif;
 }
 
@@ -23,6 +23,8 @@ html {
 }
 
 body {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
   background: var(--color-canvas);
   color: var(--color-ink);
   font-family: var(--font-sans);

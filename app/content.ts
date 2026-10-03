@@ -12,7 +12,7 @@ export const hero = {
   headline: "Tell your users what shipped.",
   subhead:
     "UseChangelog gives your product a public changelog and an in-app widget. Write a post once, and people see it on your site and inside your app.",
-  primaryCta: { label: "Get started", href: "#" },
+  primaryCta: { label: "Get started", href: "#get-started" },
   secondaryCta: { label: "See a changelog", href: "#changelog" },
 };
 
@@ -41,11 +41,11 @@ export const problem = {
 export const steps = [
   {
     title: "Write a post",
-    text: "Use a plain Markdown editor. Tag it New, Improved or Fixed, then publish now or schedule it.",
+    text: "Use a plain Markdown editor. Tag it New, Improved or Fixed, then publish.",
   },
   {
     title: "Get a public page",
-    text: "Every post lands on a clean changelog page with its own URL and an RSS feed. Link to it from your docs and emails.",
+    text: "Every post lands on a clean public changelog at usechangelog.com/your-product. Link to it from your docs and emails.",
   },
   {
     title: "Embed the widget",
@@ -58,22 +58,22 @@ export const posts: Post[] = [
     tag: "New",
     date: "Sep 30, 2026",
     dateTime: "2026-09-30",
-    title: "Scheduled posts",
-    body: "Write an update ahead of a launch and pick the date and time it goes live. The widget badge updates at the same moment.",
+    title: "What’s new widget",
+    body: "Add one script tag and your users can read new posts without leaving your app.",
   },
   {
     tag: "Improved",
     date: "Sep 22, 2026",
     dateTime: "2026-09-22",
-    title: "Lighter widget",
-    body: "The embed script is now 9 KB gzipped and loads after your page becomes interactive, so it never delays your own UI.",
+    title: "Clearer tags",
+    body: "New, Improved and Fixed now stand out on every post, so readers can tell a launch from a bug fix at a glance.",
   },
   {
     tag: "Fixed",
     date: "Sep 15, 2026",
     dateTime: "2026-09-15",
-    title: "RSS dates",
-    body: "Feed entries now use the publish date instead of the date the draft was created.",
+    title: "Line breaks in posts",
+    body: "Single line breaks from the editor now show up on the public page exactly as you wrote them.",
   },
   {
     tag: "Coming soon",
@@ -85,7 +85,7 @@ export const posts: Post[] = [
 
 export const widget = {
   title: "One line in your app.",
-  text: "Paste the snippet before the closing body tag. The widget picks up your brand color and opens from any element you choose.",
+  text: "Paste the snippet before the closing body tag. A “What’s new” panel then shows your latest posts inside your app.",
   snippet: `<script
   src="https://usechangelog.com/widget.js"
   data-project="acme"
