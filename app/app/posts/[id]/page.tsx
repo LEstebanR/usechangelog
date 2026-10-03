@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { deletePost, savePost } from "@/lib/posts/actions";
-import { dayFromDate } from "@/lib/posts/form";
 import { requirePost } from "@/lib/posts/server";
 import { DeletePost } from "../delete-post";
 import { PostForm } from "../post-form";
@@ -30,7 +29,7 @@ export default async function EditPostPage({ params }: PageProps<"/app/posts/[id
             body: post.body,
             category: post.category,
             type: post.type,
-            publishedOn: dayFromDate(post.publishedAt),
+            publishedOn: post.publishedOn ?? "",
           }}
           status={post.status}
         />

@@ -17,12 +17,12 @@ export async function listPosts() {
       category: posts.category,
       type: posts.type,
       status: posts.status,
-      publishedAt: posts.publishedAt,
+      publishedOn: posts.publishedOn,
       updatedAt: posts.updatedAt,
     })
     .from(posts)
     .where(eq(posts.workspaceId, workspace.id))
-    .orderBy(desc(sql`coalesce(${posts.publishedAt}, ${posts.updatedAt})`));
+    .orderBy(desc(sql`coalesce(${posts.publishedOn}, ${posts.updatedAt}::date)`), desc(posts.updatedAt));
 }
 
 // A post of the signed-in user's workspace. Anything else, including another

@@ -36,7 +36,7 @@ export const LABELS = {
 const oneOf = <T extends string>(list: readonly T[], value: unknown, fallback: T): T =>
   list.includes(value as T) ? (value as T) : fallback;
 
-export function parsePostForm(formData: FormData): PostFormState & { intent: Intent; today: Date } {
+export function parsePostForm(formData: FormData): PostFormState & { intent: Intent; today: string } {
   const values: PostValues = {
     title: String(formData.get("title") ?? "").trim(),
     body: String(formData.get("body") ?? ""),
@@ -52,27 +52,30 @@ export function parsePostForm(formData: FormData): PostFormState & { intent: Int
     errors.title = `Use 1–${TITLE_MAX} characters.`;
   }
   if (values.body.length > BODY_MAX) errors.body = `Keep it under ${BODY_MAX.toLocaleString("en-US")} characters.`;
-  if (values.publishedOn && !dateFromDay(values.publishedOn)) errors.publishedOn = "Use a valid date.";
+  if (values.publishedOn && !isDay(values.publishedOn)) errors.publishedOn = "Use a valid date.";
 
   return Object.keys(errors).length ? { values, errors, intent, today } : { values, intent, today };
 }
 
 // "Today" as the author's browser sees it, sent by the form. Trusted only within a
 // day of UTC (every time zone fits); without it, the UTC day.
-function todayFor(local: string): Date {
-  const utc = dateFromDay(dayFromDate(new Date()))!;
-  const day = dateFromDay(local);
-  return day && Math.abs(day.getTime() - utc.getTime()) <= 86_400_000 ? day : utc;
+function todayFor(local: string): string {
+  const utc = toDay(new Date());
+  const offset = isDay(local) ? Math.abs(Date.parse(local) - Date.parse(utc)) : Infinity;
+  return offset <= 86_400_000 ? local : utc;
 }
 
-// Dates are days: "2026-10-03" is stored as midnight UTC, so it never shifts with time zones.
-export function dateFromDay(day: string): Date | null {
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(day)) return null;
-  const date = new Date(`${day}T00:00:00Z`);
-  return Number.isNaN(date.getTime()) || date.toISOString().slice(0, 10) !== day ? null : date;
+// Dates are days, "YYYY-MM-DD", stored in a Postgres `date` column.
+export function isDay(day: string) {
+  return /^\d{4}-\d{2}-\d{2}$/.test(day) && toDay(new Date(`${day}T00:00:00Z`)) === day;
 }
 
-export const dayFromDate = (date: Date | null) => (date ? date.toISOString().slice(0, 10) : "");
+export const toDay = (date: Date) => (Number.isNaN(date.getTime()) ? "" : date.toISOString().slice(0, 10));
 
-export const formatDay = (date: Date) =>
-  date.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric", timeZone: "UTC" });
+export const formatDay = (day: string) =>
+  new Date(`${day}T00:00:00Z`).toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+    timeZone: "UTC",
+  });

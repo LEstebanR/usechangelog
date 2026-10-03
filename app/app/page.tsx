@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { formatDay } from "@/lib/posts/form";
+import { formatDay, toDay } from "@/lib/posts/form";
 import { listPosts } from "@/lib/posts/server";
 import { publicUrl } from "@/lib/site";
 import { requireWorkspace } from "@/lib/workspace/server";
@@ -59,7 +59,7 @@ export default async function AppPage() {
                     <span className="border border-hairline px-1.5 py-0.5 text-xs uppercase tracking-wider">Draft</span>
                   ) : null}
                   <span className="tabular-nums">
-                    {post.publishedAt ? formatDay(post.publishedAt) : `Edited ${formatDay(post.updatedAt)}`}
+                    {post.publishedOn ? formatDay(post.publishedOn) : `Edited ${formatDay(toDay(post.updatedAt))}`}
                   </span>
                 </span>
               </Link>

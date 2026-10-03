@@ -1,5 +1,5 @@
 import { randomBytes } from "node:crypto";
-import { index, pgEnum, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
+import { date, index, pgEnum, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
 import { CATEGORIES, TYPES } from "@/lib/posts/form";
 import { user } from "./neon-auth";
 
@@ -43,13 +43,14 @@ export const posts = pgTable(
     category: postCategory().notNull(),
     type: postType().notNull().default("shipped"),
     status: postStatus().notNull().default("draft"),
-    // Set on the first publish, editable by hand, kept when going back to draft.
-    publishedAt: timestamp("published_at", { withTimezone: true }),
+    // A day ("YYYY-MM-DD"), not a moment: set on the first publish, editable by hand,
+    // kept when going back to draft.
+    publishedOn: date("published_on", { mode: "string" }),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp("updated_at", { withTimezone: true })
       .notNull()
       .defaultNow()
       .$onUpdate(() => new Date()),
   },
-  (t) => [index("posts_workspace_status_published_idx").on(t.workspaceId, t.status, t.publishedAt.desc())],
+  (t) => [index("posts_workspace_status_published_idx").on(t.workspaceId, t.status, t.publishedOn.desc())],
 );

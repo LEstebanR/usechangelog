@@ -1,5 +1,5 @@
 {
-  "id": "e7fd59ad-7de3-422f-b2d2-7a8e8fd703e9",
+  "id": "3a2bf8eb-d152-4230-9efc-d42c124a4f5f",
   "prevId": "6437c1af-7a11-4daf-a963-6c0d59c0706b",
   "version": "7",
   "dialect": "postgresql",
@@ -57,9 +57,9 @@
           "notNull": true,
           "default": "'draft'"
         },
-        "published_at": {
-          "name": "published_at",
-          "type": "timestamp with time zone",
+        "published_on": {
+          "name": "published_on",
+          "type": "date",
           "primaryKey": false,
           "notNull": false
         },
@@ -95,7 +95,7 @@
               "nulls": "last"
             },
             {
-              "expression": "published_at",
+              "expression": "published_on",
               "isExpression": false,
               "asc": false,
               "nulls": "last"

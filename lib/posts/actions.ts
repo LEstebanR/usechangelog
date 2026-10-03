@@ -6,13 +6,13 @@ import { notFound, redirect } from "next/navigation";
 import { getDb } from "@/db";
 import { posts } from "@/db/schema";
 import { requireWorkspace } from "@/lib/workspace/server";
-import { dateFromDay, dayFromDate, parsePostForm, type PostFormState } from "./form";
+import { parsePostForm, type PostFormState } from "./form";
 import { requirePost, UUID } from "./server";
 
 // The only place a post becomes public. #16 wraps this with the subscription check.
 // A published post always has a date: the one given, or today.
-function publish(publishedAt: Date | null, today: Date) {
-  return { status: "published" as const, publishedAt: publishedAt ?? today };
+function publish(publishedOn: string | null, today: string) {
+  return { status: "published" as const, publishedOn: publishedOn ?? today };
 }
 
 // Creates the post when `id` is null, updates it otherwise.
@@ -27,14 +27,14 @@ export async function savePost(
   const { intent, today, ...state } = parsePostForm(formData);
   if (state.errors) return state;
 
-  const { publishedOn, ...fields } = state.values;
+  const { publishedOn: dateField, ...fields } = state.values;
   // The date field is the source of truth: emptying it clears a draft's date.
-  const publishedAt = publishedOn ? dateFromDay(publishedOn) : null;
+  const publishedOn = dateField || null;
   const status = intent === "publish" ? "published" : intent === "unpublish" ? "draft" : (existing?.status ?? "draft");
   const next =
     status === "published"
-      ? publish(publishedAt ?? existing?.publishedAt ?? null, today)
-      : { status, publishedAt };
+      ? publish(publishedOn ?? existing?.publishedOn ?? null, today)
+      : { status, publishedOn };
 
   const db = getDb();
   if (!existing) {
@@ -51,7 +51,7 @@ export async function savePost(
     .set({ ...fields, ...next })
     .where(and(eq(posts.id, existing.id), eq(posts.workspaceId, workspace.id)));
   revalidatePath("/app");
-  return { values: { ...state.values, publishedOn: dayFromDate(next.publishedAt) }, saved: true };
+  return { values: { ...state.values, publishedOn: next.publishedOn ?? "" }, saved: true };
 }
 
 // One query, scoped to the session's workspace: nothing deleted means not yours, so 404.
