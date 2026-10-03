@@ -8,18 +8,26 @@ import {
   widget,
   type PostTag,
 } from "./content";
+import { Reveal } from "./reveal";
 import type { CSSProperties } from "react";
 
 const delay = (ms: number) => ({ "--delay": `${ms}ms` }) as CSSProperties;
 
 const tagStyles: Record<PostTag, string> = {
   New: "border-blue bg-blue text-canvas",
-  Improved: "border-blue text-blue",
-  Fixed: "border-ink/70 text-ink",
+  Improved: "border-green/40 bg-green-wash text-green",
+  Fixed: "border-clay/40 bg-clay-wash text-clay",
   "Coming soon": "border-dashed border-graphite text-graphite",
 };
 
-const stepDetails = ["Markdown · tags", "usechangelog.com/acme", "widget.js"];
+const tagDots: Record<PostTag, string> = {
+  New: "bg-blue",
+  Improved: "bg-green",
+  Fixed: "bg-clay",
+  "Coming soon": "border border-dashed border-graphite",
+};
+
+const stepDetails = ["Markdown editor", "usechangelog.com/acme", "widget.js"];
 
 function Tag({ tag }: { tag: PostTag }) {
   return (
@@ -31,31 +39,63 @@ function Tag({ tag }: { tag: PostTag }) {
   );
 }
 
+type NodeKind = "latest" | "entry" | "next";
+
+const nodeStyles: Record<NodeKind, string> = {
+  latest: "bg-blue",
+  entry: "border border-blue bg-canvas",
+  next: "border border-dashed border-blue bg-canvas",
+};
+
+// A square on the first grid line: the page reads as a changelog of itself.
+function SpineLabel({
+  kind,
+  children,
+  className = "",
+  style,
+}: {
+  kind: NodeKind;
+  children: React.ReactNode;
+  className?: string;
+  style?: CSSProperties;
+}) {
+  return (
+    <p
+      style={style}
+      className={`relative pl-5 font-display text-sm font-medium text-blue ${className}`}
+    >
+      <span
+        aria-hidden="true"
+        data-reveal={kind === "latest" ? undefined : "node"}
+        className={`absolute -left-1 top-1.5 size-[9px] ${nodeStyles[kind]}`}
+      />
+      {children}
+    </p>
+  );
+}
+
 const container = "mx-auto w-full max-w-6xl px-5 sm:px-8";
 const h2 =
   "text-balance font-display text-3xl font-medium leading-[1.1] tracking-[-0.025em] md:text-[2.6rem]";
 
 function SectionHead({
-  index,
   label,
   id,
   title,
   aside,
+  node = "entry",
 }: {
-  index: string;
   label: string;
   id: string;
   title: string;
   aside?: string;
+  node?: NodeKind;
 }) {
   return (
     <div className="grid gap-y-6 md:grid-cols-12">
-      <p className="font-display text-sm tabular-nums text-graphite md:col-span-3">
-        <span className="text-blue">{index}</span>
-        <span aria-hidden="true"> — </span>
-        <span className="sr-only">: </span>
+      <SpineLabel kind={node} className="md:col-span-3 md:pt-2">
         {label}
-      </p>
+      </SpineLabel>
       <div className="md:col-span-9">
         <h2 id={id} className={`${h2} max-w-2xl`}>
           {title}
@@ -80,8 +120,8 @@ function Grid() {
         {Array.from({ length: 12 }, (_, i) => (
           <span
             key={i}
-            style={delay(i * 35)}
-            className={`motion-draw border-l border-gridline ${i === 3 ? "border-r md:border-r-0" : ""} ${i === 11 ? "md:border-r" : ""} ${i >= 4 ? "hidden md:block" : ""}`}
+            style={delay(i === 0 ? 0 : 200 + i * 45)}
+            className={`motion-draw border-l ${i === 0 ? "border-blue/50" : "border-gridline"} ${i === 3 ? "border-r border-r-gridline md:border-r-0" : ""} ${i === 11 ? "md:border-r md:border-r-gridline" : ""} ${i >= 4 ? "hidden md:block" : ""}`}
           />
         ))}
       </div>
@@ -93,6 +133,7 @@ export default function Home() {
   return (
     <div className="relative isolate">
       <Grid />
+      <Reveal />
 
       <a
         href="#main"
@@ -110,10 +151,10 @@ export default function Home() {
             className="flex items-center gap-2.5 font-display text-lg font-medium tracking-tight"
           >
             <span aria-hidden="true" className="grid size-4 grid-cols-2 gap-px">
-              <span className="bg-blue" />
-              <span className="bg-blue/40" />
-              <span className="bg-blue/40" />
-              <span className="bg-blue/40" />
+              <span style={delay(300)} className="motion-light bg-blue" />
+              <span style={delay(450)} className="motion-light bg-blue-soft" />
+              <span style={delay(600)} className="motion-light bg-blue-soft" />
+              <span style={delay(750)} className="motion-light bg-blue-soft" />
             </span>
             <span translate="no">UseChangelog</span>
           </a>
@@ -150,28 +191,29 @@ export default function Home() {
         {/* Hero */}
         <div className={`${container} pb-20 pt-16 md:pb-28 md:pt-24`}>
           <div className="grid gap-y-6 md:grid-cols-12">
-            <p
+            <SpineLabel
+              kind="latest"
               style={delay(150)}
-              className="motion-rise font-display text-sm text-graphite md:col-span-3 md:pt-4"
+              className="motion-rise md:col-span-3 md:pt-4"
             >
               Changelog &amp;
               <br className="hidden md:block" /> product announcements
-            </p>
+            </SpineLabel>
             <div className="md:col-span-9">
               <h1
-                style={delay(220)}
-                className="motion-rise text-balance font-display text-[2.75rem] font-medium leading-[1.02] tracking-[-0.035em] sm:text-6xl md:text-[5.25rem]"
+                style={delay(250)}
+                className="motion-rise text-balance font-display text-[2.75rem] font-medium leading-[1.02] tracking-[-0.03em] sm:text-6xl md:text-[5.25rem]"
               >
                 Tell your users what shipped.
               </h1>
               <p
-                style={delay(300)}
+                style={delay(370)}
                 className="motion-rise mt-8 max-w-xl text-lg leading-relaxed text-graphite md:text-xl"
               >
                 {hero.subhead}
               </p>
               <div
-                style={delay(380)}
+                style={delay(490)}
                 className="motion-rise mt-10 flex flex-wrap gap-3"
               >
                 <a
@@ -191,23 +233,21 @@ export default function Home() {
           </div>
 
           <dl
-            style={delay(460)}
+            style={delay(610)}
             className="motion-rise mt-20 grid grid-cols-2 border-y border-hairline md:mt-28 md:grid-cols-4"
           >
             {[
               ["Setup", "One script tag"],
               ["Editor", "Markdown"],
-              ["Tags", "New · Improved · Fixed"],
+              ["Tags", "New, Improved, Fixed"],
               ["Public page", "usechangelog.com/acme"],
             ].map(([term, value], i) => (
               <div
                 key={term}
                 className={`py-5 pr-4 ${i % 2 === 1 ? "pl-4 md:pl-0" : ""} ${i < 2 ? "border-b border-hairline md:border-b-0" : ""}`}
               >
-                <dt className="font-display text-xs uppercase tracking-wider text-graphite">
-                  {term}
-                </dt>
-                <dd className="mt-1.5 font-display text-base font-medium">
+                <dt className="text-sm text-graphite">{term}</dt>
+                <dd className="mt-1 font-display text-base font-medium [overflow-wrap:anywhere]">
                   {value}
                 </dd>
               </div>
@@ -222,16 +262,17 @@ export default function Home() {
         >
           <div className={`${container} py-20 md:py-28`}>
             <SectionHead
-              index="01"
-              label="Problem"
+              label="The problem"
               id="problem-title"
               title={problem.title}
               aside={problem.intro}
             />
             <ul className="mt-14 grid border-t border-ink md:ml-[25%] md:grid-cols-3">
-              {problem.places.map((place) => (
+              {problem.places.map((place, i) => (
                 <li
                   key={place.name}
+                  data-reveal
+                  style={delay(i * 110)}
                   className="border-b border-hairline py-6 md:border-b-0 md:pr-8"
                 >
                   <h3 className="font-display text-xl font-medium">
@@ -243,7 +284,10 @@ export default function Home() {
                 </li>
               ))}
             </ul>
-            <p className="mt-10 max-w-2xl border-l-2 border-blue pl-5 text-lg leading-relaxed md:ml-[25%]">
+            <p
+              data-reveal
+              className="mt-10 max-w-2xl border-l-2 border-blue pl-5 text-lg leading-relaxed md:ml-[25%]"
+            >
               {problem.outcome}
             </p>
           </div>
@@ -257,7 +301,6 @@ export default function Home() {
         >
           <div className={`${container} py-20 md:py-28`}>
             <SectionHead
-              index="02"
               label="How it works"
               id="how-title"
               title="Three steps from release to readers."
@@ -266,6 +309,8 @@ export default function Home() {
               {steps.map((step, i) => (
                 <li
                   key={step.title}
+                  data-reveal
+                  style={delay(i * 120)}
                   className="flex flex-col border-hairline p-6 not-last:border-b md:p-8 md:not-last:border-b-0 md:not-last:border-r"
                 >
                   <span className="font-display text-sm tabular-nums text-blue">
@@ -290,11 +335,10 @@ export default function Home() {
         <section
           id="changelog"
           aria-labelledby="changelog-title"
-          className="scroll-mt-6 border-t border-hairline"
+          className="scroll-mt-6 border-t border-hairline bg-blue-wash/85"
         >
           <div className={`${container} py-20 md:py-28`}>
             <SectionHead
-              index="03"
               label="Example"
               id="changelog-title"
               title="What your readers see."
@@ -311,19 +355,21 @@ export default function Home() {
               </div>
               <div
                 aria-hidden="true"
-                className="hidden grid-cols-12 border-b border-hairline px-8 py-3 font-display text-xs uppercase tracking-wider text-graphite md:grid"
+                className="hidden grid-cols-12 border-b border-hairline px-8 py-3 text-sm text-graphite md:grid"
               >
                 <span className="col-span-2">Date</span>
                 <span className="col-span-2">Type</span>
                 <span className="col-span-8">Entry</span>
               </div>
               <div className="divide-y divide-hairline">
-                {posts.map((post) => {
+                {posts.map((post, i) => {
                   const soon = post.tag === "Coming soon";
                   return (
                     <article
                       key={post.title}
-                      className={`motion-reveal grid gap-3 px-5 py-7 md:grid-cols-12 md:gap-0 md:px-8 ${soon ? "bg-wash" : ""}`}
+                      data-reveal
+                      style={delay(i * 130)}
+                      className={`grid gap-3 px-5 py-7 md:grid-cols-12 md:gap-0 md:px-8 ${soon ? "bg-wash" : ""}`}
                     >
                       <div className="flex items-center gap-3 md:contents">
                         <div className="font-display text-sm tabular-nums text-graphite md:col-span-2 md:pt-1">
@@ -361,15 +407,17 @@ export default function Home() {
         >
           <div className={`${container} py-20 md:py-28`}>
             <SectionHead
-              index="04"
               label="Widget"
               id="widget-title"
               title={widget.title}
               aside={widget.text}
             />
             <div className="mt-14 grid gap-6 md:ml-[25%] lg:grid-cols-9">
-              <figure className="min-w-0 border border-hairline bg-wash lg:col-span-5">
-                <figcaption className="flex items-center justify-between border-b border-hairline px-5 py-3 font-display text-xs uppercase tracking-wider text-graphite">
+              <figure
+                data-reveal
+                className="min-w-0 border border-hairline bg-wash lg:col-span-5"
+              >
+                <figcaption className="flex items-center justify-between border-b border-hairline px-5 py-3 text-sm text-graphite">
                   <span>Embed snippet</span>
                   <span>HTML</span>
                 </figcaption>
@@ -385,7 +433,9 @@ export default function Home() {
               <div
                 role="img"
                 aria-label="Mock of the What’s new widget, showing two unread posts"
-                className="motion-open border border-ink bg-canvas lg:col-span-4"
+                data-reveal="open"
+                style={delay(250)}
+                className="border border-ink bg-canvas lg:col-span-4"
               >
                 <div className="flex items-center justify-between border-b border-ink px-4 py-3">
                   <span className="font-display font-medium">What’s new</span>
@@ -396,12 +446,14 @@ export default function Home() {
                 <div className="divide-y divide-hairline">
                   {posts.slice(0, 2).map((post) => (
                     <div key={post.title} className="flex gap-3 px-4 py-4">
-                      <span className="mt-2 size-1.5 shrink-0 bg-blue" />
+                      <span
+                        className={`mt-1.5 size-2 shrink-0 ${tagDots[post.tag]}`}
+                      />
                       <div>
-                        <p className="font-display text-xs uppercase tracking-wider text-graphite">
-                          {post.tag} · {post.date}
+                        <p className="text-sm text-graphite">
+                          {post.tag}, {post.date}
                         </p>
-                        <p className="mt-1 font-display font-medium">
+                        <p className="mt-0.5 font-display font-medium">
                           {post.title}
                         </p>
                       </div>
@@ -409,7 +461,7 @@ export default function Home() {
                   ))}
                 </div>
                 <p className="border-t border-hairline px-4 py-3 text-sm text-blue">
-                  View all updates →
+                  View all updates
                 </p>
               </div>
             </div>
@@ -426,7 +478,6 @@ export default function Home() {
         >
           <div className={`${container} py-20 md:py-28`}>
             <SectionHead
-              index="05"
               label="Who it’s for"
               id="audience-title"
               title="Made for teams of one to twenty."
@@ -435,6 +486,8 @@ export default function Home() {
               {audiences.map((a, i) => (
                 <div
                   key={a.title}
+                  data-reveal
+                  style={delay(i * 120)}
                   className={`py-6 ${i === 0 ? "border-b border-hairline md:border-b-0 md:pr-8" : "md:pl-8"}`}
                 >
                   <h3 className="font-display text-2xl font-medium tracking-tight">
@@ -453,8 +506,13 @@ export default function Home() {
           aria-labelledby="get-started-title"
           className="scroll-mt-6 border-t border-ink"
         >
-          <div className={`${container} grid py-16 md:grid-cols-12 md:py-20`}>
-            <div className="md:col-span-9 md:col-start-4">
+          <div
+            className={`${container} grid gap-y-6 py-16 md:grid-cols-12 md:py-20`}
+          >
+            <SpineLabel kind="next" className="md:col-span-3 md:pt-2">
+              Next
+            </SpineLabel>
+            <div className="md:col-span-9">
               <h2
                 id="get-started-title"
                 className="text-balance font-display text-3xl font-medium leading-tight tracking-[-0.025em] md:text-4xl"

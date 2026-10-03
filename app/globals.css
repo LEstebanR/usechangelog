@@ -8,6 +8,12 @@
   --color-hairline: #e4e7ec;
   --color-gridline: #f0f2f5;
   --color-blue: #1d3a8f;
+  --color-blue-soft: #a5b0d2;
+  --color-blue-wash: #edf1fa;
+  --color-green: #17694a;
+  --color-green-wash: #eaf5ef;
+  --color-clay: #9a3f12;
+  --color-clay-wash: #fbefe7;
   --font-display: var(--font-geist), system-ui, sans-serif;
   --font-sans: var(--font-inter), system-ui, sans-serif;
 }
@@ -40,7 +46,11 @@ body {
   outline-offset: 3px;
 }
 
-/* Motion: one load sequence, scroll-linked reveals on the product demo, press feedback. */
+/*
+ * Motion: one load sequence (grid draws in, logo lights up, hero rises),
+ * reveals as sections scroll into view, and press feedback on CTAs.
+ * Reveals are opt-in from JS (`.reveal-ready`), so content stays visible without it.
+ */
 :root {
   --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
   --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
@@ -49,7 +59,7 @@ body {
 @keyframes uc-rise {
   from {
     opacity: 0;
-    transform: translateY(8px);
+    transform: translateY(18px);
   }
 }
 
@@ -65,22 +75,26 @@ body {
   }
 }
 
-@keyframes uc-open {
+@keyframes uc-light {
   from {
-    opacity: 0;
-    transform: translateY(-6px) scale(0.97);
+    background-color: var(--color-hairline);
   }
 }
 
 @media (prefers-reduced-motion: no-preference) {
   .motion-rise {
-    animation: uc-rise 560ms var(--ease-out) both;
+    animation: uc-rise 800ms var(--ease-out) both;
     animation-delay: var(--delay, 0ms);
   }
 
   .motion-draw {
     transform-origin: top;
-    animation: uc-draw 1100ms var(--ease-in-out) both;
+    animation: uc-draw 1400ms var(--ease-in-out) both;
+    animation-delay: var(--delay, 0ms);
+  }
+
+  .motion-light {
+    animation: uc-light 500ms var(--ease-out) both;
     animation-delay: var(--delay, 0ms);
   }
 
@@ -91,22 +105,31 @@ body {
   }
 
   .motion-press:active {
-    transform: scale(0.98);
+    transform: scale(0.97);
   }
 
-  @supports (animation-timeline: view()) {
-    .motion-reveal {
-      animation: uc-rise linear both;
-      animation-timeline: view();
-      animation-range: entry 0% entry 70%;
-    }
+  .reveal-ready [data-reveal] {
+    opacity: 0;
+    transform: translateY(24px);
+    transition:
+      opacity 800ms var(--ease-out),
+      transform 800ms var(--ease-out);
+    transition-delay: var(--delay, 0ms);
+  }
 
-    .motion-open {
-      transform-origin: top right;
-      animation: uc-open linear both;
-      animation-timeline: view();
-      animation-range: entry 25% entry 90%;
-    }
+  .reveal-ready [data-reveal="open"] {
+    transform: translateY(-10px) scale(0.96);
+    transform-origin: top right;
+  }
+
+  .reveal-ready [data-reveal="node"] {
+    transform: scale(0);
+    transition-duration: 500ms;
+  }
+
+  .reveal-ready [data-reveal][data-inview] {
+    opacity: 1;
+    transform: none;
   }
 }
 
