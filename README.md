@@ -99,6 +99,7 @@ lib/markdown.ts         renderMarkdown(): safe Markdown to HTML for the public p
 lib/widget/             The widget's words in 5 languages and the API payload
 public/widget.js        The embeddable "What's new" widget (vanilla JS, Shadow DOM)
 scripts/smoke-app.ts    Signed-in smoke test (`bun run smoke`)
+scripts/widget-test.ts  Host pages to try the widget from another origin (`bun run widget-test`)
 db/
   schema.ts             Our tables (public schema): workspaces, posts
   neon-auth.ts          Read-only view of Neon's user table, for foreign keys
@@ -137,6 +138,7 @@ Open http://localhost:3000.
 | `bun run db:generate` | Generate a migration from `db/schema.ts` |
 | `bun run db:migrate` | Apply pending migrations (uses `DATABASE_URL_UNPOOLED`) |
 | `bun run check-env` | Check the required env vars and their format, without printing them. Vercel runs it before migrating |
+| `bun run widget-test <widget-key> [base-url] [port]` | Host pages on another origin (`localhost:5050`) that load the widget: floating button, trigger + Spanish, hostile CSS, invalid key. For a protected preview, set `VERCEL_AUTOMATION_BYPASS_SECRET` |
 | `bun run smoke <email> [base-url]` | Signed-in smoke test of `/app`. Reuses the last session (`.smoke-session-*.json`, git-ignored), so it only sends a magic link when that expires; `SMOKE_LINK=<link>` skips the request. Never writes data, and refuses production URLs unless `SMOKE_ALLOW_PRODUCTION=1` |
 
 ### Environment variables
