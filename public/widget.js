@@ -15,11 +15,23 @@
 
   var script = document.currentScript;
   if (!script) return;
+  // One widget per page, even if the snippet runs twice (pasted twice, HMR, a re-render).
+  if (window.__useChangelogWidget) return;
+  window.__useChangelogWidget = true;
+
   var key = script.getAttribute("data-key");
   var lang = script.getAttribute("lang");
   var selector = script.getAttribute("data-trigger");
   var src = new URL(script.src);
-  if (!key) return console.warn("UseChangelog widget: missing data-key.");
+  if (!key) return warn("the script has no data-key. Copy the snippet again from your UseChangelog settings.");
+  if (selector) {
+    try {
+      document.querySelector(selector);
+    } catch {
+      warn('data-trigger="' + selector + '" isn\'t a valid CSS selector. Showing the floating button instead.');
+      selector = null;
+    }
+  }
 
   var query = new URLSearchParams();
   if (lang) query.set("lang", lang);
@@ -28,15 +40,24 @@
   var bypass = src.searchParams.get("x-vercel-protection-bypass");
   if (bypass) query.set("x-vercel-protection-bypass", bypass);
   var url = src.origin + "/api/widget/" + encodeURIComponent(key) + (query.toString() ? "?" + query : "");
-  fetch(url)
-    .then(function (res) {
-      if (!res.ok) throw new Error(res.status === 404 ? "unknown data-key" : "HTTP " + res.status);
-      return res.json();
-    })
-    .then(mount)
-    .catch(function (err) {
-      console.warn("UseChangelog widget: " + err.message + ". Nothing will show.");
-    });
+  fetch(url).then(
+    function (res) {
+      if (res.status === 404) return warn('data-key "' + key + '" doesn\'t match any workspace. Copy the snippet again from your UseChangelog settings.');
+      if (!res.ok) return warn("the server answered " + res.status + ". Nothing will show; try again later.");
+      return res.json().then(mount);
+    },
+    // A rejected fetch means the request never got an answer: offline, or blocked by the
+    // page's Content Security Policy, the usual cause on a real site.
+    function () {
+      warn("couldn't reach " + src.origin + ". If your site sets a Content Security Policy, add " + src.origin + " to connect-src.");
+    },
+  ).catch(function (err) {
+    warn("couldn't start (" + err.message + "). Nothing will show.");
+  });
+
+  function warn(message) {
+    console.warn("UseChangelog widget: " + message);
+  }
 
   // Same palette as the app (app/tag.tsx), as plain values.
   var CSS =
@@ -131,6 +152,10 @@
       "<div class=list>" +
       (data.posts.length ? section(t.tags.coming, coming, data) + section(t.latest, shipped, data) : "<p class=empty>" + esc(t.empty) + "</p>") +
       "</div><div class=foot><a class=all target=_blank rel=noopener href='" + esc(data.url) + "'>" + esc(t.all) + " →</a></div></div></div>";
+
+    if (selector && !document.querySelector(selector)) {
+      warn('data-trigger="' + selector + '" matches nothing on this page yet. It will open the panel once that element exists.');
+    }
 
     var panel = shadow.querySelector(".panel");
     var fab = shadow.querySelector(".fab");
