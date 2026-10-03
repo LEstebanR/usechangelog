@@ -1,4 +1,4 @@
-import markdownIt, { type MarkdownIt } from "markdown-it";
+import markdownIt from "markdown-it";
 
 // Post bodies are written by workspace owners and read by anyone, so the output must be safe.
 // Only paragraphs, line breaks, lists, links, bold, italic and inline code. Raw HTML is
@@ -7,28 +7,22 @@ import markdownIt, { type MarkdownIt } from "markdown-it";
 
 const SAFE_LINK = /^(https?:|mailto:)/i;
 
-let md: MarkdownIt | undefined;
-
-function parser() {
-  if (md) return md;
-  md = markdownIt("zero", { html: false, breaks: true }).enable([
-    "list",
-    "newline",
-    "link",
-    "emphasis",
-    "backticks",
-    "escape",
-    "entity",
-  ]);
-  md.validateLink = (url) => SAFE_LINK.test(url.trim());
-  md.renderer.rules.link_open = (tokens, idx, options, _env, self) => {
-    tokens[idx].attrSet("target", "_blank");
-    tokens[idx].attrSet("rel", "noopener nofollow ugc");
-    return self.renderToken(tokens, idx, options);
-  };
-  return md;
-}
+const md = markdownIt("zero", { html: false, breaks: true }).enable([
+  "list",
+  "newline",
+  "link",
+  "emphasis",
+  "backticks",
+  "escape",
+  "entity",
+]);
+md.validateLink = (url) => SAFE_LINK.test(url.trim());
+md.renderer.rules.link_open = (tokens, idx, options, _env, self) => {
+  tokens[idx].attrSet("target", "_blank");
+  tokens[idx].attrSet("rel", "noopener nofollow ugc");
+  return self.renderToken(tokens, idx, options);
+};
 
 export function renderMarkdown(body: string) {
-  return parser().render(body);
+  return md.render(body);
 }

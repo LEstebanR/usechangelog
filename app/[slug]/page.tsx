@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { formatDay } from "@/lib/posts/form";
+import { formatDay, LABELS } from "@/lib/posts/form";
 import { listPublishedPosts } from "@/lib/posts/server";
 import { getWorkspaceBySlug } from "@/lib/workspace/server";
 import { PostTags } from "../app/post-tags";
@@ -46,8 +46,8 @@ export default async function PublicChangelog({ params }: PageProps<"/[slug]">) 
           </p>
         ) : (
           <>
-            {coming.length > 0 && <PostList id="coming" label="Coming soon" marker="dashed" posts={coming} />}
-            {shipped.length > 0 && <PostList id="shipped" label="Shipped" posts={shipped} />}
+            {coming.length > 0 && <PostList label={LABELS.coming} marker="dashed" posts={coming} />}
+            {shipped.length > 0 && <PostList label={LABELS.shipped} posts={shipped} />}
           </>
         )}
       </main>
@@ -67,14 +67,13 @@ export default async function PublicChangelog({ params }: PageProps<"/[slug]">) 
 }
 
 // One block of the page, laid out like the landing's example changelog.
-function PostList({ id, label, marker, posts }: {
-  id: string;
+function PostList({ label, marker, posts }: {
   label: string;
   marker?: "dashed";
   posts: Post[];
 }) {
   return (
-    <section id={id} aria-label={label} className="mt-14 md:mt-20">
+    <section aria-label={label} className="mt-14 md:mt-20">
       <SectionLabel marker={marker}>{label}</SectionLabel>
       <div className="mt-5 divide-y divide-hairline border border-ink bg-canvas">
         {posts.map((post) => (

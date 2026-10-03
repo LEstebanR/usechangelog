@@ -26,7 +26,7 @@ export async function requireWorkspace() {
 // A workspace by its public slug, for the public page (#7). No session needed.
 export async function getWorkspaceBySlug(slug: string) {
   const [workspace] = await getDb()
-    .select({ id: workspaces.id, name: workspaces.name, slug: workspaces.slug })
+    .select({ id: workspaces.id, name: workspaces.name })
     .from(workspaces)
     .where(eq(workspaces.slug, slug))
     .limit(1);
