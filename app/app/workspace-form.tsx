@@ -25,7 +25,8 @@ export function WorkspaceForm({ action, initial, origin, submitLabel }: Props) {
   if (state !== shown) {
     setShown(state);
     setName(state.values.name);
-    setSlugInput(state.values.slug || null);
+    // A suggested slug stays a suggestion; only one typed by hand is kept.
+    setSlugInput((typed) => (typed === null ? null : state.values.slug));
   }
   const slug = slugInput ?? slugify(name);
   // Settings only: warn before a stored slug changes.
