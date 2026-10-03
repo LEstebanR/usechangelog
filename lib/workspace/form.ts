@@ -4,7 +4,6 @@ import { NAME_MAX, slugify, validateSlug } from "./slug";
 export type WorkspaceFormState = {
   values: { name: string; slug: string; widgetLang: WidgetLang };
   errors?: { name?: string; slug?: string };
-  saved?: boolean;
 };
 
 // Reads and validates the form. An empty slug falls back to one built from the name.

@@ -51,5 +51,5 @@ export async function updateWorkspace(
     return slugTakenOrThrow(error, state);
   }
   revalidatePath("/app", "layout");
-  return { ...state, saved: true };
+  redirect("/app?done=settings");
 }

@@ -11,6 +11,7 @@ const notices = {
   published: "Post published.",
   drafted: "Draft saved.",
   deleted: "Post deleted.",
+  settings: "Settings saved.",
 } as const;
 
 export default async function AppPage({ searchParams }: PageProps<"/app">) {

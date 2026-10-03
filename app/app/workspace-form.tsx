@@ -20,7 +20,7 @@ type Props = {
 // The only client code for workspaces: keeps what you typed on errors and
 // suggests a slug from the name until you edit the slug yourself.
 export function WorkspaceForm({ action, initial, origin, submitLabel, showWidgetLang }: Props) {
-  const [state, formAction, pending] = useActionState(action, { values: initial });
+  const [state, formAction] = useActionState(action, { values: initial });
   const [name, setName] = useState(state.values.name);
   // null until the slug is edited by hand: until then it follows the name.
   const [slugInput, setSlugInput] = useState<string | null>(initial.slug || null);
@@ -119,15 +119,10 @@ export function WorkspaceForm({ action, initial, origin, submitLabel, showWidget
         </fieldset>
       )}
 
-      <div className="flex items-center gap-4">
+      <div>
         <SubmitButton pendingLabel="Saving…" className={primaryButtonClass}>
           {submitLabel}
         </SubmitButton>
-        {state.saved && !pending && (
-          <p role="status" className="text-sm text-green">
-            Saved.
-          </p>
-        )}
       </div>
     </form>
   );
