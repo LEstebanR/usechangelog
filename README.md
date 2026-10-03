@@ -44,20 +44,18 @@ It's global, self-serve and priced in USD. Sign-up is free; publishing needs a m
 
 ```mermaid
 flowchart LR
-  A[Write a post<br/>in /app] -->|publish| B[(Postgres<br/>Neon)]
-  B --> C[Public page<br/>/your-slug]
-  B --> D[Widget API<br/>/api/widget/key]
-  D --> E[widget.js<br/>on your site]
-  F[Polar<br/>subscription] -->|webhook| B
-  B -.->|only when active| C
-  B -.->|only when active| D
+  A["Write a post in /app"] -->|publish| B[("Postgres (Neon)")]
+  B --> C["Public page /your-slug"]
+  B --> D["Widget API"]
+  D --> E["widget.js on your site"]
+  F["Polar subscription"] -->|webhook| B
 ```
 
 1. **Write a post:** title, Markdown body, category and type. Save it as a draft or publish it.
 2. **Get a public page:** published posts appear at `/{slug}`, with "Coming soon" first and then everything that shipped, newest first.
 3. **Embed the widget:** paste one `<script>` tag. The widget's chrome is English by default, or Spanish with `lang="es"`; posts show exactly as written.
 
-The public page and the widget only serve posts while the workspace has an **active** subscription. If it lapses, nothing is deleted; the posts come back as soon as it's active again.
+The public page and the widget only serve posts while the workspace has an **active** Polar subscription. If it lapses, nothing is deleted; the posts come back as soon as it's active again.
 
 ## Tech stack
 
