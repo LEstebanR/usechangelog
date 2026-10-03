@@ -30,6 +30,7 @@ export default async function AppLayout({ children }: LayoutProps<"/app">) {
           {workspace && (
             <WhatsNewPreview
               slug={workspace.slug}
+              name={workspace.name}
               lang={workspace.widgetLang}
               allUpdatesUrl={url}
               posts={posts.map((p) => ({ ...p, publishedOn: p.publishedOn ?? "" }))}

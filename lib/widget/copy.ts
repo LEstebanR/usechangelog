@@ -17,33 +17,35 @@ type Copy = {
   all: string;
   close: string;
   empty: string;
+  latest: string;
+  more: string;
   tags: { new: string; improved: string; fixed: string; coming: string };
 };
 
 export const WIDGET_COPY: Record<WidgetLang, Copy> = {
   en: {
     button: "What's new", title: "What's new", all: "View all updates", close: "Close",
-    empty: "No published updates yet.",
+    empty: "No published updates yet.", latest: "Latest", more: "Read more",
     tags: { new: "New", improved: "Improved", fixed: "Fixed", coming: "Coming soon" },
   },
   es: {
     button: "Novedades", title: "Novedades", all: "Ver todas", close: "Cerrar",
-    empty: "Todavía no hay novedades publicadas.",
+    empty: "Todavía no hay novedades publicadas.", latest: "Lo último", more: "Leer más",
     tags: { new: "Nuevo", improved: "Mejorado", fixed: "Corregido", coming: "Próximamente" },
   },
   pt: {
     button: "Novidades", title: "Novidades", all: "Ver todas", close: "Fechar",
-    empty: "Ainda não há novidades publicadas.",
+    empty: "Ainda não há novidades publicadas.", latest: "Últimas", more: "Ler mais",
     tags: { new: "Novo", improved: "Melhorado", fixed: "Corrigido", coming: "Em breve" },
   },
   fr: {
     button: "Nouveautés", title: "Nouveautés", all: "Voir toutes les mises à jour", close: "Fermer",
-    empty: "Aucune nouveauté publiée pour le moment.",
+    empty: "Aucune nouveauté publiée pour le moment.", latest: "Dernières", more: "Lire la suite",
     tags: { new: "Nouveau", improved: "Amélioré", fixed: "Corrigé", coming: "Bientôt" },
   },
   de: {
     button: "Neuigkeiten", title: "Neuigkeiten", all: "Alle Neuigkeiten ansehen", close: "Schließen",
-    empty: "Noch keine Neuigkeiten veröffentlicht.",
+    empty: "Noch keine Neuigkeiten veröffentlicht.", latest: "Neueste", more: "Weiterlesen",
     tags: { new: "Neu", improved: "Verbessert", fixed: "Behoben", coming: "Demnächst" },
   },
 };

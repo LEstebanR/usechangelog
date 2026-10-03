@@ -3,22 +3,31 @@
 import { useEffect, useRef, useState } from "react";
 import type { Category, PostType } from "@/lib/posts/form";
 import { WIDGET_COPY, type WidgetLang } from "@/lib/widget/copy";
-import { Tag } from "../tag";
 
 type Post = { id: string; title: string; body: string; category: Category; type: PostType; publishedOn: string };
 
-const tagName = { new: "New", improved: "Improved", fixed: "Fixed" } as const;
+// Category color: a bar beside the post and a dot before its label (the landing's tag colors).
+const accent = {
+  new: { bar: "bg-blue", dot: "bg-blue", text: "text-blue" },
+  improved: { bar: "bg-green", dot: "bg-green", text: "text-green" },
+  fixed: { bar: "bg-clay", dot: "bg-clay", text: "text-clay" },
+} as const;
 
 // A header button named after the workspace slug that opens the "What's new" panel
 // exactly as your users will see it: published posts only, in the workspace's widget language.
-export function WhatsNewPreview({ slug, lang, allUpdatesUrl, posts }: { slug: string; lang: WidgetLang; allUpdatesUrl: string; posts: Post[] }) {
+export function WhatsNewPreview({ slug, name, lang, allUpdatesUrl, posts }: {
+  slug: string;
+  name: string;
+  lang: WidgetLang;
+  allUpdatesUrl: string;
+  posts: Post[];
+}) {
   const [open, setOpen] = useState(false);
   const panel = useRef<HTMLDivElement>(null);
   const trigger = useRef<HTMLButtonElement>(null);
   const t = WIDGET_COPY[lang];
-  const formatDay = (day: string) =>
-    new Intl.DateTimeFormat(lang, { month: "short", day: "numeric", year: "numeric", timeZone: "UTC" })
-      .format(new Date(`${day}T00:00:00Z`));
+  const coming = posts.filter((p) => p.type === "coming");
+  const shipped = posts.filter((p) => p.type !== "coming");
 
   useEffect(() => {
     if (!open) return;
@@ -62,56 +71,104 @@ export function WhatsNewPreview({ slug, lang, allUpdatesUrl, posts }: { slug: st
           role="dialog"
           aria-label={`${t.title} preview`}
           tabIndex={-1}
-          className="absolute right-0 top-full z-50 mt-2 flex max-h-[min(36rem,80dvh)] w-[min(26rem,calc(100vw-2rem))] flex-col border border-hairline bg-canvas shadow-[0_12px_40px_-12px_rgb(14_17_22/0.25)] outline-none"
+          className="absolute right-0 top-full z-50 mt-2 flex max-h-[min(40rem,85dvh)] w-[min(28rem,calc(100vw-2rem))] flex-col border border-hairline bg-canvas shadow-[0_16px_48px_-12px_rgb(14_17_22/0.28)] outline-none"
         >
-          <div className="flex items-center justify-between gap-3 border-b border-hairline px-6 py-4">
-            <p className="font-display text-lg font-medium tracking-tight">{t.title}</p>
-            <div className="flex items-center gap-1">
-              <button
-                type="button"
-                onClick={() => {
-                  setOpen(false);
-                  trigger.current?.focus();
-                }}
-                aria-label={t.close}
-                className="ml-1 grid size-7 place-items-center text-graphite hover:text-ink"
-              >
-                <svg viewBox="0 0 10 10" className="size-2.5" aria-hidden="true">
-                  <path d="M1 1l8 8M9 1l-8 8" stroke="currentColor" strokeWidth="1.5" />
-                </svg>
-              </button>
+          <div className="flex items-start justify-between gap-3 px-6 pt-5 pb-4">
+            <div>
+              <p className="font-display text-xl font-medium tracking-tight">{t.title}</p>
+              <p className="mt-0.5 text-sm text-graphite">{name}</p>
             </div>
+            <button
+              type="button"
+              onClick={() => {
+                setOpen(false);
+                trigger.current?.focus();
+              }}
+              aria-label={t.close}
+              className="-mr-2 grid size-8 place-items-center text-graphite hover:text-ink"
+            >
+              <svg viewBox="0 0 10 10" className="size-3" aria-hidden="true">
+                <path d="M1 1l8 8M9 1l-8 8" stroke="currentColor" strokeWidth="1.4" />
+              </svg>
+            </button>
           </div>
 
-          <ol className="flex-1 divide-y divide-hairline overflow-y-auto">
-            {posts.length === 0 && <li className="px-6 py-10 text-center text-[0.95rem] text-graphite">{t.empty}</li>}
-            {posts.map((post) => (
-              <li key={post.id} className="px-6 py-5">
-                <div className="flex items-center justify-between gap-3">
-                  <span className="flex flex-wrap items-center gap-1.5">
-                    <Tag tag={tagName[post.category]} label={t.tags[post.category]} />
-                    {post.type === "coming" && <Tag tag="Coming soon" label={t.tags.coming} />}
-                  </span>
-                  {post.publishedOn && (
-                    <span className="shrink-0 text-xs tabular-nums text-graphite">{formatDay(post.publishedOn)}</span>
-                  )}
-                </div>
-                <p className="mt-3 font-display text-[1.05rem] font-medium leading-snug text-ink">{post.title}</p>
-                {/* Plain text until #7's renderMarkdown lands. */}
-                {post.body && (
-                  <p className="mt-2 line-clamp-5 text-[0.95rem] leading-relaxed whitespace-pre-line text-ink/80">
-                    {post.body}
-                  </p>
-                )}
-              </li>
-            ))}
-          </ol>
+          <div className="flex-1 overflow-y-auto border-t border-hairline">
+            {posts.length === 0 && <p className="px-6 py-12 text-center text-[0.95rem] text-graphite">{t.empty}</p>}
+            {coming.length > 0 && <Section label={t.tags.coming} dashed posts={coming} lang={lang} allUpdatesUrl={allUpdatesUrl} />}
+            {shipped.length > 0 && <Section label={t.latest} posts={shipped} lang={lang} allUpdatesUrl={allUpdatesUrl} />}
+          </div>
 
-          <a href={allUpdatesUrl} className="border-t border-hairline bg-wash px-6 py-3.5 text-sm font-medium text-blue hover:underline">
-            {t.all} →
-          </a>
+          <div className="border-t border-hairline p-3">
+            <a
+              href={allUpdatesUrl}
+              className="block bg-wash px-4 py-2.5 text-center text-sm font-medium text-ink transition-colors hover:bg-blue hover:text-canvas"
+            >
+              {t.all} →
+            </a>
+          </div>
         </div>
       )}
     </div>
+  );
+}
+
+function Section({ label, posts, dashed = false, lang, allUpdatesUrl }: {
+  label: string;
+  posts: Post[];
+  dashed?: boolean;
+  lang: WidgetLang;
+  allUpdatesUrl: string;
+}) {
+  const t = WIDGET_COPY[lang];
+  return (
+    <section>
+      <h3 className="sticky top-0 z-10 bg-canvas/95 px-6 pt-4 pb-2 text-xs font-medium tracking-wide text-graphite uppercase backdrop-blur">
+        {label}
+      </h3>
+      <ol className="flex flex-col gap-1 px-3 pb-3">
+        {posts.map((post) => {
+          const color = accent[post.category];
+          return (
+            <li key={post.id} className="relative px-3 py-3">
+              <span
+                aria-hidden="true"
+                className={`absolute top-3 bottom-3 left-0 w-0.5 ${dashed ? "border-l-2 border-dashed border-graphite/60" : color.bar}`}
+              />
+              <p className="flex items-center gap-2 text-[0.8rem]">
+                <span aria-hidden="true" className={`size-1.5 ${color.dot}`} />
+                <span className={`font-medium ${color.text}`}>{t.tags[post.category]}</span>
+                {post.publishedOn && (
+                  <>
+                    <span aria-hidden="true" className="text-hairline">·</span>
+                    <time dateTime={post.publishedOn} className="tabular-nums text-graphite">
+                      {formatDay(post.publishedOn, lang)}
+                    </time>
+                  </>
+                )}
+              </p>
+              <p className="mt-1.5 text-[1.0625rem] font-semibold leading-snug text-ink">{post.title}</p>
+              {/* Plain text until #7's renderMarkdown lands. */}
+              {post.body && (
+                <>
+                  <p className="mt-1.5 line-clamp-4 text-[0.9375rem] leading-relaxed whitespace-pre-line text-ink/75">
+                    {post.body}
+                  </p>
+                  <a href={allUpdatesUrl} className="mt-1.5 inline-block text-sm font-medium text-blue hover:underline">
+                    {t.more}
+                  </a>
+                </>
+              )}
+            </li>
+          );
+        })}
+      </ol>
+    </section>
+  );
+}
+
+function formatDay(day: string, lang: WidgetLang) {
+  return new Intl.DateTimeFormat(lang, { month: "short", day: "numeric", year: "numeric", timeZone: "UTC" }).format(
+    new Date(`${day}T00:00:00Z`),
   );
 }
