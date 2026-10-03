@@ -5,7 +5,7 @@ description: How UseChangelog bills with Polar. Use when working on checkout, th
 
 # Polar billing
 
-UseChangelog has one monthly plan, sold through Polar. There is no Stripe. Read the current Polar docs before writing code. This skill is our rules, not their API reference.
+The billing rules (Polar only, one monthly plan, sign-up free, only `active` publishes) are in `AGENTS.md` → **Product rules**. This skill is how to implement them. Read the current Polar docs before writing code; this isn't their API reference.
 
 ## Docs to read first
 
@@ -24,22 +24,17 @@ UseChangelog has one monthly plan, sold through Polar. There is no Stripe. Read 
 
 ## Our rules
 
-- **One product, one monthly price.** Reference the product by an env var. Never hardcode the price in code or copy; read it from Polar if it has to be shown.
+- **Product:** reference it by an env var. If the price has to be shown, read it from Polar.
 - **Checkout:** start it from the signed-in app with the workspace owner's identity. Pass our account or workspace id so the webhook can map back to it.
 - **Webhook:**
   - It is the only writer of subscription state.
   - Verify the signature with the webhook secret before reading the payload. Reject unsigned or invalid requests.
   - Handlers must be idempotent, because Polar retries deliveries.
-- **Stored state:** keep exactly one state per workspace, one of `active | past_due | canceled | none`.
-  - `none` means no subscription yet.
-  - Map Polar's subscription status into these four and keep the mapping in one function.
-  - Anything not clearly active or past due counts as `canceled`.
-- **Gate:** only `active` can publish posts, serve the public page and serve the widget.
-  - `past_due` doesn't publish. Show a banner that links to the portal.
-  - Drafts stay editable in every state.
+- **Stored state:** one per workspace: `active | past_due | canceled | none` (`none` means no subscription yet). Map Polar's status in a single function; anything not clearly active or past due is `canceled`.
+- **Gate:** check the stored state in one place, server-side. For `past_due`, show a banner that links to the portal. Drafts stay editable in every state.
 - **Customer portal:** the only place to change the payment method or cancel. Link to it from the app; don't build our own billing UI.
-- **Secrets:** access token and webhook secret live in env vars, documented in `.env.example`, never committed.
+- **Env vars:** access token, webhook secret and product id.
 
-## Out of scope
+## Not in the MVP
 
-Trials, coupons, multiple plans, annual billing, usage-based billing, seat pricing.
+Coupons, multiple plans, annual billing, usage-based billing, seat pricing.

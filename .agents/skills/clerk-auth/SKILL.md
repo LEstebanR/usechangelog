@@ -5,7 +5,7 @@ description: How UseChangelog uses Clerk. Use when working on sign-up, sign-in, 
 
 # Clerk auth
 
-Auth is Clerk with **magic link (email link) only**. Read the current Clerk docs before writing code. This skill is our rules, not a copy of their guide.
+The auth rules (Clerk magic link only, one account and one workspace, no teams or SSO) are in `AGENTS.md` → **Product rules**. This skill is how to implement them. Read the current Clerk docs before writing code; this isn't a copy of their guide.
 
 ## Docs to read first
 
@@ -17,18 +17,14 @@ Auth is Clerk with **magic link (email link) only**. Read the current Clerk docs
 
 ## Our rules
 
-- **Methods:**
-  - Email address with email link is the only method enabled in the Clerk dashboard.
-  - No passwords, no OAuth or social providers, no SSO or SAML, no organizations.
+- **Dashboard:** enable only email address with email link. Leave passwords, OAuth, SAML and organizations off.
 - **Routes:**
   - Everything under `/app` requires a session. Protect it in `proxy.ts` with `clerkMiddleware()`, and check again with `auth()` in server code that reads or writes data.
   - The landing, the legal pages, `/{slug}` and the widget endpoint are public. Public pages are still gated by the workspace subscription (see `polar-billing`), not by auth.
-- **Account model:** one Clerk user owns one workspace.
-  - Create the workspace on first sign-in, keyed by the Clerk user id.
-  - Don't use Clerk organizations to model it.
+- **Workspace:** create it on first sign-in, keyed by the Clerk user id. Don't model it with Clerk organizations.
 - **Ownership:** read the user id on the server (`auth()`) for every write, never from the client.
-- **Secrets:** Clerk keys live in env vars, documented in `.env.example`, never committed.
+- **Env vars:** the Clerk publishable and secret keys.
 
-## Out of scope
+## Not in the MVP
 
-Teams, invitations, roles, account linking, multi-factor flows beyond Clerk's defaults.
+Invitations, account linking, multi-factor flows beyond Clerk's defaults.

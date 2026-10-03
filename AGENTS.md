@@ -14,18 +14,26 @@ Changelog and product announcements for small teams: a public changelog page and
 
 ## Product rules
 
+This list is the source of truth. The skills in `.agents/skills/` add implementation detail and don't restate these rules.
+
 - **Account model:** one account, one workspace. No teams, no organizations.
 - **Public page:** the slug lives in the path (`usechangelog.com/{slug}`), never in a subdomain.
 - **Auth:** Clerk with magic link only. No SSO, no social login. See `.agents/skills/clerk-auth`.
 - **Billing:** Polar, never Stripe. One monthly plan. The price is never hardcoded in code or copy; it comes from Polar. See `.agents/skills/polar-billing`.
 - **Paywall:** sign-up is free. Publishing, the public page and the widget require a subscription in state `active`. `past_due`, `canceled` and `none` can't publish.
-- **Out of scope:** waitlist, voting, comments, RSS, email digests, custom domains, unread badge. See `.agents/skills/mvp-scope` before adding any feature.
+- **Out of scope:**
+  - waitlist, voting, comments, reactions
+  - RSS or feeds, email digests, scheduled posts
+  - custom domains, unread badge
+  - teams or roles, SSO or social login
+  - Stripe, trials or a free tier that publishes
+  - Check `.agents/skills/mvp-scope` for what *is* in before adding a feature.
 - **Language:** the app, landing, legal pages and public page are English only. Posts are never translated. The one exception is the widget chrome: English by default, Spanish with `lang="es"` on the snippet.
 
 ## Verifying changes
 
-- **Checks:** `npm run lint`, `npm run typecheck` and `npm run build`. CI runs the same on every PR. Tests run with `npm test` once that script exists.
-- **Verifier:** `.cursor/agents/verifier.md` runs these checks and reports the result without changing code.
+- **Checks:** `npm run check` runs lint, typecheck and build. CI runs the same three as separate jobs on every PR. Tests run with `npm test` once that script exists.
+- **Verifier:** the `verifier` agent (`.cursor/agents/verifier.md`, linked for Claude Code at `.claude/agents/verifier.md`) runs these checks and reports the result without changing code.
 - **Runtime:** for runtime behavior in `next dev`, use the `next-dev-loop` skill.
 
 ## Pull requests
@@ -33,4 +41,4 @@ Changelog and product announcements for small teams: a public changelog page and
 - One branch and one PR per issue, opened from an up-to-date `main`.
 - PRs are ready for review, never draft. Don't merge; the owner merges.
 - The PR description includes the Vercel preview URL and `Closes #<issue>` for every issue it resolves, so GitHub closes them when the PR is merged.
-- Never commit `.env*`, secrets or `node_modules`.
+- Never commit `.env*`, secrets or `node_modules`. Document new env var names in `.env.example`.
