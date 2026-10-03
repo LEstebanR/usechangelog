@@ -1,4 +1,4 @@
-import { createPolarCore, type Environment } from "@polar-sh/sdk/2026-10";
+import { createPolarCore, type Environment, type models } from "@polar-sh/sdk/2026-10";
 import { getProducts } from "@polar-sh/sdk/2026-10/services/products";
 
 // Read on first use, not at import, so `next build` runs without env vars.
@@ -26,8 +26,8 @@ export async function getPlanPrice() {
   try {
     const { accessToken, productId, environment } = polarConfig();
     const product = await getProducts(createPolarCore({ accessToken, environment }))(productId);
-    const price = product.prices.find((p) => !p.is_archived && "price_amount" in p && p.amount_type === "fixed");
-    if (!price || !("price_amount" in price)) return null;
+    const price = product.prices.find((p): p is models.ProductPriceFixed => p.amount_type === "fixed" && !p.is_archived);
+    if (!price) return null;
     const amount = new Intl.NumberFormat("en-US", {
       style: "currency",
       currency: price.price_currency.toUpperCase(),

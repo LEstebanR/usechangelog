@@ -3,6 +3,8 @@ import { redirect } from "next/navigation";
 import { NextRequest } from "next/server";
 import { requireUser } from "@/lib/auth/server";
 import { polarConfig } from "@/lib/billing/polar";
+import { hasSubscription } from "@/lib/billing/status";
+import { getOrigin } from "@/lib/site";
 import { requireWorkspace } from "@/lib/workspace/server";
 
 // Subscribe (#14). The helper reads the checkout from the query string, so we never pass
@@ -11,12 +13,10 @@ import { requireWorkspace } from "@/lib/workspace/server";
 export async function GET(request: NextRequest) {
   const [user, workspace] = await Promise.all([requireUser(), requireWorkspace()]);
   // One subscription per workspace: an active or failing one is managed in the portal.
-  if (workspace.subscriptionStatus === "active" || workspace.subscriptionStatus === "past_due") {
-    redirect("/app/billing");
-  }
+  if (hasSubscription(workspace)) redirect("/app/billing");
 
   const { accessToken, productId, environment } = polarConfig();
-  const { origin } = request.nextUrl;
+  const origin = await getOrigin();
   const url = new URL(request.nextUrl.pathname, origin);
   url.searchParams.set("products", productId);
   // The webhook (#15) finds the workspace by this id, never by email.

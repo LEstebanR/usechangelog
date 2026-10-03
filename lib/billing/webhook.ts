@@ -16,30 +16,32 @@ export async function applySubscription(subscription: Subscription) {
   const workspaceId = subscription.customer.external_id;
   const at = new Date(subscription.modified_at ?? subscription.created_at);
 
-  const applied =
-    workspaceId && UUID.test(workspaceId)
-      ? await getDb()
-          .update(workspaces)
-          .set({
-            polarCustomerId: subscription.customer_id,
-            polarSubscriptionId: subscription.id,
-            subscriptionStatus: mapPolarStatus(subscription.status),
-            currentPeriodEnd: new Date(subscription.current_period_end),
-            cancelAtPeriodEnd: subscription.cancel_at_period_end,
-            subscriptionUpdatedAt: at,
-          })
-          .where(
-            and(
-              eq(workspaces.id, workspaceId),
-              or(isNull(workspaces.subscriptionUpdatedAt), lte(workspaces.subscriptionUpdatedAt, at)),
-            ),
-          )
-          .returning({ id: workspaces.id })
-      : [];
+  if (!workspaceId || !UUID.test(workspaceId)) {
+    console.warn(`Polar subscription ${subscription.id} skipped: its customer has no workspace id.`);
+    return;
+  }
+
+  const applied = await getDb()
+    .update(workspaces)
+    .set({
+      polarCustomerId: subscription.customer_id,
+      polarSubscriptionId: subscription.id,
+      subscriptionStatus: mapPolarStatus(subscription.status),
+      currentPeriodEnd: new Date(subscription.current_period_end),
+      cancelAtPeriodEnd: subscription.cancel_at_period_end,
+      subscriptionUpdatedAt: at,
+    })
+    .where(
+      and(
+        eq(workspaces.id, workspaceId),
+        or(isNull(workspaces.subscriptionUpdatedAt), lte(workspaces.subscriptionUpdatedAt, at)),
+      ),
+    )
+    .returning({ id: workspaces.id });
 
   if (!applied.length) {
     console.warn(
-      `Polar subscription ${subscription.id} (${subscription.status}) skipped: no workspace ${workspaceId ?? "(no external_id)"}, or a newer event is already stored.`,
+      `Polar subscription ${subscription.id} (${subscription.status}) skipped: no workspace ${workspaceId}, or a newer event is already stored.`,
     );
   }
 }

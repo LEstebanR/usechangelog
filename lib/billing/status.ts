@@ -12,6 +12,18 @@ export function mapPolarStatus(status: string | null | undefined): SubscriptionS
   return "canceled";
 }
 
+type WithStatus = { subscriptionStatus: SubscriptionStatus };
+
 // The one rule for what goes public: publishing, the public page and the widget (#16).
-export const canPublish = (workspace: { subscriptionStatus: SubscriptionStatus }) =>
-  workspace.subscriptionStatus === "active";
+export const canPublish = (workspace: WithStatus) => workspace.subscriptionStatus === "active";
+
+// A live subscription, paid or failing: it's managed in the portal, never checked out again.
+export const hasSubscription = (workspace: WithStatus) =>
+  workspace.subscriptionStatus === "active" || workspace.subscriptionStatus === "past_due";
+
+// Where a workspace that can't publish goes to fix it: a failed payment is fixed in Polar's
+// portal (#17), anything else by subscribing. The banner and the publish refusal both use it.
+export const billingFix = (status: SubscriptionStatus) =>
+  status === "past_due"
+    ? { problem: "Your last payment failed", href: "/api/polar/portal", cta: "Update your card" }
+    : { problem: "You don't have an active subscription", href: "/app/billing", cta: "Subscribe" };

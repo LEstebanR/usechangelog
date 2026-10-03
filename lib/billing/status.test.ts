@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { canPublish, mapPolarStatus } from "./status";
+import { billingFix, canPublish, hasSubscription, mapPolarStatus } from "./status";
 
 describe("mapPolarStatus", () => {
   test("active stays active, also when it cancels at the period end", () => {
@@ -30,5 +30,22 @@ describe("canPublish", () => {
     for (const status of ["past_due", "canceled", "none"] as const) {
       expect(canPublish({ subscriptionStatus: status })).toBe(false);
     }
+  });
+});
+
+describe("hasSubscription", () => {
+  test("active and past_due have one; canceled and none can check out again", () => {
+    expect(hasSubscription({ subscriptionStatus: "active" })).toBe(true);
+    expect(hasSubscription({ subscriptionStatus: "past_due" })).toBe(true);
+    expect(hasSubscription({ subscriptionStatus: "canceled" })).toBe(false);
+    expect(hasSubscription({ subscriptionStatus: "none" })).toBe(false);
+  });
+});
+
+describe("billingFix", () => {
+  test("a failed payment goes to the portal, anything else to billing", () => {
+    expect(billingFix("past_due").href).toBe("/api/polar/portal");
+    expect(billingFix("canceled").href).toBe("/app/billing");
+    expect(billingFix("none").href).toBe("/app/billing");
   });
 });

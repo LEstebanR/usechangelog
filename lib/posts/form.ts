@@ -1,5 +1,7 @@
 // Pure post form parsing and the labels the app shows. No server imports, so #12 can test it.
 
+import type { SubscriptionStatus } from "@/lib/billing/status";
+
 export const CATEGORIES = ["new", "improved", "fixed"] as const;
 export const TYPES = ["shipped", "coming"] as const;
 export const TITLE_MAX = 120;
@@ -23,8 +25,8 @@ export type PostFormState = {
   errors?: { title?: string; body?: string; publishedOn?: string };
   // What the last save did, shown next to the buttons.
   notice?: string;
-  // Why publishing was refused (#16): no active subscription, or its last payment failed.
-  blocked?: "subscribe" | "past_due";
+  // Why publishing was refused (#16): the subscription state that doesn't allow it.
+  blocked?: SubscriptionStatus;
 };
 
 // What the app calls each category and type (the landing's tag names).

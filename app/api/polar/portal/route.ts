@@ -2,6 +2,7 @@ import { CustomerPortal } from "@polar-sh/nextjs";
 import { redirect } from "next/navigation";
 import type { NextRequest } from "next/server";
 import { polarConfig } from "@/lib/billing/polar";
+import { getOrigin } from "@/lib/site";
 import { requireWorkspace } from "@/lib/workspace/server";
 
 // Polar's customer portal (#17): change the card, cancel, see invoices. Always the session
@@ -16,7 +17,7 @@ export async function GET(request: NextRequest) {
   return CustomerPortal({
     accessToken,
     environment,
-    returnUrl: `${request.nextUrl.origin}/app/billing`,
+    returnUrl: `${await getOrigin()}/app/billing`,
     getCustomerId: async () => customerId,
   })(request);
 }

@@ -41,7 +41,7 @@ export async function savePost(
   // Going public needs an active subscription (#16). Nothing is saved, the form keeps what
   // was typed. Drafts, edits to a published post and unpublishing work in every state.
   if (next.status === "published" && existing?.status !== "published" && !canPublish(workspace)) {
-    return { values: state.values, blocked: workspace.subscriptionStatus === "past_due" ? "past_due" : "subscribe" };
+    return { values: state.values, blocked: workspace.subscriptionStatus };
   }
 
   // The header preview (in the layout) only shows published posts.
