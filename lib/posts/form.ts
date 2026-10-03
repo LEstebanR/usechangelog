@@ -21,7 +21,8 @@ type PostValues = {
 export type PostFormState = {
   values: PostValues;
   errors?: { title?: string; body?: string; publishedOn?: string };
-  saved?: boolean;
+  // What the last save did, shown next to the buttons.
+  notice?: string;
 };
 
 // What the app calls each category and type (the landing's tag names).

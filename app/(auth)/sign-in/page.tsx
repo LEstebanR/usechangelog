@@ -37,7 +37,7 @@ export default async function SignInPage({ searchParams }: PageProps<"/sign-in">
         </p>
       )}
 
-      <form action={sendMagicLink} className="mt-6 flex flex-col gap-3">
+      <form action={sendMagicLink} noValidate className="mt-6 flex flex-col gap-3">
         <label htmlFor="email" className="text-sm font-medium">
           Email
         </label>
@@ -49,6 +49,7 @@ export default async function SignInPage({ searchParams }: PageProps<"/sign-in">
           autoComplete="email"
           spellCheck={false}
           placeholder="you@company.com"
+          aria-invalid={error === "MISSING_EMAIL" || error === "INVALID_EMAIL"}
           className={inputClass}
         />
         <SubmitButton

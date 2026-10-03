@@ -15,7 +15,7 @@ function publish(publishedOn: string | null, today: string) {
   return { status: "published" as const, publishedOn: publishedOn ?? today };
 }
 
-// Creates the post when `id` is null, updates it otherwise.
+// Creates the post when `id` is null (then back to the list), updates it otherwise.
 // The buttons send `intent`: save keeps the status, publish and unpublish change it.
 export async function savePost(
   id: string | null,
@@ -38,12 +38,9 @@ export async function savePost(
 
   const db = getDb();
   if (!existing) {
-    const [created] = await db
-      .insert(posts)
-      .values({ workspaceId: workspace.id, ...fields, ...next })
-      .returning({ id: posts.id });
+    await db.insert(posts).values({ workspaceId: workspace.id, ...fields, ...next });
     revalidatePath("/app");
-    redirect(`/app/posts/${created.id}`);
+    redirect(`/app?done=${next.status === "published" ? "published" : "drafted"}`);
   }
 
   await db
@@ -51,7 +48,8 @@ export async function savePost(
     .set({ ...fields, ...next })
     .where(and(eq(posts.id, existing.id), eq(posts.workspaceId, workspace.id)));
   revalidatePath("/app");
-  return { values: { ...state.values, publishedOn: next.publishedOn ?? "" }, saved: true };
+  const notice = { publish: "Published.", unpublish: "Moved back to draft.", save: status === "published" ? "Changes saved." : "Draft saved." }[intent];
+  return { values: { ...state.values, publishedOn: next.publishedOn ?? "" }, notice };
 }
 
 // One query, scoped to the session's workspace: nothing deleted means not yours, so 404.
@@ -64,5 +62,5 @@ export async function deletePost(id: string) {
     .returning({ id: posts.id });
   if (!deleted.length) notFound();
   revalidatePath("/app");
-  redirect("/app");
+  redirect("/app?done=deleted");
 }

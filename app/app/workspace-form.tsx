@@ -33,7 +33,7 @@ export function WorkspaceForm({ action, initial, origin, submitLabel }: Props) {
   const slugChanged = Boolean(initial.slug) && slug.trim().toLowerCase() !== initial.slug;
 
   return (
-    <form action={formAction} className="flex flex-col gap-5">
+    <form action={formAction} noValidate className="flex flex-col gap-5">
       <div className="flex flex-col gap-2">
         <label htmlFor="name" className="text-sm font-medium">
           Name
