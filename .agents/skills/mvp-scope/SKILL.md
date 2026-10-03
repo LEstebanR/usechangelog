@@ -22,3 +22,7 @@ The product rules and the out-of-scope list live in `AGENTS.md` → **Product ru
 
 - Check the open issues; they are the backlog.
 - If the change needs something from the out-of-scope list in `AGENTS.md`, stop and ask the owner. Don't build a smaller version of it on your own.
+
+## Final step: improvements
+
+Before finishing, look back at the result, at how the work went, and at this skill. List up to 5 concrete improvements, each with what would change and why. Ask the owner which ones to apply. Apply only those; if they want none, stop.

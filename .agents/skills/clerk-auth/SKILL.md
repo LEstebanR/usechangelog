@@ -28,3 +28,7 @@ The auth rules (Clerk magic link only, one account and one workspace, no teams o
 ## Not in the MVP
 
 Invitations, account linking, multi-factor flows beyond Clerk's defaults.
+
+## Final step: improvements
+
+Before finishing, look back at the result, at how the work went, and at this skill. List up to 5 concrete improvements, each with what would change and why. Ask the owner which ones to apply. Apply only those; if they want none, stop.
