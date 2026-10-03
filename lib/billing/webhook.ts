@@ -3,7 +3,7 @@ import { and, eq, isNull, lte, or } from "drizzle-orm";
 import { getDb } from "@/db";
 import { workspaces } from "@/db/schema";
 import { UUID } from "@/lib/posts/server";
-import { mapPolarStatus } from "./status";
+import { hasSubscription, mapPolarStatus } from "./status";
 
 type Subscription = webhooks.WebhookSubscriptionUpdatedPayload["data"];
 
@@ -21,12 +21,14 @@ export async function applySubscription(subscription: Subscription) {
     return;
   }
 
+  const status = mapPolarStatus(subscription.status);
+  const isLive = hasSubscription({ subscriptionStatus: status });
   const applied = await getDb()
     .update(workspaces)
     .set({
       polarCustomerId: subscription.customer_id,
       polarSubscriptionId: subscription.id,
-      subscriptionStatus: mapPolarStatus(subscription.status),
+      subscriptionStatus: status,
       currentPeriodEnd: new Date(subscription.current_period_end),
       cancelAtPeriodEnd: subscription.cancel_at_period_end,
       subscriptionUpdatedAt: at,
@@ -35,13 +37,16 @@ export async function applySubscription(subscription: Subscription) {
       and(
         eq(workspaces.id, workspaceId),
         or(isNull(workspaces.subscriptionUpdatedAt), lte(workspaces.subscriptionUpdatedAt, at)),
+        // One subscription per workspace. If the customer ever has a second one, a live event
+        // (active or past due) takes over, but an ended one never turns off the one we track.
+        isLive ? undefined : or(isNull(workspaces.polarSubscriptionId), eq(workspaces.polarSubscriptionId, subscription.id)),
       ),
     )
     .returning({ id: workspaces.id });
 
   if (!applied.length) {
     console.warn(
-      `Polar subscription ${subscription.id} (${subscription.status}) skipped: no workspace ${workspaceId}, or a newer event is already stored.`,
+      `Polar subscription ${subscription.id} (${subscription.status}) skipped: no workspace ${workspaceId}, a newer event is already stored, or it ended and isn't the workspace's subscription.`,
     );
   }
 }

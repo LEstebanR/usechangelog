@@ -2,7 +2,7 @@ import { Checkout } from "@polar-sh/nextjs";
 import { redirect } from "next/navigation";
 import { NextRequest } from "next/server";
 import { requireUser } from "@/lib/auth/server";
-import { polarConfig } from "@/lib/billing/polar";
+import { hasActiveSubscriptionInPolar, polarConfig } from "@/lib/billing/polar";
 import { hasSubscription } from "@/lib/billing/status";
 import { getOrigin } from "@/lib/site";
 import { requireWorkspace } from "@/lib/workspace/server";
@@ -13,7 +13,10 @@ import { requireWorkspace } from "@/lib/workspace/server";
 export async function GET(request: NextRequest) {
   const [user, workspace] = await Promise.all([requireUser(), requireWorkspace()]);
   // One subscription per workspace: an active or failing one is managed in the portal.
-  if (hasSubscription(workspace)) redirect("/app/billing");
+  // Polar is asked too, for a payment whose webhook hasn't landed yet.
+  if (hasSubscription(workspace) || (await hasActiveSubscriptionInPolar(workspace.id))) {
+    redirect("/app/billing?checkout=success");
+  }
 
   const { accessToken, productId, environment } = polarConfig();
   const origin = await getOrigin();

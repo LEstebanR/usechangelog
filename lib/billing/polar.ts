@@ -1,5 +1,6 @@
 import { createPolarCore, type Environment, type models } from "@polar-sh/sdk/2026-10";
 import { getProducts } from "@polar-sh/sdk/2026-10/services/products";
+import { listSubscriptions } from "@polar-sh/sdk/2026-10/services/subscriptions";
 import { connection } from "next/server";
 
 // Read on first use, not at import, so `next build` runs without env vars.
@@ -13,6 +14,19 @@ export function polarConfig() {
   }
   const environment: Environment = server;
   return { accessToken, productId, environment };
+}
+
+// Whether Polar already has a live subscription for this workspace. Our row can lag behind
+// (the webhook takes a few seconds), so a second checkout asks Polar itself: one paid
+// subscription per workspace, never two.
+export async function hasActiveSubscriptionInPolar(workspaceId: string) {
+  const { accessToken, environment } = polarConfig();
+  const { items } = await listSubscriptions(createPolarCore({ accessToken, environment }))({
+    external_customer_id: workspaceId,
+    active: true,
+    limit: 1,
+  });
+  return items.length > 0;
 }
 
 export function webhookSecret() {
