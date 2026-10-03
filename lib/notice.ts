@@ -15,4 +15,4 @@ export function redirectWithNotice(notice: Notice): never {
 }
 
 export const noticeText = (done: unknown) =>
-  typeof done === "string" && done in NOTICES ? NOTICES[done as Notice] : undefined;
+  typeof done === "string" && Object.hasOwn(NOTICES, done) ? NOTICES[done as Notice] : undefined;

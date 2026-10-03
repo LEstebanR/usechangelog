@@ -1,4 +1,4 @@
-import { and, desc, eq, sql } from "drizzle-orm";
+import { and, count, desc, eq, sql } from "drizzle-orm";
 import { notFound } from "next/navigation";
 import { getDb } from "@/db";
 import { posts } from "@/db/schema";
@@ -42,6 +42,15 @@ export async function listPublishedPosts(workspaceId: string, { limit = 10, body
     .where(and(eq(posts.workspaceId, workspaceId), eq(posts.status, "published")))
     .orderBy(desc(sql`${posts.type} = 'coming'`), desc(posts.publishedOn), desc(posts.createdAt))
     .limit(limit);
+}
+
+// How many posts are public, beyond the 10 the preview lists.
+export async function countPublishedPosts(workspaceId: string) {
+  const [{ total }] = await getDb()
+    .select({ total: count() })
+    .from(posts)
+    .where(and(eq(posts.workspaceId, workspaceId), eq(posts.status, "published")));
+  return total;
 }
 
 // A post of the signed-in user's workspace. Anything else, including another

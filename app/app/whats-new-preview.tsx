@@ -16,10 +16,12 @@ const pill = {
 
 // A header button named after the workspace slug that opens the "What's new" panel
 // exactly as your users will see it: published posts only, in the workspace's widget language.
-export function WhatsNewPreview({ slug, name, lang, allUpdatesUrl, posts }: {
+export function WhatsNewPreview({ slug, name, lang, total, allUpdatesUrl, posts }: {
   slug: string;
   name: string;
   lang: WidgetLang;
+  // All published posts; the panel lists the latest 10, like the widget.
+  total: number;
   allUpdatesUrl: string;
   posts: Post[];
 }) {
@@ -63,7 +65,7 @@ export function WhatsNewPreview({ slug, name, lang, allUpdatesUrl, posts }: {
       >
         <span aria-hidden="true" className="size-2 bg-blue" />
         <span className="max-w-40 truncate">/{slug}</span>
-        <span className="tabular-nums text-graphite">{posts.length}</span>
+        <span className="tabular-nums text-graphite">{total}</span>
       </button>
 
       {open && (

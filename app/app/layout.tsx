@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { signOut } from "@/lib/auth/actions";
 import { requireUser } from "@/lib/auth/server";
-import { listPublishedPosts } from "@/lib/posts/server";
+import { countPublishedPosts, listPublishedPosts } from "@/lib/posts/server";
 import { publicUrl } from "@/lib/site";
 import { getCurrentWorkspace } from "@/lib/workspace/server";
 import { EnterSubmits } from "../enter-submits";
@@ -18,9 +18,13 @@ export default async function AppLayout({ children }: LayoutProps<"/app">) {
   const user = await requireUser();
   // Display only (not an access check): what the workspace's users will see.
   const workspace = await getCurrentWorkspace();
-  const [posts, url] = workspace
-    ? await Promise.all([listPublishedPosts(workspace.id, { bodyChars: 300 }), publicUrl(workspace.slug)])
-    : [[], ""];
+  const [posts, total, url] = workspace
+    ? await Promise.all([
+        listPublishedPosts(workspace.id, { bodyChars: 300 }),
+        countPublishedPosts(workspace.id),
+        publicUrl(workspace.slug),
+      ])
+    : [[], 0, ""];
 
   return (
     <div className="min-h-dvh bg-wash">
@@ -32,6 +36,7 @@ export default async function AppLayout({ children }: LayoutProps<"/app">) {
               slug={workspace.slug}
               name={workspace.name}
               lang={workspace.widgetLang}
+              total={total}
               allUpdatesUrl={url}
               posts={posts.map((p) => ({ ...p, publishedOn: p.publishedOn ?? "" }))}
             />
