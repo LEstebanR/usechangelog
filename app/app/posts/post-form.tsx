@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useActionState, useSyncExternalStore } from "react";
 import { BODY_MAX, CATEGORIES, LABELS, TITLE_MAX, TYPES, type PostFormState } from "@/lib/posts/form";
 import { inputClass, primaryButtonClass, secondaryButtonClass } from "../../form-styles";
@@ -109,7 +110,23 @@ export function PostForm({ action, initial, status }: Props) {
             </button>
           )}
           <p role="status" className="min-h-5 text-sm text-graphite">
-            {pending ? "Saving…" : state.notice && <span className="text-green">{state.notice}</span>}
+            {pending ? (
+              "Saving…"
+            ) : state.blocked === "past_due" ? (
+              <span className="text-clay">
+                Your last payment failed.{" "}
+                {/* A route handler, not a page: a <Link> would prefetch a portal session. */}
+                {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
+                <a href="/api/polar/portal" className="underline underline-offset-4">Update your card</a> to publish.
+              </span>
+            ) : state.blocked ? (
+              <span className="text-clay">
+                <Link href="/app/billing" className="underline underline-offset-4">Subscribe to publish.</Link> Meanwhile, save
+                it as a draft.
+              </span>
+            ) : (
+              state.notice && <span className="text-green">{state.notice}</span>
+            )}
           </p>
         </div>
       </aside>

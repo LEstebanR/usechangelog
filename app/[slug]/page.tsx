@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound, permanentRedirect } from "next/navigation";
+import { canPublish } from "@/lib/billing/status";
 import { formatDay, LABELS } from "@/lib/posts/form";
 import { listPublishedPosts } from "@/lib/posts/server";
 import { getWorkspaceBySlug } from "@/lib/workspace/server";
@@ -18,13 +19,14 @@ type Post = Awaited<ReturnType<typeof listPublishedPosts>>[number];
 const container = "mx-auto w-full max-w-6xl px-5 sm:px-8";
 
 // A workspace's public changelog: "Coming soon" first, then what shipped, newest first.
-// Unknown slugs get the 404. The subscription gate is #16's.
+// Unknown slugs get the 404, and so do workspaces without an active subscription (#16):
+// nothing unpaid is public. Their posts come back when it's active again.
 export default async function PublicChangelog({ params }: PageProps<"/[slug]">) {
   // Slugs are stored lowercase, so /Acme reaches /acme.
   const { slug } = await params;
   if (slug !== slug.toLowerCase()) permanentRedirect(`/${encodeURIComponent(slug.toLowerCase())}`);
   const workspace = await getWorkspaceBySlug(slug);
-  if (!workspace) notFound();
+  if (!workspace || !canPublish(workspace)) notFound();
   const posts = await listPublishedPosts(workspace.id);
   const coming = posts.filter((p) => p.type === "coming");
   const shipped = posts.filter((p) => p.type !== "coming");

@@ -54,7 +54,26 @@ export default async function AppLayout({ children }: LayoutProps<"/app">) {
           </form>
         </div>
       </SiteHeader>
+      {(workspace?.subscriptionStatus === "past_due" || workspace?.subscriptionStatus === "canceled") && (
+        <BillingBanner pastDue={workspace.subscriptionStatus === "past_due"} />
+      )}
       <main className="mx-auto max-w-6xl px-6 py-16">{children}</main>
+    </div>
+  );
+}
+
+// A paid workspace that stopped paying (#16): its page and widget are off until it's fixed.
+// A workspace that never subscribed (`none`) gets no banner; it learns on its first publish.
+function BillingBanner({ pastDue }: { pastDue: boolean }) {
+  return (
+    <div role="status" className="border-b border-clay/40 bg-clay-wash">
+      <p className="mx-auto max-w-6xl px-6 py-3 text-sm text-clay">
+        {pastDue ? "Your last payment failed" : "Your subscription has ended"}, so your changelog page and widget
+        aren&apos;t showing anything in public. Your posts are safe.{" "}
+        <a href={pastDue ? "/api/polar/portal" : "/app/billing"} className="font-medium underline underline-offset-4">
+          {pastDue ? "Update your card" : "Subscribe again"}
+        </a>
+      </p>
     </div>
   );
 }

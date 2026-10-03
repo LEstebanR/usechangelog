@@ -25,6 +25,10 @@ export default async function AppPage({ searchParams }: PageProps<"/app">) {
             <Link href="/app/settings" className="hover:text-ink">
               Settings
             </Link>
+            {" · "}
+            <Link href="/app/billing" className="hover:text-ink">
+              Billing
+            </Link>
           </p>
         </div>
         {posts.length > 0 && (

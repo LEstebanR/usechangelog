@@ -23,6 +23,8 @@ export type PostFormState = {
   errors?: { title?: string; body?: string; publishedOn?: string };
   // What the last save did, shown next to the buttons.
   notice?: string;
+  // Why publishing was refused (#16): no active subscription, or its last payment failed.
+  blocked?: "subscribe" | "past_due";
 };
 
 // What the app calls each category and type (the landing's tag names).
