@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Grid } from "./grid";
 import { SectionLabel } from "./section-label";
-import { Tag } from "./tag";
+import { TAG_PALETTE, Tag } from "./tag";
 import { SiteHeader } from "./wordmark";
 
 export const metadata: Metadata = { title: "Page not found — UseChangelog" };
@@ -52,7 +52,7 @@ export default function NotFound() {
               <li style={delay(660)} className="motion-rise relative pl-6">
                 <span
                   aria-hidden="true"
-                  className="absolute top-1.5 -left-[5px] size-2.5 bg-clay"
+                  className={`absolute top-1.5 -left-[5px] size-2.5 ${TAG_PALETTE.Fixed.dot}`}
                 />
                 <div className="flex items-center gap-2.5 text-sm text-graphite">
                   <Tag tag="Fixed" />

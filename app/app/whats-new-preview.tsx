@@ -3,15 +3,15 @@
 import { useEffect, useRef, useState } from "react";
 import { formatDay, type Category, type PostType } from "@/lib/posts/form";
 import { WIDGET_COPY, type WidgetLang } from "@/lib/widget/copy";
+import { TAG_PALETTE } from "../tag";
 
 type Post = { id: string; title: string; body: string; category: Category; type: PostType; publishedOn: string };
 
-// Category color as a soft pill with strong text. Fixed is green (a resolved problem
-// reads as good news); Improved is violet so the two never blur.
+// Category color as a soft pill, from the shared palette.
 const pill = {
-  new: "bg-blue-wash text-blue",
-  improved: "bg-violet-wash text-violet",
-  fixed: "bg-green-wash text-green",
+  new: TAG_PALETTE.New.pill,
+  improved: TAG_PALETTE.Improved.pill,
+  fixed: TAG_PALETTE.Fixed.pill,
 } as const;
 
 // A header button named after the workspace slug that opens the "What's new" panel
@@ -135,7 +135,7 @@ function Section({ label, posts, coming = false, lang, allUpdatesUrl }: {
             <p className="flex flex-wrap items-center gap-2 text-[0.8125rem]">
               <span className={`px-2 py-0.5 font-medium ${pill[post.category]}`}>{t.tags[post.category]}</span>
               {coming && (
-                <span className="border border-dashed border-graphite/60 px-2 py-0.5 font-medium text-ink">
+                <span className={`px-2 py-0.5 font-medium ${TAG_PALETTE["Coming soon"].pill}`}>
                   {t.tags.coming}
                 </span>
               )}

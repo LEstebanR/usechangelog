@@ -3,6 +3,7 @@
 import { useActionState, useSyncExternalStore } from "react";
 import { BODY_MAX, CATEGORIES, LABELS, TITLE_MAX, TYPES, type PostFormState } from "@/lib/posts/form";
 import { inputClass, primaryButtonClass, secondaryButtonClass } from "../../form-styles";
+import { TAG_PALETTE } from "../../tag";
 import { Chips } from "../chips";
 
 type Props = {
@@ -11,13 +12,13 @@ type Props = {
   status: "draft" | "published" | "new";
 };
 
-// Chosen chips take the landing's tag colors.
+// Chosen chips take the category palette; Shipped is plain ink.
 const chipOn = {
-  new: "peer-checked:border-blue peer-checked:bg-blue peer-checked:text-canvas",
-  improved: "peer-checked:border-green/40 peer-checked:bg-green-wash peer-checked:text-green",
-  fixed: "peer-checked:border-clay/40 peer-checked:bg-clay-wash peer-checked:text-clay",
+  new: TAG_PALETTE.New.chip,
+  improved: TAG_PALETTE.Improved.chip,
+  fixed: TAG_PALETTE.Fixed.chip,
   shipped: "peer-checked:border-ink peer-checked:bg-ink peer-checked:text-canvas",
-  coming: "peer-checked:border-dashed peer-checked:border-graphite peer-checked:text-ink",
+  coming: TAG_PALETTE["Coming soon"].chip,
 } as const;
 
 // A writing surface on the left, everything about publishing on the right.

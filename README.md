@@ -201,7 +201,7 @@ The landing is the **Quiet grid** direction. It has five parts:
   - Instrument Sans for body text.
 - **Colors:**
   - ink-blue accent `#1D3A8F`;
-  - tag colors: blue for New, green for Improved, clay for Fixed.
+  - tag colors: blue for New, violet for Improved, green for Fixed (one palette in `app/tag.tsx`).
 - **Motion:** sober, and it respects `prefers-reduced-motion`.
 - **Copy:** all of it lives in `app/content.ts`.
 
