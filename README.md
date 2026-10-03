@@ -85,13 +85,16 @@ app/
   reveal.tsx            Scroll reveals (IntersectionObserver)
   section-label.tsx     Section label with the brand square
   tag.tsx               New / Improved / Fixed / Coming soon tags
+  markdown-body.tsx     A post body rendered from Markdown, with its styles
+  [slug]/               The public changelog at /{slug}, rendered on every request
   icon.svg, apple-icon.png, opengraph-image.png
   (auth)/sign-in/       Magic link sign-in
   app/                  The signed-in app: /app (posts), /app/posts/new, /app/posts/[id], /app/onboarding, /app/settings
   api/auth/[...path]/   Auth handler, proxied to Neon
 lib/auth/               Server auth client and Server Actions (sign in, sign out)
-lib/workspace/          Slug rules, form parsing, getCurrentWorkspace() and workspace Server Actions
+lib/workspace/          Slug rules, form parsing, getCurrentWorkspace(), getWorkspaceBySlug() and workspace Server Actions
 lib/posts/              Post form parsing, workspace-scoped queries and post Server Actions
+lib/markdown.ts         renderMarkdown(): safe Markdown to HTML for the public page and the widget
 scripts/smoke-app.ts    Signed-in smoke test (`bun run smoke`)
 db/
   schema.ts             Our tables (public schema): workspaces, posts
