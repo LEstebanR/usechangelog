@@ -21,33 +21,12 @@ An issue is ready when someone can develop it without asking questions, and the 
 
 ## Structure
 
-Title: `<n>. <Short outcome>`, keeping the existing numbering. The body is in Spanish; code, paths and identifiers stay in English.
+Use `.github/ISSUE_TEMPLATE/feature.md` for product work and `.github/ISSUE_TEMPLATE/bug.md` for bugs. Those templates are the source of truth for the structure, so don't restate them here.
 
-```markdown
-<One or two lines: what this unlocks and why it comes now.>
-
-## 1. Decisión            ← only if the issue picks a tool or approach
-- Options table (rows: the criteria that matter here)
-- What we chose and why (numbered)
-- What we accept in exchange
-
-## 2. Alcance
-Grouped by area (A, B, C…). Concrete: packages, files, routes, env vars,
-config values. Say what is read-only or must not be touched.
-
-## 3. Hecho cuando
-- [ ] Checkboxes, each one observable by a person or a check
-- [ ] Verified on the PR's Vercel preview, not only locally
-- [ ] CI green; no secrets in git
-- [ ] What the PR description must document
-
-## 4. Fuera
-What a developer might reasonably add but must not, each with where it goes instead.
-
-## 5. Impacto en otros issues   ← if this changes another issue or open PR
-## 6. Riesgos                    ← risk | mitigation table, if any
-## Referencias                   ← links to the docs used for decisions
-```
+- **Title:** `<n>. <Short outcome>`. `<n>` is the build order, not the GitHub number.
+- **Language:** the body is in Spanish; code, paths and identifiers stay in English.
+- **References:** point to other issues by their GitHub number (`#12`), never by the number in their title.
+- **Sections:** "Depende de", "Decisiones", "Impacto" and "Riesgos" go in only when they apply.
 
 ## Rules
 
@@ -56,9 +35,11 @@ What a developer might reasonably add but must not, each with where it goes inst
 - **Testable criteria:** every item can be checked as true or false. No "works well" or "looks good".
 - **No invented facts:** if something can't be confirmed before implementing, like an exact table name, say so and make confirming it part of the work.
 - **Changing a decision:** if a rewrite changes a decision from the previous version, say so at the top in one line, and list the affected issues and PRs in "Impacto".
+- **One owner per rule:** product rules live in `AGENTS.md`. Shared logic (a validator, a renderer, a gate function) belongs to one issue, and the others reuse it by name.
+- **Order changes renumber:** if an issue now depends on a later one, renumber the titles so the order holds, and update every "Depende de".
 
 ## Publishing
 
-- **New issue:** `gh issue create --title "<n>. …" --body-file <file>`.
+- **New issue:** `gh issue create --title "<n>. …" --body-file <file>`, with the body built from the template.
 - **Rewrite:** `gh issue edit <n> --title … --body-file <file>`.
 - **Approval first:** don't start development in the same turn. The owner reads and approves the issue first.
