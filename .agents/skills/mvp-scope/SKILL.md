@@ -9,7 +9,7 @@ The product rules and the out-of-scope list live in `AGENTS.md` → **Product ru
 
 ## In
 
-- **Account:** Clerk sign-in (see `clerk-auth`) creates one workspace with a unique slug.
+- **Account:** Magic link sign-in (see `auth`) creates one workspace with a unique slug.
 - **Posts:**
   - Markdown body, one tag: New, Improved or Fixed.
   - States `draft` and `published`. Drafts are never public.

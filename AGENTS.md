@@ -18,7 +18,7 @@ This list is the source of truth. The skills in `.agents/skills/` add implementa
 
 - **Account model:** one account, one workspace. No teams, no organizations.
 - **Public page:** the slug lives in the path (`usechangelog.com/{slug}`), never in a subdomain.
-- **Auth:** Clerk with magic link only. No SSO, no social login. See `.agents/skills/clerk-auth`.
+- **Auth:** Neon Managed Better Auth with magic link only. No passwords, SSO or social login. See `.agents/skills/auth`.
 - **Billing:** Polar, never Stripe. One monthly plan. The price is never hardcoded in code or copy; it comes from Polar. See `.agents/skills/polar-billing`.
 - **Paywall:** sign-up is free. Publishing, the public page and the widget require a subscription in state `active`. `past_due`, `canceled` and `none` can't publish.
 - **Out of scope:**
