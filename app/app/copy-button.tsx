@@ -3,14 +3,19 @@
 import { useState } from "react";
 import { secondaryButtonClass } from "../form-styles";
 
-// Copies `text` to the clipboard and says so for a moment.
+// Copies `text` to the clipboard and says so for a moment. If the browser blocks the
+// clipboard, nothing happens; the text itself stays selectable.
 export function CopyButton({ text, label }: { text: string; label: string }) {
   const [copied, setCopied] = useState(false);
   return (
     <button
       type="button"
       onClick={async () => {
-        await navigator.clipboard.writeText(text);
+        try {
+          await navigator.clipboard.writeText(text);
+        } catch {
+          return;
+        }
         setCopied(true);
         setTimeout(() => setCopied(false), 2000);
       }}
