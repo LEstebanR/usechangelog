@@ -9,7 +9,7 @@ The product rules and the out-of-scope list live in `AGENTS.md` → **Product ru
 
 ## In
 
-- **Account:** Magic link sign-in (see `auth`) creates one workspace with a unique slug.
+- **Account:** Magic link sign-in (see `auth`), then onboarding creates one workspace with a unique slug. The user can delete their account, which deletes the workspace and its posts (#31).
 - **Posts:**
   - Markdown body, one tag: New, Improved or Fixed.
   - States `draft` and `published`. Drafts are never public.
