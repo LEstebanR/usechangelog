@@ -41,6 +41,7 @@ Use `.github/ISSUE_TEMPLATE/feature.md` for product work and `.github/ISSUE_TEMP
 - **One outcome per issue.** If "Hecho cuando" needs two unrelated demos, split the issue.
 - **Testable criteria:** every item can be checked as true or false. No "works well" or "looks good".
 - **No invented facts:** if something can't be confirmed before implementing, like an exact table name, say so and make confirming it part of the work.
+- **Real names:** tables, columns, routes and functions that already exist are named exactly as in the code (`db/schema.ts` for columns, e.g. `published_on`, not `published_at`). Check them before writing.
 - **Changing a decision:** if a rewrite changes a decision from the previous version, say so at the top in one line, and list the affected issues and PRs in "Impacto".
 - **One owner per rule:** product rules live in `AGENTS.md`. Shared logic (a validator, a renderer, a gate function) belongs to one issue, and the others reuse it by name.
 - **Order changes renumber:** if an issue now depends on a later one, or its priority changes, renumber the titles so the order holds, and update every "Depende de".
