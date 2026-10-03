@@ -13,7 +13,15 @@ export async function sendMagicLink(formData: FormData) {
     callbackURL: "/app",
     errorCallbackURL: "/sign-in",
   });
-  redirect(error ? "/sign-in?error=SEND_FAILED" : "/sign-in?sent=1");
+  if (error) {
+    console.error("[sign-in] magic link failed", {
+      status: error.status,
+      code: error.code,
+      message: error.message,
+    });
+    redirect("/sign-in?error=SEND_FAILED");
+  }
+  redirect("/sign-in?sent=1");
 }
 
 export async function signOut() {
