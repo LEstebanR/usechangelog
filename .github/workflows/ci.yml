@@ -20,7 +20,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        script: [lint, typecheck, build]
+        script: [lint, typecheck, build, test]
     steps:
       - uses: actions/checkout@v4
 

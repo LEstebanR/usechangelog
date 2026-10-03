@@ -64,7 +64,7 @@ The public page and the widget only serve posts while the workspace has an **act
 | Framework | [Next.js 16](https://nextjs.org) (App Router, Turbopack), React 19, TypeScript | ✅ In use |
 | Styling | Tailwind CSS 4, `next/font` (Funnel Display + Instrument Sans) | ✅ In use |
 | Hosting | [Vercel](https://vercel.com): production on `main`, a preview per PR | ✅ In use |
-| CI | GitHub Actions: lint, typecheck and build as separate jobs | ✅ In use |
+| CI | GitHub Actions: lint, typecheck, build and test as separate jobs | ✅ In use |
 | Package manager | [Bun](https://bun.sh) | ✅ In use |
 | Database | [Neon](https://neon.com) Postgres, with Drizzle ORM and migrations in the repo | ✅ In use |
 | Auth | Neon Managed Better Auth, magic link only | ✅ In use |
@@ -129,7 +129,8 @@ Open http://localhost:3000.
 | `bun run start` | Serve the production build |
 | `bun run lint` | ESLint |
 | `bun run typecheck` | `next typegen` + `tsc --noEmit` (typegen creates route types like `LayoutProps` on a clean checkout) |
-| `bun run check` | Lint, typecheck and build: the same checks CI runs |
+| `bun run check` | Lint, typecheck and build |
+| `bun run test` | Unit tests with `bun test` (`*.test.ts`) |
 | `bun run db:generate` | Generate a migration from `db/schema.ts` |
 | `bun run db:migrate` | Apply pending migrations (uses `DATABASE_URL_UNPOOLED`) |
 | `bun run check-env` | Check the required env vars and their format, without printing them. Vercel runs it before migrating |
@@ -155,7 +156,7 @@ For local work, copy `.env.example` to `.env.local`. Real `.env*` files are git-
 - **Production:** https://usechangelog-xi.vercel.app, deployed from `main`. There's no custom domain yet; [#24](https://github.com/LEstebanR/usechangelog/issues/24) covers it.
 - **Previews:** every pull request gets its own Vercel preview, with its own Neon branch and auth. Its URL goes in the PR description.
 - **Migrations:** Vercel runs `vercel-build`: it checks the env vars (`check-env`), applies pending migrations to the deployment's database, then runs `next build`.
-- **CI:** [GitHub Actions](.github/workflows/ci.yml) runs `lint`, `typecheck` and `build` as separate checks on every PR and on each push to `main`.
+- **CI:** [GitHub Actions](.github/workflows/ci.yml) runs `lint`, `typecheck`, `build` and `test` as separate checks on every PR and on each push to `main`.
 
 ## Roadmap
 
