@@ -20,7 +20,7 @@ export default async function AppLayout({ children }: LayoutProps<"/app">) {
   const workspace = await getCurrentWorkspace();
   const [posts, total, url] = workspace
     ? await Promise.all([
-        listPublishedPosts(workspace.id, { bodyChars: 300 }),
+        listPublishedPosts(workspace.id, { limit: 10, bodyChars: 300 }),
         countPublishedPosts(workspace.id),
         publicUrl(workspace.slug),
       ])
