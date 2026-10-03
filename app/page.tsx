@@ -8,6 +8,9 @@ import {
   widget,
   type PostTag,
 } from "./content";
+import type { CSSProperties } from "react";
+
+const delay = (ms: number) => ({ "--delay": `${ms}ms` }) as CSSProperties;
 
 const tagStyles: Record<PostTag, string> = {
   New: "border-blue bg-blue text-canvas",
@@ -16,11 +19,7 @@ const tagStyles: Record<PostTag, string> = {
   "Coming soon": "border-dashed border-graphite text-graphite",
 };
 
-const stepDetails = [
-  "Markdown · tags",
-  "usechangelog.com/acme",
-  "widget.js",
-];
+const stepDetails = ["Markdown · tags", "usechangelog.com/acme", "widget.js"];
 
 function Tag({ tag }: { tag: PostTag }) {
   return (
@@ -77,13 +76,12 @@ function Grid() {
       aria-hidden="true"
       className="pointer-events-none absolute inset-0 -z-10"
     >
-      <div
-        className={`${container} grid h-full grid-cols-4 md:grid-cols-12`}
-      >
+      <div className={`${container} grid h-full grid-cols-4 md:grid-cols-12`}>
         {Array.from({ length: 12 }, (_, i) => (
           <span
             key={i}
-            className={`border-l border-gridline ${i === 3 ? "border-r md:border-r-0" : ""} ${i === 11 ? "md:border-r" : ""} ${i >= 4 ? "hidden md:block" : ""}`}
+            style={delay(i * 35)}
+            className={`motion-draw border-l border-gridline ${i === 3 ? "border-r md:border-r-0" : ""} ${i === 11 ? "md:border-r" : ""} ${i >= 4 ? "hidden md:block" : ""}`}
           />
         ))}
       </div>
@@ -120,7 +118,10 @@ export default function Home() {
             <span translate="no">UseChangelog</span>
           </a>
           <nav aria-label="Main" className="flex items-center gap-8 text-sm">
-            <a href="#how" className="hidden text-graphite hover:text-ink md:inline">
+            <a
+              href="#how"
+              className="hidden text-graphite hover:text-ink md:inline"
+            >
               How it works
             </a>
             <a
@@ -137,7 +138,7 @@ export default function Home() {
             </a>
             <a
               href={hero.primaryCta.href}
-              className="border border-ink px-4 py-2 font-medium transition-colors hover:bg-ink hover:text-canvas"
+              className="motion-press border border-ink px-4 py-2 font-medium transition-colors hover:bg-ink hover:text-canvas"
             >
               {hero.primaryCta.label}
             </a>
@@ -149,27 +150,39 @@ export default function Home() {
         {/* Hero */}
         <div className={`${container} pb-20 pt-16 md:pb-28 md:pt-24`}>
           <div className="grid gap-y-6 md:grid-cols-12">
-            <p className="font-display text-sm text-graphite md:col-span-3 md:pt-4">
+            <p
+              style={delay(150)}
+              className="motion-rise font-display text-sm text-graphite md:col-span-3 md:pt-4"
+            >
               Changelog &amp;
               <br className="hidden md:block" /> product announcements
             </p>
             <div className="md:col-span-9">
-              <h1 className="text-balance font-display text-[2.75rem] font-medium leading-[1.02] tracking-[-0.035em] sm:text-6xl md:text-[5.25rem]">
+              <h1
+                style={delay(220)}
+                className="motion-rise text-balance font-display text-[2.75rem] font-medium leading-[1.02] tracking-[-0.035em] sm:text-6xl md:text-[5.25rem]"
+              >
                 Tell your users what shipped.
               </h1>
-              <p className="mt-8 max-w-xl text-lg leading-relaxed text-graphite md:text-xl">
+              <p
+                style={delay(300)}
+                className="motion-rise mt-8 max-w-xl text-lg leading-relaxed text-graphite md:text-xl"
+              >
                 {hero.subhead}
               </p>
-              <div className="mt-10 flex flex-wrap gap-3">
+              <div
+                style={delay(380)}
+                className="motion-rise mt-10 flex flex-wrap gap-3"
+              >
                 <a
                   href={hero.primaryCta.href}
-                  className="bg-blue px-6 py-3.5 text-base font-medium text-canvas transition-colors hover:bg-ink"
+                  className="motion-press bg-blue px-6 py-3.5 text-base font-medium text-canvas transition-colors hover:bg-ink"
                 >
                   {hero.primaryCta.label}
                 </a>
                 <a
                   href={hero.secondaryCta.href}
-                  className="border border-hairline bg-canvas px-6 py-3.5 text-base font-medium transition-colors hover:border-ink"
+                  className="motion-press border border-hairline bg-canvas px-6 py-3.5 text-base font-medium transition-colors hover:border-ink"
                 >
                   {hero.secondaryCta.label}
                 </a>
@@ -177,7 +190,10 @@ export default function Home() {
             </div>
           </div>
 
-          <dl className="mt-20 grid grid-cols-2 border-y border-hairline md:mt-28 md:grid-cols-4">
+          <dl
+            style={delay(460)}
+            className="motion-rise mt-20 grid grid-cols-2 border-y border-hairline md:mt-28 md:grid-cols-4"
+          >
             {[
               ["Setup", "One script tag"],
               ["Editor", "Markdown"],
@@ -307,7 +323,7 @@ export default function Home() {
                   return (
                     <article
                       key={post.title}
-                      className={`grid gap-3 px-5 py-7 md:grid-cols-12 md:gap-0 md:px-8 ${soon ? "bg-wash" : ""}`}
+                      className={`motion-reveal grid gap-3 px-5 py-7 md:grid-cols-12 md:gap-0 md:px-8 ${soon ? "bg-wash" : ""}`}
                     >
                       <div className="flex items-center gap-3 md:contents">
                         <div className="font-display text-sm tabular-nums text-graphite md:col-span-2 md:pt-1">
@@ -369,7 +385,7 @@ export default function Home() {
               <div
                 role="img"
                 aria-label="Mock of the What’s new widget, showing two unread posts"
-                className="border border-ink bg-canvas lg:col-span-4"
+                className="motion-open border border-ink bg-canvas lg:col-span-4"
               >
                 <div className="flex items-center justify-between border-b border-ink px-4 py-3">
                   <span className="font-display font-medium">What’s new</span>
@@ -437,9 +453,7 @@ export default function Home() {
           aria-labelledby="get-started-title"
           className="scroll-mt-6 border-t border-ink"
         >
-          <div
-            className={`${container} grid py-16 md:grid-cols-12 md:py-20`}
-          >
+          <div className={`${container} grid py-16 md:grid-cols-12 md:py-20`}>
             <div className="md:col-span-9 md:col-start-4">
               <h2
                 id="get-started-title"

@@ -39,3 +39,80 @@ body {
   outline: 2px solid var(--color-blue);
   outline-offset: 3px;
 }
+
+/* Motion: one load sequence, scroll-linked reveals on the product demo, press feedback. */
+:root {
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+}
+
+@keyframes uc-rise {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+
+@keyframes uc-fade {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes uc-draw {
+  from {
+    transform: scaleY(0);
+  }
+}
+
+@keyframes uc-open {
+  from {
+    opacity: 0;
+    transform: translateY(-6px) scale(0.97);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .motion-rise {
+    animation: uc-rise 560ms var(--ease-out) both;
+    animation-delay: var(--delay, 0ms);
+  }
+
+  .motion-draw {
+    transform-origin: top;
+    animation: uc-draw 1100ms var(--ease-in-out) both;
+    animation-delay: var(--delay, 0ms);
+  }
+
+  .motion-press {
+    transition-property: color, background-color, border-color, transform;
+    transition-duration: 150ms;
+    transition-timing-function: var(--ease-out);
+  }
+
+  .motion-press:active {
+    transform: scale(0.98);
+  }
+
+  @supports (animation-timeline: view()) {
+    .motion-reveal {
+      animation: uc-rise linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 70%;
+    }
+
+    .motion-open {
+      transform-origin: top right;
+      animation: uc-open linear both;
+      animation-timeline: view();
+      animation-range: entry 25% entry 90%;
+    }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .motion-rise {
+    animation: uc-fade 400ms ease-out both;
+    animation-delay: var(--delay, 0ms);
+  }
+}
