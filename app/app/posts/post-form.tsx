@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useSyncExternalStore } from "react";
 import { BODY_MAX, CATEGORIES, LABELS, TITLE_MAX, TYPES, type PostFormState } from "@/lib/posts/form";
 import { inputClass, primaryButtonClass, secondaryButtonClass } from "../../form-styles";
 
@@ -16,9 +16,12 @@ type Props = {
 export function PostForm({ action, initial, status }: Props) {
   const [state, formAction, pending] = useActionState(action, { values: initial });
   const v = state.values;
+  // The author's local day, so a post published tonight isn't dated tomorrow (UTC).
+  const today = useSyncExternalStore(noSubscribe, localDay, () => "");
 
   return (
     <form action={formAction} key={JSON.stringify(v)} className="flex flex-col gap-6">
+      <input type="hidden" name="today" value={today} />
       <Field label="Title" id="title" error={state.errors?.title}>
         <input id="title" name="title" required maxLength={TITLE_MAX} defaultValue={v.title}
           aria-invalid={Boolean(state.errors?.title)} className={`${inputClass} text-lg`} />
@@ -59,6 +62,10 @@ export function PostForm({ action, initial, status }: Props) {
     </form>
   );
 }
+
+const noSubscribe = () => () => {};
+// "YYYY-MM-DD" in the browser's time zone.
+const localDay = () => new Date().toLocaleDateString("en-CA");
 
 function Field({ label, id, error, hint, children }: { label: string; id: string; error?: string; hint?: string; children: React.ReactNode }) {
   return (

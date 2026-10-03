@@ -10,9 +10,9 @@ import { dateFromDay, dayFromDate, parsePostForm, type PostFormState } from "./f
 import { requirePost, UUID } from "./server";
 
 // The only place a post becomes public. #16 wraps this with the subscription check.
-// Without a date it gets today, as a day (midnight UTC), like dates typed in the form.
-function publish(publishedAt: Date | null) {
-  return { status: "published" as const, publishedAt: publishedAt ?? dateFromDay(dayFromDate(new Date())) };
+// A published post always has a date: the one given, or today.
+function publish(publishedAt: Date | null, today: Date) {
+  return { status: "published" as const, publishedAt: publishedAt ?? today };
 }
 
 // Creates the post when `id` is null, updates it otherwise.
@@ -24,16 +24,17 @@ export async function savePost(
 ): Promise<PostFormState> {
   const workspace = await requireWorkspace();
   const existing = id ? await requirePost(id) : null;
-  const { intent, ...state } = parsePostForm(formData);
+  const { intent, today, ...state } = parsePostForm(formData);
   if (state.errors) return state;
 
   const { publishedOn, ...fields } = state.values;
-  // An edited date wins; otherwise keep the one from the first publish.
-  const publishedAt = publishedOn ? dateFromDay(publishedOn) : (existing?.publishedAt ?? null);
+  // The date field is the source of truth: emptying it clears a draft's date.
+  const publishedAt = publishedOn ? dateFromDay(publishedOn) : null;
+  const status = intent === "publish" ? "published" : intent === "unpublish" ? "draft" : (existing?.status ?? "draft");
   const next =
-    intent === "publish"
-      ? publish(publishedAt)
-      : { status: intent === "unpublish" ? ("draft" as const) : (existing?.status ?? "draft"), publishedAt };
+    status === "published"
+      ? publish(publishedAt ?? existing?.publishedAt ?? null, today)
+      : { status, publishedAt };
 
   const db = getDb();
   if (!existing) {

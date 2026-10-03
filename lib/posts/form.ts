@@ -36,7 +36,7 @@ export const LABELS = {
 const oneOf = <T extends string>(list: readonly T[], value: unknown, fallback: T): T =>
   list.includes(value as T) ? (value as T) : fallback;
 
-export function parsePostForm(formData: FormData): PostFormState & { intent: Intent } {
+export function parsePostForm(formData: FormData): PostFormState & { intent: Intent; today: Date } {
   const values: PostValues = {
     title: String(formData.get("title") ?? "").trim(),
     body: String(formData.get("body") ?? ""),
@@ -45,6 +45,7 @@ export function parsePostForm(formData: FormData): PostFormState & { intent: Int
     publishedOn: String(formData.get("publishedOn") ?? "").trim(),
   };
   const intent = oneOf(["save", "publish", "unpublish"] as const, formData.get("intent"), "save");
+  const today = todayFor(String(formData.get("today") ?? ""));
 
   const errors: NonNullable<PostFormState["errors"]> = {};
   if (values.title.length < 1 || values.title.length > TITLE_MAX) {
@@ -53,7 +54,15 @@ export function parsePostForm(formData: FormData): PostFormState & { intent: Int
   if (values.body.length > BODY_MAX) errors.body = `Keep it under ${BODY_MAX.toLocaleString("en-US")} characters.`;
   if (values.publishedOn && !dateFromDay(values.publishedOn)) errors.publishedOn = "Use a valid date.";
 
-  return Object.keys(errors).length ? { values, errors, intent } : { values, intent };
+  return Object.keys(errors).length ? { values, errors, intent, today } : { values, intent, today };
+}
+
+// "Today" as the author's browser sees it, sent by the form. Trusted only within a
+// day of UTC (every time zone fits); without it, the UTC day.
+function todayFor(local: string): Date {
+  const utc = dateFromDay(dayFromDate(new Date()))!;
+  const day = dateFromDay(local);
+  return day && Math.abs(day.getTime() - utc.getTime()) <= 86_400_000 ? day : utc;
 }
 
 // Dates are days: "2026-10-03" is stored as midnight UTC, so it never shifts with time zones.

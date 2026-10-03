@@ -13,6 +13,8 @@ export function EnterSubmits() {
       const field = event.target;
       if (!(field instanceof HTMLInputElement) || !field.form) return;
       if (["checkbox", "radio", "button", "submit", "file"].includes(field.type)) return;
+      // A disabled submit button means the form is already saving: don't send it twice.
+      if (field.form.querySelector("button[type=submit]:disabled")) return;
       field.form.requestSubmit();
     }
     window.addEventListener("keydown", onKeyDown);
