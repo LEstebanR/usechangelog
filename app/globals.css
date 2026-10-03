@@ -131,8 +131,14 @@ body {
     animation: uc-rise 600ms var(--ease-out) both;
   }
 
-  .latest-feed:hover .motion-progress,
-  .latest-feed:focus-within .motion-progress,
+  /* Hover over the posts (not the button) pauses on pointer devices only, so
+     a tap or a click on Play never leaves the feed stuck. */
+  @media (hover: hover) {
+    .latest-posts:hover .motion-progress {
+      animation-play-state: paused;
+    }
+  }
+
   .motion-progress[data-paused] {
     animation-play-state: paused;
   }
