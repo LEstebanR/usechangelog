@@ -1,4 +1,8 @@
+import { loadEnvConfig } from "@next/env";
 import { defineConfig } from "drizzle-kit";
+
+// Loads .env.local and friends like `next dev` does; on Vercel the vars are already set.
+loadEnvConfig(process.cwd());
 
 export default defineConfig({
   dialect: "postgresql",
