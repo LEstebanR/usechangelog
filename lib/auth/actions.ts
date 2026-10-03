@@ -13,7 +13,7 @@ export async function sendMagicLink(formData: FormData) {
   const origin = await getOrigin();
   const { error } = await getAuth().signIn.magicLink({
     email,
-    callbackURL: `${origin}/app`,
+    callbackURL: `${origin}/auth/callback`,
     errorCallbackURL: `${origin}/sign-in`,
   });
   if (error) {

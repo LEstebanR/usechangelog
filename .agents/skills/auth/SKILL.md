@@ -13,7 +13,8 @@ The auth rules (magic link only, one account and one workspace, no teams, SSO or
 - **Server only:** `lib/auth/server.ts` has `getAuth()`, `getUser()` (cached per request) and `requireUser()`. Clients are created on first use (`lazy()`), so `next build` runs without env vars. Don't create auth or DB clients at import time.
 - **SSR first:** pages read the user on the server with `getUser()`. Sign-in and sign-out are Server Actions in `lib/auth/actions.ts`, posted from plain forms. There is no client auth SDK or auth UI library.
 - **Routes:**
-  - `/sign-in` sends the magic link. The link lands on `/app`; an expired or used link lands on `/sign-in?error=` (`EXPIRED_TOKEN`, `INVALID_TOKEN`). A signed-in visitor on `/sign-in` goes to `/app`.
+  - `/sign-in` sends the magic link with absolute callback URLs (Neon resolves relative ones against its own domain). The link lands on `/auth/callback`, which exchanges Neon's `neon_auth_session_verifier` for the session cookies (the job Neon's client SDK does in the browser) and redirects to `/app`. An expired or used link lands on `/sign-in?error=` (`EXPIRED_TOKEN`, `INVALID_TOKEN`). A signed-in visitor on `/sign-in` goes to `/app`.
+  - Trusted domains are per Neon branch. The branch previews use needs `https://usechangelog-*-lestebanrs-projects.vercel.app`.
   - `/signup` redirects to `/sign-in` (`next.config.ts`).
   - `/app/:path*` requires a session. `proxy.ts` redirects without one, but it skips Server Actions, so every page and action under `/app` calls `requireUser()`.
   - The landing, legal pages, `/{slug}` and the widget never load auth.
