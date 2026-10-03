@@ -16,6 +16,7 @@ import { Latest } from "./latest";
 import { Reveal } from "./reveal";
 import { SectionLabel } from "./section-label";
 import { Tag, tagDots } from "./tag";
+import { Wordmark } from "./wordmark";
 import type { CSSProperties } from "react";
 
 const delay = (ms: number) => ({ "--delay": `${ms}ms` }) as CSSProperties;
@@ -134,18 +135,7 @@ export default function Home() {
         <div
           className={`${container} flex h-(--header-h) items-center justify-between gap-6`}
         >
-          <a
-            href="#"
-            className="flex items-center gap-2.5 font-display text-lg font-medium tracking-tight"
-          >
-            <span aria-hidden="true" className="grid size-4 grid-cols-2 gap-px">
-              <span style={delay(300)} className="motion-light bg-blue" />
-              <span style={delay(450)} className="motion-light bg-blue-soft" />
-              <span style={delay(600)} className="motion-light bg-blue-soft" />
-              <span style={delay(750)} className="motion-light bg-blue-soft" />
-            </span>
-            <span translate="no">{brand}</span>
-          </a>
+          <Wordmark href="#" animated />
           <nav aria-label="Main" className="flex items-center gap-8 text-sm">
             {navLinks.map((link) => (
               <a

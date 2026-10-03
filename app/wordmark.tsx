@@ -1,20 +1,41 @@
-import Link from "next/link";
+import type { CSSProperties } from "react";
 import { brand } from "./content";
 
-// The landing's logo without its load animation, for the app and auth pages.
-export function Wordmark() {
+const delay = (ms: number) => ({ "--delay": `${ms}ms` }) as CSSProperties;
+
+// The brand mark. `animated` lights the squares up in sequence on the landing.
+export function Wordmark({ href = "/", animated = false }: { href?: string; animated?: boolean }) {
+  const cell = (color: string, ms: number) => (
+    <span
+      style={animated ? delay(ms) : undefined}
+      className={animated ? `motion-light ${color}` : color}
+    />
+  );
+
   return (
-    <Link
-      href="/"
+    <a
+      href={href}
       className="flex items-center gap-2.5 font-display text-lg font-medium tracking-tight"
     >
       <span aria-hidden="true" className="grid size-4 grid-cols-2 gap-px">
-        <span className="bg-blue" />
-        <span className="bg-blue-soft" />
-        <span className="bg-blue-soft" />
-        <span className="bg-blue-soft" />
+        {cell("bg-blue", 300)}
+        {cell("bg-blue-soft", 450)}
+        {cell("bg-blue-soft", 600)}
+        {cell("bg-blue-soft", 750)}
       </span>
       <span translate="no">{brand}</span>
-    </Link>
+    </a>
+  );
+}
+
+// The top bar of the app and auth pages.
+export function SiteHeader({ children }: { children?: React.ReactNode }) {
+  return (
+    <header className="border-b border-hairline bg-canvas">
+      <div className="mx-auto flex h-(--header-h) max-w-6xl items-center justify-between gap-6 px-6">
+        <Wordmark />
+        {children}
+      </div>
+    </header>
   );
 }

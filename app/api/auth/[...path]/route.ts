@@ -1,20 +1,11 @@
-import { getAuth } from "@/lib/auth/server";
+import { getAuthHandlers } from "@/lib/auth/server";
 
-type Handlers = ReturnType<ReturnType<typeof getAuth>["handler"]>;
-type Context = Parameters<Handlers["GET"]>[1];
-
-let handlers: Handlers | undefined;
-
-// Built on first request so the route can be imported at build time without env vars.
-function getHandlers() {
-  handlers ??= getAuth().handler();
-  return handlers;
-}
+type Context = Parameters<ReturnType<typeof getAuthHandlers>["GET"]>[1];
 
 export function GET(request: Request, context: Context) {
-  return getHandlers().GET(request, context);
+  return getAuthHandlers().GET(request, context);
 }
 
 export function POST(request: Request, context: Context) {
-  return getHandlers().POST(request, context);
+  return getAuthHandlers().POST(request, context);
 }

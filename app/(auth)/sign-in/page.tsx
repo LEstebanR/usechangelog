@@ -19,20 +19,17 @@ export default async function SignInPage({ searchParams }: PageProps<"/sign-in">
 
   const { error, sent } = await searchParams;
   const errorMessage = typeof error === "string" ? (errors[error] ?? fallbackError) : undefined;
+  const copy = sent
+    ? { intro: "Check your email. We sent you a sign-in link that works for 15 minutes.", cta: "Send another link" }
+    : { intro: "New or returning, enter your email and we\u2019ll send you a sign-in link.", cta: "Send magic link" };
 
   return (
     <div className="w-full max-w-sm border border-hairline bg-canvas p-8">
       <h1 className="font-display text-2xl font-medium tracking-tight">Sign in</h1>
 
-      {sent ? (
-        <p role="status" className="mt-3 text-graphite">
-          Check your email. We sent you a sign-in link that works for 15 minutes.
-        </p>
-      ) : (
-        <p className="mt-3 text-graphite">
-          New or returning, enter your email and we&apos;ll send you a sign-in link.
-        </p>
-      )}
+      <p role={sent ? "status" : undefined} className="mt-3 text-graphite">
+        {copy.intro}
+      </p>
 
       {errorMessage && (
         <p role="alert" className="mt-4 border border-clay/30 bg-clay-wash px-4 py-3 text-sm text-clay">
@@ -58,7 +55,7 @@ export default async function SignInPage({ searchParams }: PageProps<"/sign-in">
           pendingLabel="Sending…"
           className="motion-press mt-2 bg-blue px-4 py-2.5 font-medium text-canvas transition-opacity hover:opacity-90 disabled:opacity-60"
         >
-          {sent ? "Send another link" : "Send magic link"}
+          {copy.cta}
         </SubmitButton>
       </form>
     </div>

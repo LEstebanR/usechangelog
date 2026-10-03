@@ -10,14 +10,14 @@ The auth rules (magic link only, one account and one workspace, no teams, SSO or
 ## How it's built
 
 - **Provider:** Neon Managed Better Auth through `@neondatabase/auth`. Users live in the `neon_auth` schema of the branch's database.
-- **Server only:** `getAuth()` and `getUser()` in `lib/auth/server.ts`. Both are created on first use, so `next build` runs without env vars. Don't create auth or DB clients at import time.
+- **Server only:** `lib/auth/server.ts` has `getAuth()`, `getUser()` (cached per request) and `requireUser()`. Clients are created on first use (`lazy()`), so `next build` runs without env vars. Don't create auth or DB clients at import time.
 - **SSR first:** pages read the user on the server with `getUser()`. Sign-in and sign-out are Server Actions in `lib/auth/actions.ts`, posted from plain forms. There is no client auth SDK or auth UI library.
 - **Routes:**
-  - `/sign-in` sends the magic link. The link returns to `/sign-in`, which sends a session on to `/app` and shows `?error=` codes (`EXPIRED_TOKEN`, `INVALID_TOKEN`).
+  - `/sign-in` sends the magic link. The link lands on `/app`; an expired or used link lands on `/sign-in?error=` (`EXPIRED_TOKEN`, `INVALID_TOKEN`). A signed-in visitor on `/sign-in` goes to `/app`.
   - `/signup` redirects to `/sign-in` (`next.config.ts`).
-  - `/app/:path*` requires a session. `proxy.ts` redirects without one, and every page or action that reads or writes data checks `getUser()` again.
+  - `/app/:path*` requires a session. `proxy.ts` redirects without one, but it skips Server Actions, so every page and action under `/app` calls `requireUser()`.
   - The landing, legal pages, `/{slug}` and the widget never load auth.
-- **Ownership:** take the user id from `getUser()` on the server for every write, never from the client.
+- **Ownership:** take the user id from `requireUser()` on the server for every write, never from the client.
 - **Foreign keys:** reference `user.id` from `db/neon-auth.ts`. That file is read-only and stays out of `drizzle.config.ts`, so migrations never touch `neon_auth`.
 
 ## Neon settings (Console → Auth)

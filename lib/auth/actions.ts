@@ -7,11 +7,11 @@ export async function sendMagicLink(formData: FormData) {
   const email = String(formData.get("email") ?? "").trim();
   if (!email) redirect("/sign-in?error=MISSING_EMAIL");
 
-  // The link lands back on /sign-in: with a session it forwards to /app,
-  // and with an expired or used link it shows the `error` param.
+  // An expired or used link comes back to /sign-in with an `error` param.
   const { error } = await getAuth().signIn.magicLink({
     email,
-    callbackURL: "/sign-in",
+    callbackURL: "/app",
+    errorCallbackURL: "/sign-in",
   });
   redirect(error ? "/sign-in?error=SEND_FAILED" : "/sign-in?sent=1");
 }
