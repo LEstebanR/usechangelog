@@ -1,5 +1,6 @@
 import { createPolarCore, type Environment, type models } from "@polar-sh/sdk/2026-10";
 import { getProducts } from "@polar-sh/sdk/2026-10/services/products";
+import { connection } from "next/server";
 
 // Read on first use, not at import, so `next build` runs without env vars.
 // Previews point to Polar's sandbox and production to production (`POLAR_SERVER`).
@@ -23,6 +24,8 @@ export function webhookSecret() {
 // The plan's price as Polar has it, e.g. "$9 / month". Null when it can't be read: the
 // billing page then says "Monthly plan". The price is never written in our code.
 export async function getPlanPrice() {
+  // Per request, never at build: the billing page reads it alongside the session.
+  await connection();
   try {
     const { accessToken, productId, environment } = polarConfig();
     const product = await getProducts(createPolarCore({ accessToken, environment }))(productId);
