@@ -18,7 +18,7 @@ export default async function OnboardingPage() {
       </p>
       <WorkspaceForm
         action={createWorkspace}
-        initial={{ name: "", slug: "" }}
+        initial={{ name: "", slug: "", widgetLang: "en" }}
         origin={await getOrigin()}
         submitLabel="Create workspace"
       />

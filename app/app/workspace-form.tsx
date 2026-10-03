@@ -1,7 +1,7 @@
 "use client";
 
 import { useActionState, useState } from "react";
-import type { WorkspaceFormState } from "@/lib/workspace/form";
+import { WIDGET_LANGS, type WorkspaceFormState } from "@/lib/workspace/form";
 import { NAME_MAX, SLUG_MAX, slugify } from "@/lib/workspace/slug";
 import { inputClass, primaryButtonClass } from "../form-styles";
 import { SubmitButton } from "../submit-button";
@@ -11,11 +11,15 @@ type Props = {
   initial: WorkspaceFormState["values"];
   origin: string;
   submitLabel: string;
+  // Settings only: onboarding starts in English.
+  showWidgetLang?: boolean;
 };
+
+const langName = { en: "English", es: "Español" } as const;
 
 // The only client code for workspaces: keeps what you typed on errors and
 // suggests a slug from the name until you edit the slug yourself.
-export function WorkspaceForm({ action, initial, origin, submitLabel }: Props) {
+export function WorkspaceForm({ action, initial, origin, submitLabel, showWidgetLang }: Props) {
   const [state, formAction, pending] = useActionState(action, { values: initial });
   const [name, setName] = useState(state.values.name);
   // null until the slug is edited by hand: until then it follows the name.
@@ -89,6 +93,31 @@ export function WorkspaceForm({ action, initial, origin, submitLabel }: Props) {
           </p>
         )}
       </div>
+
+      {showWidgetLang && (
+        <fieldset className="flex flex-col gap-2">
+          <legend className="mb-2 text-sm font-medium">Widget language</legend>
+          <div className="flex gap-1.5">
+            {WIDGET_LANGS.map((lang) => (
+              <label key={lang} className="cursor-pointer">
+                <input
+                  type="radio"
+                  name="widgetLang"
+                  value={lang}
+                  defaultChecked={state.values.widgetLang === lang}
+                  className="peer sr-only"
+                />
+                <span className="block border border-hairline px-3 py-1.5 text-sm text-graphite transition-colors hover:text-ink peer-checked:border-ink peer-checked:bg-ink peer-checked:text-canvas peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-blue">
+                  {langName[lang]}
+                </span>
+              </label>
+            ))}
+          </div>
+          <p className="text-sm text-graphite">
+            The widget&apos;s own words: its button, title and dates. Your posts show as you wrote them.
+          </p>
+        </fieldset>
+      )}
 
       <div className="flex items-center gap-4">
         <SubmitButton pendingLabel="Saving…" className={primaryButtonClass}>

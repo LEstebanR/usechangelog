@@ -2,12 +2,12 @@
 
 import { useEffect, useRef, useState } from "react";
 import type { Category, PostType } from "@/lib/posts/form";
+import type { WidgetLang } from "@/lib/workspace/form";
 import { Tag } from "../tag";
 
 type Post = { id: string; title: string; body: string; category: Category; type: PostType; publishedOn: string };
-type Lang = "en" | "es";
 
-// The widget's own words (#8): English by default, Spanish with lang="es". Posts are never translated.
+// The widget's own words (#8), in the language chosen in settings. Posts are never translated.
 const copy = {
   en: { title: "What's new", all: "View all updates", close: "Close", empty: "No published updates yet.",
         tags: { new: "New", improved: "Improved", fixed: "Fixed", coming: "Coming soon" } },
@@ -18,10 +18,9 @@ const copy = {
 const tagName = { new: "New", improved: "Improved", fixed: "Fixed" } as const;
 
 // A header button named after the workspace slug that opens the "What's new" panel
-// exactly as your users will see it: published posts only, same content as the widget (#8).
-export function WhatsNewPreview({ slug, allUpdatesUrl, posts }: { slug: string; allUpdatesUrl: string; posts: Post[] }) {
+// exactly as your users will see it: published posts only, in the workspace's widget language.
+export function WhatsNewPreview({ slug, lang, allUpdatesUrl, posts }: { slug: string; lang: WidgetLang; allUpdatesUrl: string; posts: Post[] }) {
   const [open, setOpen] = useState(false);
-  const [lang, setLang] = useState<Lang>("en");
   const panel = useRef<HTMLDivElement>(null);
   const trigger = useRef<HTMLButtonElement>(null);
   const t = copy[lang];
@@ -76,18 +75,6 @@ export function WhatsNewPreview({ slug, allUpdatesUrl, posts }: { slug: string; 
           <div className="flex items-center justify-between gap-3 border-b border-hairline px-5 py-3.5">
             <p className="font-display text-base font-medium">{t.title}</p>
             <div className="flex items-center gap-1">
-              {(["en", "es"] as const).map((l) => (
-                <button
-                  key={l}
-                  type="button"
-                  onClick={() => setLang(l)}
-                  aria-pressed={lang === l}
-                  aria-label={l === "en" ? "Preview in English" : "Preview in Spanish"}
-                  className={`px-1.5 py-0.5 text-[0.68rem] font-medium uppercase ${lang === l ? "bg-ink text-canvas" : "text-graphite hover:text-ink"}`}
-                >
-                  {l}
-                </button>
-              ))}
               <button
                 type="button"
                 onClick={() => {

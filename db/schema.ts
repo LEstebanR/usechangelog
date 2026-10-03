@@ -1,9 +1,12 @@
 import { randomBytes } from "node:crypto";
 import { date, index, pgEnum, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
 import { CATEGORIES, TYPES } from "@/lib/posts/form";
+import { WIDGET_LANGS } from "@/lib/workspace/form";
 import { user } from "./neon-auth";
 
 // Our tables, in the `public` schema. Users live in Neon's schema (`./neon-auth`).
+
+export const widgetLang = pgEnum("widget_lang", WIDGET_LANGS);
 
 // One per user (unique owner_id). Deleting the user deletes the workspace (#31).
 export const workspaces = pgTable("workspaces", {
@@ -19,6 +22,8 @@ export const workspaces = pgTable("workspaces", {
     .notNull()
     .unique("workspaces_widget_key_unique")
     .$defaultFn(() => randomBytes(16).toString("base64url")),
+  // Language of the widget's chrome (#8), set in settings.
+  widgetLang: widgetLang("widget_lang").notNull().default("en"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true })
     .notNull()
