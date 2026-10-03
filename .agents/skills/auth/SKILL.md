@@ -16,7 +16,7 @@ The auth rules (magic link only, one account and one workspace, no teams, SSO or
   - `/sign-in` sends the magic link with absolute callback URLs; Neon resolves relative ones against its own domain. A signed-in visitor on `/sign-in` goes to `/app`.
   - `/auth/callback` is where the link lands. It exchanges Neon's `neon_auth_session_verifier` for the session cookies (what Neon's client SDK does in the browser) and redirects to `/app`. The SDK middleware can't do it: it needs a challenge cookie that magic links never set.
   - An expired or used link lands on `/sign-in?error=` (`EXPIRED_TOKEN`, `INVALID_TOKEN`).
-  - Trusted domains are per Neon branch. The branch previews use needs `https://usechangelog-*-lestebanrs-projects.vercel.app`.
+  - Trusted domains are per Neon branch, and Neon only accepts a wildcard as the leftmost full label (`https://*.example.com`), so Vercel preview URLs can't share one pattern. Test auth locally (`localhost` is trusted). To test it on a preview, add that PR's branch alias (`https://usechangelog-git-<branch>-lestebanrs-projects.vercel.app`) to the trusted domains of the branch previews use. Never add `https://*.vercel.app`, and keep only exact domains on `production`.
   - `/signup` redirects to `/sign-in` (`next.config.ts`).
   - `/app/:path*` requires a session. `proxy.ts` redirects without one, but it skips Server Actions, so every page and action under `/app` calls `requireUser()`.
   - The landing, legal pages, `/{slug}` and the widget never load auth.
