@@ -14,12 +14,13 @@ export const tagDots: Record<PostTag, string> = {
   "Coming soon": "border border-dashed border-graphite",
 };
 
-export function Tag({ tag }: { tag: PostTag }) {
+// `label` overrides the text, e.g. to show the tag in another language.
+export function Tag({ tag, label }: { tag: PostTag; label?: string }) {
   return (
     <span
       className={`inline-block whitespace-nowrap border px-2 py-0.5 font-display text-[0.72rem] font-medium uppercase tracking-wider ${tagStyles[tag]}`}
     >
-      {tag}
+      {label ?? tag}
     </span>
   );
 }

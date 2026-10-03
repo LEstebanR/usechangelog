@@ -39,7 +39,7 @@ export async function savePost(
   const db = getDb();
   if (!existing) {
     await db.insert(posts).values({ workspaceId: workspace.id, ...fields, ...next });
-    revalidatePath("/app");
+    revalidatePath("/app", "layout");
     redirect(`/app?done=${next.status === "published" ? "published" : "drafted"}`);
   }
 
@@ -47,7 +47,9 @@ export async function savePost(
     .update(posts)
     .set({ ...fields, ...next })
     .where(and(eq(posts.id, existing.id), eq(posts.workspaceId, workspace.id)));
-  revalidatePath("/app");
+  revalidatePath("/app", "layout");
+  // Publishing is done with the post: back to the list, like creating one.
+  if (intent === "publish") redirect("/app?done=published");
   const notice = { publish: "Published.", unpublish: "Moved back to draft.", save: status === "published" ? "Changes saved." : "Draft saved." }[intent];
   return { values: { ...state.values, publishedOn: next.publishedOn ?? "" }, notice };
 }
@@ -61,6 +63,6 @@ export async function deletePost(id: string) {
     .where(and(eq(posts.id, id), eq(posts.workspaceId, workspace.id)))
     .returning({ id: posts.id });
   if (!deleted.length) notFound();
-  revalidatePath("/app");
+  revalidatePath("/app", "layout");
   redirect("/app?done=deleted");
 }

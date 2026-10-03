@@ -25,6 +25,24 @@ export async function listPosts() {
     .orderBy(desc(sql`coalesce(${posts.publishedOn}, ${posts.updatedAt}::date)`), desc(posts.updatedAt));
 }
 
+// What the public sees: published posts only, "Coming soon" first, then newest first.
+// One place for this rule, shared by the header preview, the public page (#7) and the widget (#8).
+export async function listPublishedPosts(workspaceId: string, limit = 10) {
+  return getDb()
+    .select({
+      id: posts.id,
+      title: posts.title,
+      body: posts.body,
+      category: posts.category,
+      type: posts.type,
+      publishedOn: posts.publishedOn,
+    })
+    .from(posts)
+    .where(and(eq(posts.workspaceId, workspaceId), eq(posts.status, "published")))
+    .orderBy(desc(sql`${posts.type} = 'coming'`), desc(posts.publishedOn), desc(posts.createdAt))
+    .limit(limit);
+}
+
 // A post of the signed-in user's workspace. Anything else, including another
 // workspace's id or a malformed one, is a 404.
 export async function requirePost(id: string) {
