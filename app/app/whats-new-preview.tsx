@@ -6,11 +6,12 @@ import { WIDGET_COPY, type WidgetLang } from "@/lib/widget/copy";
 
 type Post = { id: string; title: string; body: string; category: Category; type: PostType; publishedOn: string };
 
-// Category color: a bar beside the post and a dot before its label (the landing's tag colors).
+// Category color: a bar beside the post and a dot before its label. Fixed is green
+// (a resolved problem reads as good news); Improved is violet so the two never blur.
 const accent = {
   new: { bar: "bg-blue", dot: "bg-blue", text: "text-blue" },
-  improved: { bar: "bg-green", dot: "bg-green", text: "text-green" },
-  fixed: { bar: "bg-clay", dot: "bg-clay", text: "text-clay" },
+  improved: { bar: "bg-violet", dot: "bg-violet", text: "text-violet" },
+  fixed: { bar: "bg-green", dot: "bg-green", text: "text-green" },
 } as const;
 
 // A header button named after the workspace slug that opens the "What's new" panel
