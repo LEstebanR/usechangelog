@@ -153,6 +153,7 @@ The landing needs none. The variables arrive with the product issues, each docum
 | `POLAR_ACCESS_TOKEN`, `POLAR_PRODUCT_ID`, `POLAR_SERVER` | Checkout and portal (`sandbox` on previews) | Manually | [#14](https://github.com/LEstebanR/usechangelog/issues/14) |
 | `POLAR_WEBHOOK_SECRET` | Webhook signature check | Manually | [#15](https://github.com/LEstebanR/usechangelog/issues/15) |
 | `NEXT_PUBLIC_SITE_URL` | Canonical URL and metadata | Manually | [#13](https://github.com/LEstebanR/usechangelog/issues/13) |
+| `VERCEL_AUTOMATION_BYPASS_SECRET` | Optional, local only: `bun run widget-test` against a protected preview | Manually, in `.env.local` | [#8](https://github.com/LEstebanR/usechangelog/issues/8) |
 
 For local work, copy `.env.example` to `.env.local`. Real `.env*` files are git-ignored.
 
