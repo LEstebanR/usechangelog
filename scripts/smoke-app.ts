@@ -14,6 +14,13 @@ if (!email) {
 }
 
 const host = new URL(base).host;
+
+// Production has real users and its own email limit: refuse unless asked explicitly.
+const PRODUCTION_HOSTS = ["usechangelog-xi.vercel.app", "usechangelog.com", "www.usechangelog.com"];
+if (PRODUCTION_HOSTS.includes(host) && process.env.SMOKE_ALLOW_PRODUCTION !== "1") {
+  console.error(`Refusing to run against production (${host}). Set SMOKE_ALLOW_PRODUCTION=1 if you really mean it.`);
+  process.exit(1);
+}
 // One saved session per email and host, so local and preview runs don't mix.
 const sessionFile = `.smoke-session-${email.replace(/[^a-z0-9]+/gi, "_")}-${host.replace(/[^a-z0-9]+/gi, "_")}.json`;
 const jar = new Map<string, string>(
