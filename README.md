@@ -68,7 +68,7 @@ The public page and the widget only serve posts while the workspace has an **act
 | Package manager | [Bun](https://bun.sh) | ✅ In use |
 | Database | [Neon](https://neon.com) Postgres, with Drizzle ORM and migrations in the repo | ✅ In use |
 | Auth | Neon Managed Better Auth, magic link only | ✅ In use |
-| Payments | [Polar](https://polar.sh) as merchant of record: one monthly plan, sandbox on previews | 🛠 Planned ([#14](https://github.com/LEstebanR/usechangelog/issues/14), [#15](https://github.com/LEstebanR/usechangelog/issues/15), [#17](https://github.com/LEstebanR/usechangelog/issues/17)) |
+| Payments | [Polar](https://polar.sh) as merchant of record: one monthly plan, sandbox on previews | ✅ In use |
 
 The reasoning behind each choice is in its issue. For example, [#4](https://github.com/LEstebanR/usechangelog/issues/4) explains why it's Neon's auth and not Clerk.
 
@@ -88,13 +88,15 @@ app/
   markdown-body.tsx     A post body rendered from Markdown (styles in markdown-styles.ts)
   [slug]/               The public changelog at /{slug}, rendered on every request
   api/widget/[key]/     Public widget data (CORS open, 60-second CDN cache)
+  api/polar/            Polar checkout, customer portal and webhook (the only writer of subscription state)
   icon.svg, apple-icon.png, opengraph-image.png
   (auth)/sign-in/       Magic link sign-in
-  app/                  The signed-in app: /app (posts), /app/posts/new, /app/posts/[id], /app/onboarding, /app/settings
+  app/                  The signed-in app: /app (posts), /app/posts/new, /app/posts/[id], /app/onboarding, /app/settings, /app/billing
   api/auth/[...path]/   Auth handler, proxied to Neon
 lib/auth/               Server auth client and Server Actions (sign in, sign out)
 lib/workspace/          Slug rules, form parsing, getCurrentWorkspace(), getWorkspaceBySlug() and workspace Server Actions
 lib/posts/              Post form parsing, workspace-scoped queries and post Server Actions
+lib/billing/            Polar config, mapPolarStatus(), canPublish() (the one publish gate) and the webhook handler
 lib/markdown.ts         renderMarkdown(): safe Markdown to HTML for the public page and the widget
 lib/widget/             The widget's words in 5 languages and the API payload
 public/widget.js        The embeddable "What's new" widget (vanilla JS, Shadow DOM)
@@ -162,6 +164,7 @@ For local work, copy `.env.example` to `.env.local`. Real `.env*` files are git-
 - **Production:** https://usechangelog-xi.vercel.app, deployed from `main`. There's no custom domain yet; [#24](https://github.com/LEstebanR/usechangelog/issues/24) covers it.
 - **Previews:** every pull request gets its own Vercel preview, with its own Neon branch and auth. Its URL goes in the PR description.
 - **Migrations:** Vercel runs `vercel-build`: it checks the env vars (`check-env`), applies pending migrations to the deployment's database, then runs `next build`.
+- **Billing:** Production uses Polar's production organization; previews and local use its sandbox (`POLAR_SERVER`, enforced by `check-env`). Polar sends webhooks to `/api/polar/webhook`; for a protected preview, the sandbox endpoint uses the branch URL with `?x-vercel-protection-bypass=<secret>`. Locally, `polar listen` forwards them.
 - **CI:** [GitHub Actions](.github/workflows/ci.yml) runs `lint`, `typecheck`, `build` and `test` as separate checks on every PR and on each push to `main`.
 
 ## Roadmap
