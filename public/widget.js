@@ -7,15 +7,27 @@
  * already rendered and sanitized (lib/markdown.ts).
  */
 (function () {
+  // Outside a browser (bun test), hand the pure helpers to the tests instead of booting.
+  if (typeof document === "undefined") {
+    module.exports = { esc: esc, day: day, section: section };
+    return;
+  }
+
   var script = document.currentScript;
   if (!script) return;
   var key = script.getAttribute("data-key");
   var lang = script.getAttribute("lang");
   var selector = script.getAttribute("data-trigger");
-  var origin = new URL(script.src).origin;
+  var src = new URL(script.src);
   if (!key) return console.warn("UseChangelog widget: missing data-key.");
 
-  var url = origin + "/api/widget/" + encodeURIComponent(key) + (lang ? "?lang=" + encodeURIComponent(lang) : "");
+  var query = new URLSearchParams();
+  if (lang) query.set("lang", lang);
+  // Testing only: a protected Vercel preview needs its bypass secret on the API call too,
+  // so it's passed on from widget.js's own URL. Real embeds never carry it.
+  var bypass = src.searchParams.get("x-vercel-protection-bypass");
+  if (bypass) query.set("x-vercel-protection-bypass", bypass);
+  var url = src.origin + "/api/widget/" + encodeURIComponent(key) + (query.toString() ? "?" + query : "");
   fetch(url)
     .then(function (res) {
       if (!res.ok) throw new Error(res.status === 404 ? "unknown data-key" : "HTTP " + res.status);
