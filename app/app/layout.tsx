@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { signOut } from "@/lib/auth/actions";
 import { requireUser } from "@/lib/auth/server";
+import { renderMarkdown } from "@/lib/markdown";
 import { countPublishedPosts, listPublishedPosts } from "@/lib/posts/server";
 import { publicUrl } from "@/lib/site";
 import { getCurrentWorkspace } from "@/lib/workspace/server";
@@ -20,7 +21,7 @@ export default async function AppLayout({ children }: LayoutProps<"/app">) {
   const workspace = await getCurrentWorkspace();
   const [posts, total, url] = workspace
     ? await Promise.all([
-        listPublishedPosts(workspace.id, { limit: 10, bodyChars: 300 }),
+        listPublishedPosts(workspace.id, { limit: 10 }),
         countPublishedPosts(workspace.id),
         publicUrl(workspace.slug),
       ])
@@ -36,9 +37,10 @@ export default async function AppLayout({ children }: LayoutProps<"/app">) {
               slug={workspace.slug}
               name={workspace.name}
               lang={workspace.widgetLang}
+              enabled={workspace.widgetEnabled}
               total={total}
               allUpdatesUrl={url}
-              posts={posts.map((p) => ({ ...p, publishedOn: p.publishedOn ?? "" }))}
+              posts={posts.map(({ body, ...p }) => ({ ...p, html: renderMarkdown(body), publishedOn: p.publishedOn ?? "" }))}
             />
           )}
           <form action={signOut} className="flex items-center gap-4">

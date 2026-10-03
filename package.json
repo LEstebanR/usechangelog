@@ -15,6 +15,7 @@
     "db:migrate": "drizzle-kit migrate",
     "vercel-build": "bun run check-env && bun run db:migrate && next build",
     "smoke": "bun scripts/smoke-app.ts",
+    "widget-test": "bun scripts/widget-test.ts",
     "check-env": "bun scripts/check-env.ts"
   },
   "dependencies": {

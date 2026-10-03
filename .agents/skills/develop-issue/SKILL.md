@@ -47,6 +47,8 @@ Goal: a PR, ready for review and not merged, that meets every "Hecho cuando" ite
 
 - Run the `verifier` agent, or the same commands it runs: lint, typecheck, build, and tests if they exist. Everything must pass.
 - For runtime behavior, use the `next-dev-loop` skill against `next dev`.
+- In the browser, fill forms with JS (the native `value` setter plus an `input` event, then `form.requestSubmit(button)`) instead of typing and clicking by coordinates: pages hydrate after load and layouts shift with the window size, so typed text gets lost and clicks land on the wrong button.
+- To try the widget from another origin, `bun run widget-test <widget-key> [base-url]` serves host pages on `localhost:5050`. For a protected preview, export `VERCEL_AUTOMATION_BYPASS_SECRET` first.
 - For anything behind sign-in, `bun run smoke <email> [base-url]` signs in with a real magic link (you paste it from the email) and checks `/app` and onboarding. It reuses the saved session, so it only spends a Neon email when the session has expired; don't sign in by hand for each check. It never writes to the database.
 
 ## 6. Open the PR and verify on the preview

@@ -1,0 +1,1 @@
+ALTER TABLE "workspaces" ADD COLUMN "widget_enabled" boolean DEFAULT true NOT NULL;

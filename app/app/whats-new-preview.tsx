@@ -3,9 +3,10 @@
 import { useEffect, useRef, useState } from "react";
 import { formatDay, type Category, type PostType } from "@/lib/posts/form";
 import { WIDGET_COPY, type WidgetLang } from "@/lib/widget/copy";
+import { markdownClass } from "../markdown-styles";
 import { TAG_PALETTE } from "../tag";
 
-type Post = { id: string; title: string; body: string; category: Category; type: PostType; publishedOn: string };
+type Post = { id: string; title: string; html: string; category: Category; type: PostType; publishedOn: string };
 
 // Category color as a soft pill, from the shared palette.
 const pill = {
@@ -16,10 +17,12 @@ const pill = {
 
 // A header button named after the workspace slug that opens the "What's new" panel
 // exactly as your users will see it: published posts only, in the workspace's widget language.
-export function WhatsNewPreview({ slug, name, lang, total, allUpdatesUrl, posts }: {
+export function WhatsNewPreview({ slug, name, lang, enabled, total, allUpdatesUrl, posts }: {
   slug: string;
   name: string;
   lang: WidgetLang;
+  // Off in settings: the widget shows nothing on the customer's site.
+  enabled: boolean;
   // All published posts; the panel lists the latest 10, like the widget.
   total: number;
   allUpdatesUrl: string;
@@ -60,12 +63,15 @@ export function WhatsNewPreview({ slug, name, lang, total, allUpdatesUrl, posts 
         onClick={() => setOpen((o) => !o)}
         aria-expanded={open}
         aria-haspopup="dialog"
-        title="Preview what your users see"
+        title={enabled ? "Preview what your users see" : "The widget is off: your users don't see it"}
         className="flex items-center gap-2 border border-hairline px-3 py-2 text-sm font-medium transition-colors hover:border-ink"
       >
         <span aria-hidden="true" className="size-2 bg-blue" />
         <span className="max-w-40 truncate">/{slug}</span>
         <span className="tabular-nums text-graphite">{total}</span>
+        {!enabled && (
+          <span className="border border-hairline px-1.5 py-0.5 text-xs uppercase tracking-wider text-graphite">Off</span>
+        )}
       </button>
 
       {open && (
@@ -98,8 +104,8 @@ export function WhatsNewPreview({ slug, name, lang, total, allUpdatesUrl, posts 
 
           <div className="flex-1 overflow-y-auto border-t border-hairline">
             {posts.length === 0 && <p className="px-6 py-12 text-center text-[0.95rem] text-graphite">{t.empty}</p>}
-            {coming.length > 0 && <Section label={t.tags.coming} coming posts={coming} lang={lang} allUpdatesUrl={allUpdatesUrl} />}
-            {shipped.length > 0 && <Section label={t.latest} posts={shipped} lang={lang} allUpdatesUrl={allUpdatesUrl} />}
+            {coming.length > 0 && <Section label={t.tags.coming} coming posts={coming} lang={lang} />}
+            {shipped.length > 0 && <Section label={t.latest} posts={shipped} lang={lang} />}
           </div>
 
           <div className="border-t border-hairline p-3">
@@ -116,12 +122,11 @@ export function WhatsNewPreview({ slug, name, lang, total, allUpdatesUrl, posts 
   );
 }
 
-function Section({ label, posts, coming = false, lang, allUpdatesUrl }: {
+function Section({ label, posts, coming = false, lang }: {
   label: string;
   posts: Post[];
   coming?: boolean;
   lang: WidgetLang;
-  allUpdatesUrl: string;
 }) {
   const t = WIDGET_COPY[lang];
   return (
@@ -146,16 +151,12 @@ function Section({ label, posts, coming = false, lang, allUpdatesUrl }: {
               )}
             </p>
             <p className="mt-2.5 text-[1.0625rem] font-semibold leading-snug text-ink">{post.title}</p>
-            {/* Plain text until #7's renderMarkdown lands. */}
-            {post.body && (
-              <>
-                <p className="mt-1.5 line-clamp-4 text-[0.9375rem] leading-relaxed whitespace-pre-line text-ink/75">
-                  {post.body}
-                </p>
-                <a href={allUpdatesUrl} className="mt-1.5 inline-block text-sm font-medium text-blue hover:underline">
-                  {t.more}
-                </a>
-              </>
+            {/* Rendered and sanitized on the server by renderMarkdown, like the widget's. */}
+            {post.html && (
+              <div
+                className={`${markdownClass} mt-1.5 text-[0.9375rem] text-ink/75 [overflow-wrap:anywhere]`}
+                dangerouslySetInnerHTML={{ __html: post.html }}
+              />
             )}
           </li>
         ))}
