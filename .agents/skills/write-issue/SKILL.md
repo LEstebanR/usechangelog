@@ -23,7 +23,13 @@ An issue is ready when someone can develop it without asking questions, and the 
 
 Use `.github/ISSUE_TEMPLATE/feature.md` for product work and `.github/ISSUE_TEMPLATE/bug.md` for bugs. Those templates are the source of truth for the structure, so don't restate them here.
 
-- **Title:** `<n>. <Short outcome>`. `<n>` is the build order, not the GitHub number.
+- **Title:** `<n>. <Área>: <resultado>`, for example `3. Posts: crear, editar y publicar desde el app`. `<n>` is the priority order, not the GitHub number.
+- **Priority label:** every issue gets one.
+  - `P0`: core product and billing.
+  - `P1`: needed before opening sign-up.
+  - `P2`: after launch.
+
+  Within a priority, dependencies set the order.
 - **Language:** the body is in Spanish; code, paths and identifiers stay in English.
 - **References:** point to other issues by their GitHub number (`#12`), never by the number in their title.
 - **Sections:** "Depende de", "Decisiones", "Impacto" and "Riesgos" go in only when they apply.
@@ -36,10 +42,14 @@ Use `.github/ISSUE_TEMPLATE/feature.md` for product work and `.github/ISSUE_TEMP
 - **No invented facts:** if something can't be confirmed before implementing, like an exact table name, say so and make confirming it part of the work.
 - **Changing a decision:** if a rewrite changes a decision from the previous version, say so at the top in one line, and list the affected issues and PRs in "Impacto".
 - **One owner per rule:** product rules live in `AGENTS.md`. Shared logic (a validator, a renderer, a gate function) belongs to one issue, and the others reuse it by name.
-- **Order changes renumber:** if an issue now depends on a later one, renumber the titles so the order holds, and update every "Depende de".
+- **Order changes renumber:** if an issue now depends on a later one, or its priority changes, renumber the titles so the order holds, and update every "Depende de".
 
 ## Publishing
 
 - **New issue:** `gh issue create --title "<n>. …" --body-file <file>`, with the body built from the template.
 - **Rewrite:** `gh issue edit <n> --title … --body-file <file>`.
 - **Approval first:** don't start development in the same turn. The owner reads and approves the issue first.
+
+## Final step: improvements
+
+Before finishing, look back at the result, at how the work went, and at this skill. List up to 5 concrete improvements, each with what would change and why. Ask the owner which ones to apply. Apply only those; if they want none, stop.

@@ -204,5 +204,8 @@ Lighthouse on the production build: **98 / 100 / 100 / 100** on mobile and **100
 | `polar-billing` | How to implement checkout, webhook, subscription states and the publish gate |
 | `clerk-auth` | Superseded: [#4](https://github.com/LEstebanR/usechangelog/issues/4) replaces it with Neon's auth skill |
 | `write-issue` | How to write an issue that can be built without guessing |
+| `develop-issue` | The full process to develop an issue: plan checkpoint, implementation, preview verification, `simplify`, `code-review`, README update, PR |
 | `next-dev-loop` | Official Next.js skill to verify changes in a running `next dev` |
 | `verifier` agent | Runs lint, typecheck, build and tests, and reports without editing code |
+
+Every project skill ends with an **improvements** step: it lists what could be better and asks the owner which changes to apply.

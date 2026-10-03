@@ -38,3 +38,7 @@ The billing rules (Polar only, one monthly plan, sign-up free, only `active` pub
 ## Not in the MVP
 
 Coupons, multiple plans, annual billing, usage-based billing, seat pricing.
+
+## Final step: improvements
+
+Before finishing, look back at the result, at how the work went, and at this skill. List up to 5 concrete improvements, each with what would change and why. Ask the owner which ones to apply. Apply only those; if they want none, stop.

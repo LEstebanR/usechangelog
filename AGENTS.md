@@ -42,4 +42,11 @@ This list is the source of truth. The skills in `.agents/skills/` add implementa
 - PRs are ready for review, never draft. Don't merge; the owner merges.
 - Fill in `.github/pull_request_template.md`: the Vercel preview URL and `Closes #<issue>` for every issue it resolves, so GitHub closes them on merge.
 - Issues follow `.github/ISSUE_TEMPLATE/` and the `write-issue` skill.
+- To develop an issue, follow the `develop-issue` skill. It covers the plan checkpoint, the preview verification, simplify, code review and the README update.
+
+## Skills
+
+Every project skill ends with an **improvements** step. It looks back at the result, the process and the skill itself, lists concrete improvements, and asks the owner which to apply. Apply only the ones the owner approves.
+
+This also applies to vendored skills like `next-dev-loop`, which we don't edit, so the hash in `skills-lock.json` stays valid.
 - Never commit secrets, `node_modules` or `.env*` files. The one exception is `.env.example`, which lists every env var name with no values.
