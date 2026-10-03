@@ -1,21 +1,49 @@
-import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import type { Metadata, Viewport } from "next";
+import { Funnel_Display, Instrument_Sans } from "next/font/google";
+import { brand, hero } from "./content";
 import "./globals.css";
 
-const inter = Inter({
-  variable: "--font-inter",
+const funnelDisplay = Funnel_Display({
+  variable: "--font-funnel-display",
   subsets: ["latin"],
 });
 
+const instrumentSans = Instrument_Sans({
+  variable: "--font-instrument-sans",
+  subsets: ["latin"],
+});
+
+const title = `${brand} — ${hero.headline.replace(/\.$/, "")}`;
+const description =
+  "A public changelog and an in-app widget for indie hackers and small product teams.";
+
 export const metadata: Metadata = {
-  title: "UseChangelog",
-  description: "Changelog and product announcements for small teams.",
+  // Production URL until usechangelog.com is connected.
+  metadataBase: new URL("https://usechangelog-xi.vercel.app"),
+  title,
+  description,
+  openGraph: {
+    type: "website",
+    siteName: brand,
+    title,
+    description,
+  },
+  twitter: {
+    card: "summary_large_image",
+  },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#ffffff",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="en" className={`${inter.variable} h-full antialiased`}>
-      <body className="min-h-full flex flex-col">{children}</body>
+    <html
+      lang="en"
+      className={`${funnelDisplay.variable} ${instrumentSans.variable} antialiased`}
+    >
+      <body>{children}</body>
     </html>
   );
 }
