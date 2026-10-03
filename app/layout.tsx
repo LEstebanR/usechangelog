@@ -12,10 +12,23 @@ const instrumentSans = Instrument_Sans({
   subsets: ["latin"],
 });
 
+const description =
+  "A public changelog and an in-app widget for indie hackers and small product teams.";
+
 export const metadata: Metadata = {
+  // Production URL until usechangelog.com is connected.
+  metadataBase: new URL("https://usechangelog-xi.vercel.app"),
   title: "UseChangelog — Tell your users what shipped",
-  description:
-    "A public changelog and an in-app widget for indie hackers and small product teams.",
+  description,
+  openGraph: {
+    type: "website",
+    siteName: "UseChangelog",
+    title: "UseChangelog — Tell your users what shipped",
+    description,
+  },
+  twitter: {
+    card: "summary_large_image",
+  },
 };
 
 export const viewport: Viewport = {
