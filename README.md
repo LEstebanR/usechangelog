@@ -79,6 +79,7 @@ app/
   page.tsx              Landing page
   content.ts            All landing copy (edit text here, not in page.tsx)
   layout.tsx            Fonts, metadata, Open Graph
+  not-found.tsx         404 page (unknown routes and notFound())
   globals.css           Design tokens (@theme) and motion
   latest.tsx            Rotating "Latest from Acme" feed in the hero
   reveal.tsx            Scroll reveals (IntersectionObserver)
@@ -175,6 +176,7 @@ The issue tracker is the backlog. Issues are numbered in build order; each one l
 | 16 | Custom domain and branded auth email *(post-MVP)* | [#24](https://github.com/LEstebanR/usechangelog/issues/24) |
 | 17 | Sign in with Google *(post-MVP)* | [#25](https://github.com/LEstebanR/usechangelog/issues/25) |
 | 19 | Delete your account | [#31](https://github.com/LEstebanR/usechangelog/issues/31) |
+| 20 | Custom 404 page | [#33](https://github.com/LEstebanR/usechangelog/issues/33) |
 
 ### Out of scope
 
