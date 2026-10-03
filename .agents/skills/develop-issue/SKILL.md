@@ -57,6 +57,8 @@ Goal: a PR, ready for review and not merged, that meets every "Hecho cuando" ite
 
 ## 7. Simplify and review
 
+Batch first: if the owner keeps asking for UX or design changes on the PR, finish that round of requests, then run simplify and code-review once over everything, instead of one pass per request.
+
 1. **Simplify:** run the `simplify` skill on the branch diff and apply its fixes.
 2. **Code review:** run the `code-review` skill on the PR. Fix confirmed bugs. If a finding would change the issue's scope or a decision, ask the owner instead.
 3. **Re-check:** run step 5 again, push, and confirm CI is still green.

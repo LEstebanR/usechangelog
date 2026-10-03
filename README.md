@@ -129,6 +129,7 @@ Open http://localhost:3000.
 | `bun run check` | Lint, typecheck and build: the same checks CI runs |
 | `bun run db:generate` | Generate a migration from `db/schema.ts` |
 | `bun run db:migrate` | Apply pending migrations (uses `DATABASE_URL_UNPOOLED`) |
+| `bun run check-env` | Check the required env vars and their format, without printing them. Vercel runs it before migrating |
 | `bun run smoke <email> [base-url]` | Signed-in smoke test of `/app`. Reuses the last session (`.smoke-session-*.json`, git-ignored), so it only sends a magic link when that expires; `SMOKE_LINK=<link>` skips the request. Never writes data, and refuses production URLs unless `SMOKE_ALLOW_PRODUCTION=1` |
 
 ### Environment variables
@@ -150,7 +151,7 @@ For local work, copy `.env.example` to `.env.local`. Real `.env*` files are git-
 
 - **Production:** https://usechangelog-xi.vercel.app, deployed from `main`. There's no custom domain yet; [#24](https://github.com/LEstebanR/usechangelog/issues/24) covers it.
 - **Previews:** every pull request gets its own Vercel preview, with its own Neon branch and auth. Its URL goes in the PR description.
-- **Migrations:** Vercel runs `vercel-build`, which applies pending migrations to the deployment's database before `next build`.
+- **Migrations:** Vercel runs `vercel-build`: it checks the env vars (`check-env`), applies pending migrations to the deployment's database, then runs `next build`.
 - **CI:** [GitHub Actions](.github/workflows/ci.yml) runs `lint`, `typecheck` and `build` as separate checks on every PR and on each push to `main`.
 
 ## Roadmap

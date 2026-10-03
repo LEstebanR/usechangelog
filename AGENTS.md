@@ -35,6 +35,8 @@ This list is the source of truth. The skills in `.agents/skills/` add implementa
 - **Bun, never npm:** `bun install`, `bun add`, `bun run <script>`, `bunx`. `bun.lock` is the only lockfile.
 - **SSR first:** read data in Server Components and write it with Server Actions posted from plain forms. Use a client component only for a small interactive island (a pending button, a toggle), and prefer a server form over a client UI library.
 - **Access checks in pages, not layouts:** every page and Server Action under `/app` calls `requireUser()` or `requireWorkspace()` itself. Layouts don't re-run on client navigation and don't stop nested routes from rendering, so a layout check protects nothing.
+- **Migrations in an open PR:** if a migration hasn't reached `main`, change it by regenerating it (delete the file, its snapshot and its journal entry, then `bun run db:generate`) instead of stacking a fix-up migration. Re-apply it on `develop` only after telling the owner, since local dev and previews share that database; never drop or alter tables there while the owner is using the app.
+- **Env vars are checked before deploying:** `vercel-build` runs `bun run check-env` (`scripts/check-env.ts`) first. Add every new required var there with its expected format.
 - **No env vars at import time:** create clients (auth, database, SDKs) on first use, so `bun run build` passes without secrets.
 
 ## Verifying changes
