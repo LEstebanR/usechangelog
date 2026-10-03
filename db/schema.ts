@@ -1,7 +1,7 @@
 import { randomBytes } from "node:crypto";
 import { date, index, pgEnum, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
 import { CATEGORIES, TYPES } from "@/lib/posts/form";
-import { WIDGET_LANGS } from "@/lib/workspace/form";
+import { WIDGET_LANGS } from "@/lib/widget/copy";
 import { user } from "./neon-auth";
 
 // Our tables, in the `public` schema. Users live in Neon's schema (`./neon-auth`).

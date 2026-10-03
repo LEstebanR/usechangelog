@@ -2,18 +2,10 @@
 
 import { useEffect, useRef, useState } from "react";
 import type { Category, PostType } from "@/lib/posts/form";
-import type { WidgetLang } from "@/lib/workspace/form";
+import { WIDGET_COPY, type WidgetLang } from "@/lib/widget/copy";
 import { Tag } from "../tag";
 
 type Post = { id: string; title: string; body: string; category: Category; type: PostType; publishedOn: string };
-
-// The widget's own words (#8), in the language chosen in settings. Posts are never translated.
-const copy = {
-  en: { title: "What's new", all: "View all updates", close: "Close", empty: "No published updates yet.",
-        tags: { new: "New", improved: "Improved", fixed: "Fixed", coming: "Coming soon" } },
-  es: { title: "Novedades", all: "Ver todas", close: "Cerrar", empty: "Todavía no hay novedades publicadas.",
-        tags: { new: "Nuevo", improved: "Mejorado", fixed: "Corregido", coming: "Próximamente" } },
-} as const;
 
 const tagName = { new: "New", improved: "Improved", fixed: "Fixed" } as const;
 
@@ -23,7 +15,7 @@ export function WhatsNewPreview({ slug, lang, allUpdatesUrl, posts }: { slug: st
   const [open, setOpen] = useState(false);
   const panel = useRef<HTMLDivElement>(null);
   const trigger = useRef<HTMLButtonElement>(null);
-  const t = copy[lang];
+  const t = WIDGET_COPY[lang];
   const formatDay = (day: string) =>
     new Intl.DateTimeFormat(lang, { month: "short", day: "numeric", year: "numeric", timeZone: "UTC" })
       .format(new Date(`${day}T00:00:00Z`));
@@ -70,10 +62,10 @@ export function WhatsNewPreview({ slug, lang, allUpdatesUrl, posts }: { slug: st
           role="dialog"
           aria-label={`${t.title} preview`}
           tabIndex={-1}
-          className="absolute right-0 top-full z-50 mt-2 flex max-h-[min(32rem,80dvh)] w-[min(23rem,calc(100vw-2rem))] flex-col border border-hairline bg-canvas shadow-[0_12px_40px_-12px_rgb(14_17_22/0.25)] outline-none"
+          className="absolute right-0 top-full z-50 mt-2 flex max-h-[min(36rem,80dvh)] w-[min(26rem,calc(100vw-2rem))] flex-col border border-hairline bg-canvas shadow-[0_12px_40px_-12px_rgb(14_17_22/0.25)] outline-none"
         >
-          <div className="flex items-center justify-between gap-3 border-b border-hairline px-5 py-3.5">
-            <p className="font-display text-base font-medium">{t.title}</p>
+          <div className="flex items-center justify-between gap-3 border-b border-hairline px-6 py-4">
+            <p className="font-display text-lg font-medium tracking-tight">{t.title}</p>
             <div className="flex items-center gap-1">
               <button
                 type="button"
@@ -92,22 +84,30 @@ export function WhatsNewPreview({ slug, lang, allUpdatesUrl, posts }: { slug: st
           </div>
 
           <ol className="flex-1 divide-y divide-hairline overflow-y-auto">
-            {posts.length === 0 && <li className="px-5 py-8 text-center text-sm text-graphite">{t.empty}</li>}
+            {posts.length === 0 && <li className="px-6 py-10 text-center text-[0.95rem] text-graphite">{t.empty}</li>}
             {posts.map((post) => (
-              <li key={post.id} className="px-5 py-4">
-                <div className="flex flex-wrap items-center gap-1.5 text-xs text-graphite">
-                  <Tag tag={tagName[post.category]} label={t.tags[post.category]} />
-                  {post.type === "coming" && <Tag tag="Coming soon" label={t.tags.coming} />}
-                  {post.publishedOn && <span className="ml-1 tabular-nums">{formatDay(post.publishedOn)}</span>}
+              <li key={post.id} className="px-6 py-5">
+                <div className="flex items-center justify-between gap-3">
+                  <span className="flex flex-wrap items-center gap-1.5">
+                    <Tag tag={tagName[post.category]} label={t.tags[post.category]} />
+                    {post.type === "coming" && <Tag tag="Coming soon" label={t.tags.coming} />}
+                  </span>
+                  {post.publishedOn && (
+                    <span className="shrink-0 text-xs tabular-nums text-graphite">{formatDay(post.publishedOn)}</span>
+                  )}
                 </div>
-                <p className="mt-2 font-display font-medium leading-snug">{post.title}</p>
+                <p className="mt-3 font-display text-[1.05rem] font-medium leading-snug text-ink">{post.title}</p>
                 {/* Plain text until #7's renderMarkdown lands. */}
-                {post.body && <p className="mt-1.5 line-clamp-6 text-sm whitespace-pre-line text-graphite">{post.body}</p>}
+                {post.body && (
+                  <p className="mt-2 line-clamp-5 text-[0.95rem] leading-relaxed whitespace-pre-line text-ink/80">
+                    {post.body}
+                  </p>
+                )}
               </li>
             ))}
           </ol>
 
-          <a href={allUpdatesUrl} className="border-t border-hairline px-5 py-3 text-sm font-medium text-blue hover:underline">
+          <a href={allUpdatesUrl} className="border-t border-hairline bg-wash px-6 py-3.5 text-sm font-medium text-blue hover:underline">
             {t.all} →
           </a>
         </div>

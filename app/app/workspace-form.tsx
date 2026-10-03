@@ -1,7 +1,8 @@
 "use client";
 
 import { useActionState, useState } from "react";
-import { WIDGET_LANGS, type WorkspaceFormState } from "@/lib/workspace/form";
+import { LANG_NAMES, WIDGET_LANGS } from "@/lib/widget/copy";
+import type { WorkspaceFormState } from "@/lib/workspace/form";
 import { NAME_MAX, SLUG_MAX, slugify } from "@/lib/workspace/slug";
 import { inputClass, primaryButtonClass } from "../form-styles";
 import { SubmitButton } from "../submit-button";
@@ -15,7 +16,6 @@ type Props = {
   showWidgetLang?: boolean;
 };
 
-const langName = { en: "English", es: "Español" } as const;
 
 // The only client code for workspaces: keeps what you typed on errors and
 // suggests a slug from the name until you edit the slug yourself.
@@ -97,7 +97,7 @@ export function WorkspaceForm({ action, initial, origin, submitLabel, showWidget
       {showWidgetLang && (
         <fieldset className="flex flex-col gap-2">
           <legend className="mb-2 text-sm font-medium">Widget language</legend>
-          <div className="flex gap-1.5">
+          <div className="flex flex-wrap gap-1.5">
             {WIDGET_LANGS.map((lang) => (
               <label key={lang} className="cursor-pointer">
                 <input
@@ -108,7 +108,7 @@ export function WorkspaceForm({ action, initial, origin, submitLabel, showWidget
                   className="peer sr-only"
                 />
                 <span className="block border border-hairline px-3 py-1.5 text-sm text-graphite transition-colors hover:text-ink peer-checked:border-ink peer-checked:bg-ink peer-checked:text-canvas peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-blue">
-                  {langName[lang]}
+                  {LANG_NAMES[lang]}
                 </span>
               </label>
             ))}

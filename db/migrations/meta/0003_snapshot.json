@@ -1,5 +1,5 @@
 {
-  "id": "66049b45-53a0-4ba7-8e79-39e1e8308b73",
+  "id": "1ffa81f9-0eb7-4c76-acfa-28d370396c68",
   "prevId": "3a2bf8eb-d152-4230-9efc-d42c124a4f5f",
   "version": "7",
   "dialect": "postgresql",
@@ -263,7 +263,10 @@
       "schema": "public",
       "values": [
         "en",
-        "es"
+        "es",
+        "pt",
+        "fr",
+        "de"
       ]
     }
   },

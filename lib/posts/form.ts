@@ -49,9 +49,8 @@ export function parsePostForm(formData: FormData): PostFormState & { intent: Int
   const today = todayFor(String(formData.get("today") ?? ""));
 
   const errors: NonNullable<PostFormState["errors"]> = {};
-  if (values.title.length < 1 || values.title.length > TITLE_MAX) {
-    errors.title = `Use 1–${TITLE_MAX} characters.`;
-  }
+  if (!values.title) errors.title = "Add a title.";
+  else if (values.title.length > TITLE_MAX) errors.title = `Keep it under ${TITLE_MAX} characters.`;
   if (values.body.length > BODY_MAX) errors.body = `Keep it under ${BODY_MAX.toLocaleString("en-US")} characters.`;
   if (values.publishedOn && !isDay(values.publishedOn)) errors.publishedOn = "Use a valid date.";
 
