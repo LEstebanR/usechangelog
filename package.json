@@ -10,6 +10,7 @@
     "lint": "eslint",
     "typecheck": "next typegen && tsc --noEmit",
     "check": "bun run lint && bun run typecheck && bun run build",
+    "test": "bun test",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
     "vercel-build": "bun run check-env && bun run db:migrate && next build",
@@ -20,6 +21,7 @@
     "@neondatabase/auth": "0.5.0-beta",
     "@neondatabase/serverless": "^1.2.0",
     "drizzle-orm": "^0.45.3",
+    "markdown-it": "^15.0.2",
     "next": "16.3.8",
     "react": "19.2.8",
     "react-dom": "19.2.8"
@@ -27,6 +29,7 @@
   "devDependencies": {
     "@next/env": "16.3.8",
     "@tailwindcss/postcss": "^4",
+    "@types/bun": "^1.4.2",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",

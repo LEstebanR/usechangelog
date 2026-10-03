@@ -22,3 +22,13 @@ export async function requireWorkspace() {
   if (!workspace) redirect("/app/onboarding");
   return workspace;
 }
+
+// A workspace by its public slug, for the public page (#7). No session needed.
+export async function getWorkspaceBySlug(slug: string) {
+  const [workspace] = await getDb()
+    .select({ id: workspaces.id, name: workspaces.name })
+    .from(workspaces)
+    .where(eq(workspaces.slug, slug))
+    .limit(1);
+  return workspace ?? null;
+}
