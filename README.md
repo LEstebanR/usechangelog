@@ -92,13 +92,13 @@ AGENTS.md               Product rules and conventions (read by AI agents and hum
 
 ## Run locally
 
-Requires Node.js 22+ and npm.
+Requires Node.js 22+ and Bun.
 
 ```bash
 git clone https://github.com/LEstebanR/usechangelog.git
 cd usechangelog
-npm install
-npm run dev
+bun install
+bun run dev
 ```
 
 Open http://localhost:3000.
@@ -107,12 +107,12 @@ Open http://localhost:3000.
 
 | Command | What it does |
 | --- | --- |
-| `npm run dev` | Dev server with Turbopack |
-| `npm run build` | Production build |
-| `npm run start` | Serve the production build |
-| `npm run lint` | ESLint |
-| `npm run typecheck` | `next typegen` + `tsc --noEmit` (typegen creates route types like `LayoutProps` on a clean checkout) |
-| `npm run check` | Lint, typecheck and build: the same checks CI runs |
+| `bun run dev` | Dev server with Turbopack |
+| `bun run build` | Production build |
+| `bun run start` | Serve the production build |
+| `bun run lint` | ESLint |
+| `bun run typecheck` | `next typegen` + `tsc --noEmit` (typegen creates route types like `LayoutProps` on a clean checkout) |
+| `bun run check` | Lint, typecheck and build: the same checks CI runs |
 
 ### Environment variables
 

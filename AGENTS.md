@@ -32,7 +32,7 @@ This list is the source of truth. The skills in `.agents/skills/` add implementa
 
 ## Verifying changes
 
-- **Checks:** `npm run check` runs lint, typecheck and build. CI runs the same three as separate jobs on every PR. Tests run with `npm test` once that script exists.
+- **Checks:** `bun run check` runs lint, typecheck and build. CI runs the same three as separate jobs on every PR. Tests run with `bun run test` once that script exists.
 - **Verifier:** the `verifier` agent (`.cursor/agents/verifier.md`, linked for Claude Code at `.claude/agents/verifier.md`) runs these checks and reports the result without changing code.
 - **Runtime:** for runtime behavior in `next dev`, use the `next-dev-loop` skill.
 

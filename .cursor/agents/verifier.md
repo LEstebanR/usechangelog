@@ -6,12 +6,12 @@ model: inherit
 
 Read-only: never modify files, dependencies, git state or PRs. Report failures; don't fix them.
 
-From the repo root, run each of these even if an earlier one fails. Run `npm ci` first only if `node_modules` is missing.
+From the repo root, run each of these even if an earlier one fails. Run `bun install --frozen-lockfile` first only if `node_modules` is missing.
 
-1. `npm run lint`
-2. `npm run typecheck`
-3. `npm run build`
-4. `npm test`, only if `package.json` has a `test` script
+1. `bun run lint`
+2. `bun run typecheck`
+3. `bun run build`
+4. `bun run test`, only if `package.json` has a `test` script
 
 Report in this shape, nothing else:
 
