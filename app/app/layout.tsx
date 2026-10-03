@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { signOut } from "@/lib/auth/actions";
 import { requireUser } from "@/lib/auth/server";
 import { EnterSubmits } from "../enter-submits";
+import { secondaryButtonClass } from "../form-styles";
 import { SubmitButton } from "../submit-button";
 import { SiteHeader } from "../wordmark";
 
@@ -20,7 +21,7 @@ export default async function AppLayout({ children }: LayoutProps<"/app">) {
           <span className="hidden text-sm text-graphite sm:inline">{user.email}</span>
           <SubmitButton
             pendingLabel="Signing out…"
-            className="motion-press border border-ink px-4 py-2 text-sm font-medium transition-colors hover:bg-ink hover:text-canvas disabled:opacity-50"
+            className={`${secondaryButtonClass} py-2 text-sm`}
           >
             Sign out
           </SubmitButton>

@@ -2,22 +2,21 @@
 
 import { useEffect } from "react";
 
-// Enter in a text field submits its form, even when a browser extension cancels
-// the keydown (some do, and then the browser's own implicit submit never runs).
-// We listen in the capture phase, before page-level handlers, and submit through
-// requestSubmit() so the browser still validates required fields.
+// Some browser extensions cancel Enter in text fields, which stops the browser's
+// own submit. We listen last (bubble phase on window) and only step in when
+// someone else already cancelled it, so native behavior is untouched otherwise.
+// requestSubmit() keeps the browser's validation of required fields.
 export function EnterSubmits() {
   useEffect(() => {
     function onKeyDown(event: KeyboardEvent) {
-      if (event.key !== "Enter" || event.isComposing || event.shiftKey) return;
+      if (event.key !== "Enter" || !event.defaultPrevented || event.isComposing) return;
       const field = event.target;
       if (!(field instanceof HTMLInputElement) || !field.form) return;
       if (["checkbox", "radio", "button", "submit", "file"].includes(field.type)) return;
-      event.preventDefault();
       field.form.requestSubmit();
     }
-    window.addEventListener("keydown", onKeyDown, true);
-    return () => window.removeEventListener("keydown", onKeyDown, true);
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
   }, []);
   return null;
 }

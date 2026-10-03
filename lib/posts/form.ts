@@ -7,9 +7,9 @@ export const BODY_MAX = 10_000;
 
 export type Category = (typeof CATEGORIES)[number];
 export type PostType = (typeof TYPES)[number];
-export type Intent = "save" | "publish" | "unpublish";
+type Intent = "save" | "publish" | "unpublish";
 
-export type PostValues = {
+type PostValues = {
   title: string;
   body: string;
   category: Category;
@@ -23,6 +23,15 @@ export type PostFormState = {
   errors?: { title?: string; body?: string; publishedOn?: string };
   saved?: boolean;
 };
+
+// What the app calls each category and type (the landing's tag names).
+export const LABELS = {
+  new: "New",
+  improved: "Improved",
+  fixed: "Fixed",
+  shipped: "Shipped",
+  coming: "Coming soon",
+} as const satisfies Record<Category | PostType, string>;
 
 const oneOf = <T extends string>(list: readonly T[], value: unknown, fallback: T): T =>
   list.includes(value as T) ? (value as T) : fallback;

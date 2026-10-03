@@ -1,8 +1,8 @@
 "use client";
 
 import { useActionState } from "react";
-import { BODY_MAX, CATEGORIES, TITLE_MAX, TYPES, type PostFormState } from "@/lib/posts/form";
-import { inputClass, primaryButtonClass } from "../../form-styles";
+import { BODY_MAX, CATEGORIES, LABELS, TITLE_MAX, TYPES, type PostFormState } from "@/lib/posts/form";
+import { inputClass, primaryButtonClass, secondaryButtonClass } from "../../form-styles";
 
 type Props = {
   action: (state: PostFormState, formData: FormData) => Promise<PostFormState>;
@@ -10,9 +10,6 @@ type Props = {
   status: "draft" | "published" | "new";
 };
 
-const label = { new: "New", improved: "Improved", fixed: "Fixed", shipped: "Shipped", coming: "Coming soon" };
-const secondary =
-  "motion-press border border-ink px-4 py-2.5 font-medium transition-colors hover:bg-ink hover:text-canvas disabled:opacity-50";
 
 // Client only to keep what you typed when the server returns errors.
 // Uncontrolled fields: the form re-renders from `state.values` after each submit.
@@ -44,11 +41,11 @@ export function PostForm({ action, initial, status }: Props) {
 
       <div className="flex flex-wrap items-center gap-3">
         {/* The first button is what Enter submits: always the non-destructive save. */}
-        <button type="submit" name="intent" value="save" disabled={pending} className={secondary}>
+        <button type="submit" name="intent" value="save" disabled={pending} className={secondaryButtonClass}>
           {status === "published" ? "Save" : "Save draft"}
         </button>
         {status === "published" ? (
-          <button type="submit" name="intent" value="unpublish" disabled={pending} className={secondary}>
+          <button type="submit" name="intent" value="unpublish" disabled={pending} className={secondaryButtonClass}>
             Unpublish
           </button>
         ) : (
@@ -73,14 +70,14 @@ function Field({ label, id, error, hint, children }: { label: string; id: string
   );
 }
 
-function Choice({ name, legend, options, value }: { name: string; legend: string; options: readonly string[]; value: string }) {
+function Choice({ name, legend, options, value }: { name: string; legend: string; options: readonly (keyof typeof LABELS)[]; value: string }) {
   return (
     <fieldset className="flex flex-col gap-2">
       <legend className="mb-2 text-sm font-medium">{legend}</legend>
       {options.map((option) => (
         <label key={option} className="flex items-center gap-2 text-sm">
           <input type="radio" name={name} value={option} defaultChecked={value === option} className="accent-blue" />
-          {label[option as keyof typeof label]}
+          {LABELS[option]}
         </label>
       ))}
     </fieldset>

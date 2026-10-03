@@ -4,13 +4,22 @@ import { getDb } from "@/db";
 import { posts } from "@/db/schema";
 import { requireWorkspace } from "@/lib/workspace/server";
 
-const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+export const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 // The workspace's posts, newest first: by publish date, or by last edit for never-published drafts.
 export async function listPosts() {
   const workspace = await requireWorkspace();
+  // Everything but the body, which the list never shows.
   return getDb()
-    .select()
+    .select({
+      id: posts.id,
+      title: posts.title,
+      category: posts.category,
+      type: posts.type,
+      status: posts.status,
+      publishedAt: posts.publishedAt,
+      updatedAt: posts.updatedAt,
+    })
     .from(posts)
     .where(eq(posts.workspaceId, workspace.id))
     .orderBy(desc(sql`coalesce(${posts.publishedAt}, ${posts.updatedAt})`));

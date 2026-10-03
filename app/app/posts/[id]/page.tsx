@@ -24,8 +24,6 @@ export default async function EditPostPage({ params }: PageProps<"/app/posts/[id
       </div>
       <div className="border border-hairline bg-canvas p-8">
         <PostForm
-          // Re-mount with fresh values when the status changes after publish/unpublish.
-          key={post.status}
           action={savePost.bind(null, post.id)}
           initial={{
             title: post.title,

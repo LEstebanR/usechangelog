@@ -1,5 +1,6 @@
 import { randomBytes } from "node:crypto";
 import { index, pgEnum, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
+import { CATEGORIES, TYPES } from "@/lib/posts/form";
 import { user } from "./neon-auth";
 
 // Our tables, in the `public` schema. Users live in Neon's schema (`./neon-auth`).
@@ -25,8 +26,8 @@ export const workspaces = pgTable("workspaces", {
     .$onUpdate(() => new Date()),
 });
 
-export const postCategory = pgEnum("post_category", ["new", "improved", "fixed"]);
-export const postType = pgEnum("post_type", ["shipped", "coming"]);
+export const postCategory = pgEnum("post_category", CATEGORIES);
+export const postType = pgEnum("post_type", TYPES);
 export const postStatus = pgEnum("post_status", ["draft", "published"]);
 
 // Only `published` posts are public (#7, #8). Deleting a workspace deletes its posts.
