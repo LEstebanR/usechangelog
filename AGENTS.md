@@ -41,4 +41,4 @@ This list is the source of truth. The skills in `.agents/skills/` add implementa
 - One branch and one PR per issue, opened from an up-to-date `main`.
 - PRs are ready for review, never draft. Don't merge; the owner merges.
 - The PR description includes the Vercel preview URL and `Closes #<issue>` for every issue it resolves, so GitHub closes them when the PR is merged.
-- Never commit `.env*`, secrets or `node_modules`. Document new env var names in `.env.example`.
+- Never commit secrets, `node_modules` or `.env*` files. The one exception is `.env.example`, which lists every env var name with no values.
