@@ -15,7 +15,10 @@ const errors: Record<string, string> = {
 const fallbackError = "Something went wrong with that link. Enter your email to get a new one.";
 
 export default async function SignInPage({ searchParams }: PageProps<"/sign-in">) {
-  if (await getUser()) redirect("/app");
+  // The proxy doesn't refresh the session on the login URL, and the SDK can
+  // try to set a cookie mid-render, which throws. Show the form then.
+  const user = await getUser().catch(() => null);
+  if (user) redirect("/app");
 
   const { error, sent } = await searchParams;
   const errorMessage = typeof error === "string" ? (errors[error] ?? fallbackError) : undefined;
