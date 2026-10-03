@@ -1,22 +1,27 @@
 "use client";
 
 import { useActionState, useState } from "react";
+import { LANG_NAMES, WIDGET_LANGS } from "@/lib/widget/copy";
 import type { WorkspaceFormState } from "@/lib/workspace/form";
 import { NAME_MAX, SLUG_MAX, slugify } from "@/lib/workspace/slug";
 import { inputClass, primaryButtonClass } from "../form-styles";
 import { SubmitButton } from "../submit-button";
+import { Chips } from "./chips";
 
 type Props = {
   action: (state: WorkspaceFormState, formData: FormData) => Promise<WorkspaceFormState>;
   initial: WorkspaceFormState["values"];
   origin: string;
   submitLabel: string;
+  // Settings only: onboarding starts in English.
+  showWidgetLang?: boolean;
 };
+
 
 // The only client code for workspaces: keeps what you typed on errors and
 // suggests a slug from the name until you edit the slug yourself.
-export function WorkspaceForm({ action, initial, origin, submitLabel }: Props) {
-  const [state, formAction, pending] = useActionState(action, { values: initial });
+export function WorkspaceForm({ action, initial, origin, submitLabel, showWidgetLang }: Props) {
+  const [state, formAction] = useActionState(action, { values: initial });
   const [name, setName] = useState(state.values.name);
   // null until the slug is edited by hand: until then it follows the name.
   const [slugInput, setSlugInput] = useState<string | null>(initial.slug || null);
@@ -33,7 +38,7 @@ export function WorkspaceForm({ action, initial, origin, submitLabel }: Props) {
   const slugChanged = Boolean(initial.slug) && slug.trim().toLowerCase() !== initial.slug;
 
   return (
-    <form action={formAction} className="flex flex-col gap-5">
+    <form action={formAction} noValidate className="flex flex-col gap-5">
       <div className="flex flex-col gap-2">
         <label htmlFor="name" className="text-sm font-medium">
           Name
@@ -90,15 +95,22 @@ export function WorkspaceForm({ action, initial, origin, submitLabel }: Props) {
         )}
       </div>
 
-      <div className="flex items-center gap-4">
+      {showWidgetLang && (
+        <Chips
+          name="widgetLang"
+          legend="Widget language"
+          options={WIDGET_LANGS}
+          value={state.values.widgetLang}
+          label={(lang) => LANG_NAMES[lang]}
+          chipClass={() => "px-3 py-1.5 text-sm peer-checked:border-ink peer-checked:bg-ink peer-checked:text-canvas"}
+          hint="The widget's own words: its button, title and dates. Your posts show as you wrote them."
+        />
+      )}
+
+      <div>
         <SubmitButton pendingLabel="Saving…" className={primaryButtonClass}>
           {submitLabel}
         </SubmitButton>
-        {state.saved && !pending && (
-          <p role="status" className="text-sm text-green">
-            Saved.
-          </p>
-        )}
       </div>
     </form>
   );

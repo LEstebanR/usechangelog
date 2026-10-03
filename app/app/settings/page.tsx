@@ -24,7 +24,8 @@ export default async function SettingsPage() {
         </p>
         <WorkspaceForm
           action={updateWorkspace}
-          initial={{ name: workspace.name, slug: workspace.slug }}
+          initial={{ name: workspace.name, slug: workspace.slug, widgetLang: workspace.widgetLang }}
+          showWidgetLang
           origin={origin}
           submitLabel="Save changes"
         />

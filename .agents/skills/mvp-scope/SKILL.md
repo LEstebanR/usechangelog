@@ -11,8 +11,9 @@ The product rules and the out-of-scope list live in `AGENTS.md` → **Product ru
 
 - **Account:** Magic link sign-in (see `auth`), then onboarding creates one workspace with a unique slug. The user can delete their account, which deletes the workspace and its posts (#31).
 - **Posts:**
-  - Markdown body, one tag: New, Improved or Fixed.
-  - States `draft` and `published`. Drafts are never public.
+  - Title and a Markdown body.
+  - A category (New, Improved or Fixed) and a type (Shipped, or Coming for what's on the way).
+  - States `draft` and `published`. Drafts are never public. The publish date is set on the first publish and can be edited.
 - **Public page:** `usechangelog.com/{slug}` lists the workspace's published posts, newest first.
 - **Widget:** one script tag that shows the latest published posts in a "What's new" panel.
 - **Billing:** one monthly plan through Polar, gating publishing, the page and the widget (see `polar-billing`).

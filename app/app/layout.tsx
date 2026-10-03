@@ -1,8 +1,14 @@
 import type { Metadata } from "next";
 import { signOut } from "@/lib/auth/actions";
 import { requireUser } from "@/lib/auth/server";
+import { countPublishedPosts, listPublishedPosts } from "@/lib/posts/server";
+import { publicUrl } from "@/lib/site";
+import { getCurrentWorkspace } from "@/lib/workspace/server";
+import { EnterSubmits } from "../enter-submits";
+import { secondaryButtonClass } from "../form-styles";
 import { SubmitButton } from "../submit-button";
 import { SiteHeader } from "../wordmark";
+import { WhatsNewPreview } from "./whats-new-preview";
 
 export const metadata: Metadata = { title: "UseChangelog" };
 
@@ -10,19 +16,41 @@ export const metadata: Metadata = { title: "UseChangelog" };
 // layouts don't re-run on client navigation.
 export default async function AppLayout({ children }: LayoutProps<"/app">) {
   const user = await requireUser();
+  // Display only (not an access check): what the workspace's users will see.
+  const workspace = await getCurrentWorkspace();
+  const [posts, total, url] = workspace
+    ? await Promise.all([
+        listPublishedPosts(workspace.id, { bodyChars: 300 }),
+        countPublishedPosts(workspace.id),
+        publicUrl(workspace.slug),
+      ])
+    : [[], 0, ""];
 
   return (
     <div className="min-h-dvh bg-wash">
+      <EnterSubmits />
       <SiteHeader>
-        <form action={signOut} className="flex items-center gap-4">
+        <div className="flex items-center gap-3">
+          {workspace && (
+            <WhatsNewPreview
+              slug={workspace.slug}
+              name={workspace.name}
+              lang={workspace.widgetLang}
+              total={total}
+              allUpdatesUrl={url}
+              posts={posts.map((p) => ({ ...p, publishedOn: p.publishedOn ?? "" }))}
+            />
+          )}
+          <form action={signOut} className="flex items-center gap-4">
           <span className="hidden text-sm text-graphite sm:inline">{user.email}</span>
           <SubmitButton
             pendingLabel="Signing out…"
-            className="motion-press border border-ink px-4 py-2 text-sm font-medium transition-colors hover:bg-ink hover:text-canvas disabled:opacity-50"
+            className={`${secondaryButtonClass} py-2 text-sm`}
           >
             Sign out
           </SubmitButton>
-        </form>
+          </form>
+        </div>
       </SiteHeader>
       <main className="mx-auto max-w-6xl px-6 py-16">{children}</main>
     </div>

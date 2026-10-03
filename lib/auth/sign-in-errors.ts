@@ -4,6 +4,7 @@ const messages: Record<string, string> = {
   EXPIRED_TOKEN: "That sign-in link has expired. Enter your email to get a new one.",
   INVALID_TOKEN: "That sign-in link was already used or isn't valid. Enter your email to get a new one.",
   MISSING_EMAIL: "Enter your email address.",
+  INVALID_EMAIL: "That doesn't look like an email address. Check it and try again.",
   SEND_FAILED: "We couldn't send the link. Check the address and try again.",
 };
 

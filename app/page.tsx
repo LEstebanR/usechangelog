@@ -16,7 +16,7 @@ import { Latest } from "./latest";
 import { Reveal } from "./reveal";
 import { SectionLabel } from "./section-label";
 import { Grid } from "./grid";
-import { Tag, tagDots } from "./tag";
+import { TAG_PALETTE, Tag } from "./tag";
 import { Wordmark } from "./wordmark";
 import type { CSSProperties } from "react";
 
@@ -354,7 +354,7 @@ export default function Home() {
                   {shippedPosts.slice(0, 2).map((post) => (
                     <div key={post.title} className="flex gap-3 px-4 py-4">
                       <span
-                        className={`mt-1.5 size-2 shrink-0 ${tagDots[post.tag]}`}
+                        className={`mt-1.5 size-2 shrink-0 ${TAG_PALETTE[post.tag].dot}`}
                       />
                       <div>
                         <p className="text-sm text-graphite">

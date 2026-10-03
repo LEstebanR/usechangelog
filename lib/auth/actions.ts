@@ -7,6 +7,7 @@ import { getAuth } from "./server";
 export async function sendMagicLink(formData: FormData) {
   const email = String(formData.get("email") ?? "").trim();
   if (!email) redirect("/sign-in?error=MISSING_EMAIL");
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) redirect("/sign-in?error=INVALID_EMAIL");
 
   // Absolute: Neon resolves relative URLs against its own domain.
   const origin = await getOrigin();
