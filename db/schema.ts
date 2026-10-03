@@ -24,5 +24,3 @@ export const workspaces = pgTable("workspaces", {
     .defaultNow()
     .$onUpdate(() => new Date()),
 });
-
-export type Workspace = typeof workspaces.$inferSelect;

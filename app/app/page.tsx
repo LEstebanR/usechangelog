@@ -1,11 +1,11 @@
 import Link from "next/link";
 import { requireWorkspace } from "@/lib/workspace/server";
-import { getOrigin } from "@/lib/site";
+import { publicUrl } from "@/lib/site";
 
 // Placeholder home. Posts (#6) come next.
 export default async function AppPage() {
   const workspace = await requireWorkspace();
-  const url = `${await getOrigin()}/${workspace.slug}`;
+  const url = await publicUrl(workspace.slug);
 
   return (
     <>

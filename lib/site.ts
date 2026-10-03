@@ -9,3 +9,8 @@ export async function getOrigin() {
   const host = h.get("x-forwarded-host") ?? h.get("host");
   return `${h.get("x-forwarded-proto") ?? "https"}://${host}`;
 }
+
+// A workspace's public changelog URL.
+export async function publicUrl(slug: string) {
+  return `${await getOrigin()}/${slug}`;
+}

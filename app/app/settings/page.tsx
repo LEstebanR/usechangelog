@@ -1,15 +1,14 @@
 import type { Metadata } from "next";
 import { updateWorkspace } from "@/lib/workspace/actions";
 import { requireWorkspace } from "@/lib/workspace/server";
-import { getOrigin } from "@/lib/site";
+import { getOrigin, publicUrl } from "@/lib/site";
 import { WorkspaceForm } from "../workspace-form";
 
 export const metadata: Metadata = { title: "Settings — UseChangelog" };
 
 export default async function SettingsPage() {
   const workspace = await requireWorkspace();
-  const origin = await getOrigin();
-  const url = `${origin}/${workspace.slug}`;
+  const [origin, url] = await Promise.all([getOrigin(), publicUrl(workspace.slug)]);
 
   return (
     <div className="mx-auto flex max-w-lg flex-col gap-8">
@@ -28,7 +27,6 @@ export default async function SettingsPage() {
           initial={{ name: workspace.name, slug: workspace.slug }}
           origin={origin}
           submitLabel="Save changes"
-          currentSlug={workspace.slug}
         />
       </section>
 

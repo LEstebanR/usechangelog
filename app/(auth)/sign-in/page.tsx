@@ -3,6 +3,7 @@ import { redirect, unstable_rethrow } from "next/navigation";
 import { sendMagicLink } from "@/lib/auth/actions";
 import { getUser } from "@/lib/auth/server";
 import { signInErrorMessage } from "@/lib/auth/sign-in-errors";
+import { inputClass, primaryButtonClass } from "../../form-styles";
 import { SubmitButton } from "../../submit-button";
 
 export const metadata: Metadata = { title: "Sign in — UseChangelog" };
@@ -48,11 +49,11 @@ export default async function SignInPage({ searchParams }: PageProps<"/sign-in">
           autoComplete="email"
           spellCheck={false}
           placeholder="you@company.com"
-          className="border border-hairline bg-canvas px-3 py-2 placeholder:text-graphite/70 focus:border-blue"
+          className={inputClass}
         />
         <SubmitButton
           pendingLabel="Sending…"
-          className="motion-press mt-2 bg-blue px-4 py-2.5 font-medium text-canvas transition-opacity hover:opacity-90 disabled:opacity-60"
+          className={`mt-2 ${primaryButtonClass}`}
         >
           {copy.cta}
         </SubmitButton>

@@ -2,7 +2,7 @@
 
 import { useFormStatus } from "react-dom";
 
-// The only client code in the auth flow: disables the button while the form posts.
+// Disables the submit button while its form posts.
 export function SubmitButton({
   children,
   pendingLabel,

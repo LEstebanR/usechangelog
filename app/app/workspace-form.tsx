@@ -2,35 +2,34 @@
 
 import { useActionState, useState } from "react";
 import type { WorkspaceFormState } from "@/lib/workspace/actions";
-import { slugify } from "@/lib/workspace/slug";
+import { NAME_MAX, SLUG_MAX, slugify } from "@/lib/workspace/slug";
+import { inputClass, primaryButtonClass } from "../form-styles";
+import { SubmitButton } from "../submit-button";
 
 type Props = {
   action: (state: WorkspaceFormState, formData: FormData) => Promise<WorkspaceFormState>;
   initial: WorkspaceFormState["values"];
   origin: string;
   submitLabel: string;
-  // Settings: the slug already in use, to warn before it changes.
-  currentSlug?: string;
 };
-
-const input =
-  "border border-hairline bg-canvas px-3 py-2 placeholder:text-graphite/70 focus:border-blue aria-invalid:border-clay";
 
 // The only client code for workspaces: keeps what you typed on errors and
 // suggests a slug from the name until you edit the slug yourself.
-export function WorkspaceForm({ action, initial, origin, submitLabel, currentSlug }: Props) {
+export function WorkspaceForm({ action, initial, origin, submitLabel }: Props) {
   const [state, formAction, pending] = useActionState(action, { values: initial });
   const [name, setName] = useState(state.values.name);
-  const [slug, setSlug] = useState(state.values.slug);
-  const [slugEdited, setSlugEdited] = useState(Boolean(currentSlug));
+  // null until the slug is edited by hand: until then it follows the name.
+  const [slugInput, setSlugInput] = useState<string | null>(initial.slug || null);
   // After each submit, show the values the server normalized (e.g. a lowercased slug).
   const [shown, setShown] = useState(state);
   if (state !== shown) {
     setShown(state);
     setName(state.values.name);
-    setSlug(state.values.slug);
+    setSlugInput(state.values.slug || null);
   }
-  const slugChanged = currentSlug !== undefined && slug.trim().toLowerCase() !== currentSlug;
+  const slug = slugInput ?? slugify(name);
+  // Settings only: warn before a stored slug changes.
+  const slugChanged = Boolean(initial.slug) && slug.trim().toLowerCase() !== initial.slug;
 
   return (
     <form action={formAction} className="flex flex-col gap-5">
@@ -42,16 +41,13 @@ export function WorkspaceForm({ action, initial, origin, submitLabel, currentSlu
           id="name"
           name="name"
           required
-          maxLength={60}
+          maxLength={NAME_MAX}
           value={name}
-          onChange={(e) => {
-            setName(e.target.value);
-            if (!slugEdited) setSlug(slugify(e.target.value));
-          }}
+          onChange={(e) => setName(e.target.value)}
           placeholder="Acme"
           aria-invalid={Boolean(state.errors?.name)}
           aria-describedby={state.errors?.name ? "name-error" : undefined}
-          className={input}
+          className={inputClass}
         />
         {state.errors?.name && (
           <p id="name-error" className="text-sm text-clay">
@@ -72,18 +68,15 @@ export function WorkspaceForm({ action, initial, origin, submitLabel, currentSlu
             id="slug"
             name="slug"
             required
-            maxLength={40}
+            maxLength={SLUG_MAX}
             spellCheck={false}
             autoCapitalize="none"
             value={slug}
-            onChange={(e) => {
-              setSlug(e.target.value);
-              setSlugEdited(true);
-            }}
+            onChange={(e) => setSlugInput(e.target.value)}
             placeholder="acme"
             aria-invalid={Boolean(state.errors?.slug)}
             aria-describedby="slug-help"
-            className={`${input} min-w-0 flex-1`}
+            className={`${inputClass} min-w-0 flex-1`}
           />
         </div>
         <p id="slug-help" className={`text-sm ${state.errors?.slug ? "text-clay" : "text-graphite"}`}>
@@ -97,13 +90,9 @@ export function WorkspaceForm({ action, initial, origin, submitLabel, currentSlu
       </div>
 
       <div className="flex items-center gap-4">
-        <button
-          type="submit"
-          disabled={pending}
-          className="motion-press bg-blue px-4 py-2.5 font-medium text-canvas transition-opacity hover:opacity-90 disabled:opacity-60"
-        >
-          {pending ? "Saving…" : submitLabel}
-        </button>
+        <SubmitButton pendingLabel="Saving…" className={primaryButtonClass}>
+          {submitLabel}
+        </SubmitButton>
         {state.saved && !pending && (
           <p role="status" className="text-sm text-green">
             Saved.

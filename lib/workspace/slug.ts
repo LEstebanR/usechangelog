@@ -1,5 +1,5 @@
 // The public page lives at /{slug}, so a slug can't shadow one of our own routes or files.
-export const RESERVED_SLUGS = new Set([
+const RESERVED_SLUGS = new Set([
   "app",
   "api",
   "auth",
@@ -23,12 +23,13 @@ export const RESERVED_SLUGS = new Set([
 ]);
 
 const SLUG_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
-export const SLUG_MIN = 3;
+const SLUG_MIN = 3;
 export const SLUG_MAX = 40;
+export const NAME_MAX = 60;
 
 export const SLUG_TAKEN = "That URL is already taken. Try another one.";
 
-export type SlugResult = { ok: true; slug: string } | { ok: false; error: string };
+type SlugResult = { ok: true; slug: string } | { ok: false; error: string };
 
 // Normalizes (trim, lowercase) and validates. Uniqueness is the database's job.
 export function validateSlug(input: string): SlugResult {
