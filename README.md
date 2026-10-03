@@ -137,27 +137,34 @@ For local work, copy `.env.example` to `.env.local`. Real `.env*` files are git-
 
 ## Roadmap
 
-The issue tracker is the backlog. Issues are numbered in build order; each one lists its dependencies, decisions and a "Hecho cuando" (done when) checklist.
+The issue tracker is the backlog. Issues are ordered by priority, and within a priority by dependencies. Each one lists its dependencies, decisions and a "Hecho cuando" (done when) checklist.
 
-| # | Issue | |
-| --- | --- | --- |
-| 1 | Database and auth: Neon + magic link | [#4](https://github.com/LEstebanR/usechangelog/issues/4) |
-| 2 | Workspace: onboarding, slug, settings | [#5](https://github.com/LEstebanR/usechangelog/issues/5) |
-| 3 | Post admin: create, edit, publish | [#6](https://github.com/LEstebanR/usechangelog/issues/6) |
-| 4 | Public changelog page | [#7](https://github.com/LEstebanR/usechangelog/issues/7) |
-| 5 | Embeddable widget | [#8](https://github.com/LEstebanR/usechangelog/issues/8) |
-| 6 | Tests for the critical rules | [#12](https://github.com/LEstebanR/usechangelog/issues/12) |
-| 7 | Polar checkout: one monthly plan | [#14](https://github.com/LEstebanR/usechangelog/issues/14) |
-| 8 | Polar webhook and subscription state | [#15](https://github.com/LEstebanR/usechangelog/issues/15) |
-| 9 | Publishing, page and widget only with an active plan | [#16](https://github.com/LEstebanR/usechangelog/issues/16) |
-| 10 | Polar customer portal | [#17](https://github.com/LEstebanR/usechangelog/issues/17) |
-| 11 | Environment variables and site URL | [#13](https://github.com/LEstebanR/usechangelog/issues/13) |
-| 12 | Privacy and terms | [#18](https://github.com/LEstebanR/usechangelog/issues/18) |
-| 13 | SEO: metadata, sitemap, robots | [#19](https://github.com/LEstebanR/usechangelog/issues/19) |
-| 14 | Landing: open sign-up | [#9](https://github.com/LEstebanR/usechangelog/issues/9) |
-| 15 | End-to-end check of the MVP | [#10](https://github.com/LEstebanR/usechangelog/issues/10) |
-| 16 | Custom domain and branded auth email *(post-MVP)* | [#24](https://github.com/LEstebanR/usechangelog/issues/24) |
-| 17 | Sign in with Google *(post-MVP)* | [#25](https://github.com/LEstebanR/usechangelog/issues/25) |
+| Priority | Meaning |
+| --- | --- |
+| **P0** | Core product and billing: nothing works without it |
+| **P1** | Needed before opening sign-up to the public |
+| **P2** | After launch |
+
+| # | Priority | Issue | |
+| --- | --- | --- | --- |
+| 1 | P0 | Auth: database and magic-link sign-in | [#4](https://github.com/LEstebanR/usechangelog/issues/4) |
+| 2 | P0 | Workspace: onboarding, public slug, settings | [#5](https://github.com/LEstebanR/usechangelog/issues/5) |
+| 3 | P0 | Posts: create, edit and publish | [#6](https://github.com/LEstebanR/usechangelog/issues/6) |
+| 4 | P0 | Public page: the changelog at `/{slug}` | [#7](https://github.com/LEstebanR/usechangelog/issues/7) |
+| 5 | P0 | Widget: embeddable script with the latest posts | [#8](https://github.com/LEstebanR/usechangelog/issues/8) |
+| 6 | P0 | Billing: Polar checkout, one monthly plan | [#14](https://github.com/LEstebanR/usechangelog/issues/14) |
+| 7 | P0 | Billing: Polar webhook and subscription state | [#15](https://github.com/LEstebanR/usechangelog/issues/15) |
+| 8 | P0 | Billing: publish only with an active plan | [#16](https://github.com/LEstebanR/usechangelog/issues/16) |
+| 9 | P0 | Billing: Polar customer portal | [#17](https://github.com/LEstebanR/usechangelog/issues/17) |
+| 10 | P1 | Legal: privacy and terms | [#18](https://github.com/LEstebanR/usechangelog/issues/18) |
+| 11 | P1 | Feedback: users write to us from the app | [#28](https://github.com/LEstebanR/usechangelog/issues/28) |
+| 12 | P1 | Quality: tests for the critical rules | [#12](https://github.com/LEstebanR/usechangelog/issues/12) |
+| 13 | P1 | Config: documented env vars and site URL | [#13](https://github.com/LEstebanR/usechangelog/issues/13) |
+| 14 | P1 | Launch: open sign-up from the landing | [#9](https://github.com/LEstebanR/usechangelog/issues/9) |
+| 15 | P1 | Launch: end-to-end check of the MVP | [#10](https://github.com/LEstebanR/usechangelog/issues/10) |
+| 16 | P2 | SEO: metadata, sitemap, robots | [#19](https://github.com/LEstebanR/usechangelog/issues/19) |
+| 17 | P2 | Domain: usechangelog.com and branded auth email | [#24](https://github.com/LEstebanR/usechangelog/issues/24) |
+| 18 | P2 | Auth: sign in with Google | [#25](https://github.com/LEstebanR/usechangelog/issues/25) |
 
 ### Out of scope
 
