@@ -34,6 +34,7 @@ This list is the source of truth. The skills in `.agents/skills/` add implementa
 
 - **Bun, never npm:** `bun install`, `bun add`, `bun run <script>`, `bunx`. `bun.lock` is the only lockfile.
 - **SSR first:** read data in Server Components and write it with Server Actions posted from plain forms. Use a client component only for a small interactive island (a pending button, a toggle), and prefer a server form over a client UI library.
+- **Access checks in pages, not layouts:** every page and Server Action under `/app` calls `requireUser()` or `requireWorkspace()` itself. Layouts don't re-run on client navigation and don't stop nested routes from rendering, so a layout check protects nothing.
 - **No env vars at import time:** create clients (auth, database, SDKs) on first use, so `bun run build` passes without secrets.
 
 ## Verifying changes

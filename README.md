@@ -89,7 +89,8 @@ app/
   app/                  The signed-in app: /app, /app/onboarding, /app/settings
   api/auth/[...path]/   Auth handler, proxied to Neon
 lib/auth/               Server auth client and Server Actions (sign in, sign out)
-lib/workspace/          Slug rules, getCurrentWorkspace() and workspace Server Actions
+lib/workspace/          Slug rules, form parsing, getCurrentWorkspace() and workspace Server Actions
+scripts/smoke-app.ts    Signed-in smoke test (`bun run smoke`)
 db/
   schema.ts             Our tables (public schema): workspaces
   neon-auth.ts          Read-only view of Neon's user table, for foreign keys
@@ -126,6 +127,7 @@ Open http://localhost:3000.
 | `bun run check` | Lint, typecheck and build: the same checks CI runs |
 | `bun run db:generate` | Generate a migration from `db/schema.ts` |
 | `bun run db:migrate` | Apply pending migrations (uses `DATABASE_URL_UNPOOLED`) |
+| `bun run smoke <email> [base-url]` | Signed-in smoke test of `/app`: asks for the magic link from the email, never writes data |
 
 ### Environment variables
 

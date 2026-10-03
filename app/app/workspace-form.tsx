@@ -1,7 +1,7 @@
 "use client";
 
 import { useActionState, useState } from "react";
-import type { WorkspaceFormState } from "@/lib/workspace/actions";
+import type { WorkspaceFormState } from "@/lib/workspace/form";
 import { NAME_MAX, SLUG_MAX, slugify } from "@/lib/workspace/slug";
 import { inputClass, primaryButtonClass } from "../form-styles";
 import { SubmitButton } from "../submit-button";
