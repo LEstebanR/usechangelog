@@ -2,17 +2,10 @@ import type { Metadata } from "next";
 import { redirect, unstable_rethrow } from "next/navigation";
 import { sendMagicLink } from "@/lib/auth/actions";
 import { getUser } from "@/lib/auth/server";
+import { signInErrorMessage } from "@/lib/auth/sign-in-errors";
 import { SubmitButton } from "../../submit-button";
 
 export const metadata: Metadata = { title: "Sign in — UseChangelog" };
-
-const errors: Record<string, string> = {
-  EXPIRED_TOKEN: "That sign-in link has expired. Enter your email to get a new one.",
-  INVALID_TOKEN: "That sign-in link was already used or isn't valid. Enter your email to get a new one.",
-  MISSING_EMAIL: "Enter your email address.",
-  SEND_FAILED: "We couldn't send the link. Check the address and try again.",
-};
-const fallbackError = "Something went wrong with that link. Enter your email to get a new one.";
 
 export default async function SignInPage({ searchParams }: PageProps<"/sign-in">) {
   // The proxy doesn't refresh the session on the login URL, and the SDK can
@@ -24,7 +17,7 @@ export default async function SignInPage({ searchParams }: PageProps<"/sign-in">
   if (user) redirect("/app");
 
   const { error, sent } = await searchParams;
-  const errorMessage = typeof error === "string" ? (errors[error] ?? fallbackError) : undefined;
+  const errorMessage = signInErrorMessage(error);
   const copy = sent
     ? { intro: "Check your email. We sent you a sign-in link that works for 15 minutes.", cta: "Send another link" }
     : { intro: "New or returning, enter your email and we\u2019ll send you a sign-in link.", cta: "Send magic link" };

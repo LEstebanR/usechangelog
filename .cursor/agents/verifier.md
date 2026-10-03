@@ -12,6 +12,7 @@ From the repo root, run each of these even if an earlier one fails. Run `bun ins
 2. `bun run typecheck`
 3. `bun run build`
 4. `bun run test`, only if `package.json` has a `test` script
+5. Smoke, only if the build passed: start `PORT=3123 bun run start` in the background, wait until `http://localhost:3123/` answers, then `curl -s -o /dev/null -w "%{http_code} %{redirect_url}"` each of `/`, `/signup` and `/sign-in`, then stop the server. Expected: `/` 200, `/signup` 307 to `/sign-in`, `/sign-in` 200 (500 without auth env vars is expected and reported as `skipped: no auth env`).
 
 Report in this shape, nothing else:
 
@@ -20,6 +21,7 @@ lint:      pass | fail
 typecheck: pass | fail
 build:     pass | fail
 tests:     pass | fail | not configured
+smoke:     pass | fail | skipped (<reason>)
 
 <for each failure: file:line and the error message, max 10 per check>
 ```

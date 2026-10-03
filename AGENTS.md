@@ -30,6 +30,12 @@ This list is the source of truth. The skills in `.agents/skills/` add implementa
   - Check `.agents/skills/mvp-scope` for what *is* in before adding a feature.
 - **Language:** the app, landing, legal pages and public page are English only. Posts are never translated. The one exception is the widget chrome: English by default, Spanish with `lang="es"` on the snippet.
 
+## Code conventions
+
+- **Bun, never npm:** `bun install`, `bun add`, `bun run <script>`, `bunx`. `bun.lock` is the only lockfile.
+- **SSR first:** read data in Server Components and write it with Server Actions posted from plain forms. Use a client component only for a small interactive island (a pending button, a toggle), and prefer a server form over a client UI library.
+- **No env vars at import time:** create clients (auth, database, SDKs) on first use, so `bun run build` passes without secrets.
+
 ## Verifying changes
 
 - **Checks:** `bun run check` runs lint, typecheck and build. CI runs the same three as separate jobs on every PR. Tests run with `bun run test` once that script exists.
