@@ -1,0 +1,29 @@
+import { NextResponse, type NextRequest } from "next/server";
+import { getAuthHandlers } from "@/lib/auth/server";
+
+const VERIFIER = "neon_auth_session_verifier";
+
+// The magic link lands here with a one-time verifier. Neon's client SDK
+// exchanges it on page load; we have no client SDK, so we exchange it here
+// and hand the session cookies to the browser before going to /app.
+export async function GET(request: NextRequest) {
+  const verifier = request.nextUrl.searchParams.get(VERIFIER);
+  if (!verifier) return redirectTo(request, "/sign-in?error=INVALID_TOKEN");
+
+  const url = new URL("/api/auth/get-session", request.url);
+  url.searchParams.set(VERIFIER, verifier);
+  const session = await getAuthHandlers().GET(new Request(url, { headers: request.headers }), {
+    params: Promise.resolve({ path: ["get-session"] }),
+  });
+  const data = session.ok ? await session.json().catch(() => null) : null;
+
+  const response = redirectTo(request, data?.user ? "/app" : "/sign-in?error=INVALID_TOKEN");
+  for (const cookie of session.headers.getSetCookie()) {
+    response.headers.append("Set-Cookie", cookie);
+  }
+  return response;
+}
+
+function redirectTo(request: NextRequest, path: string) {
+  return NextResponse.redirect(new URL(path, request.url));
+}

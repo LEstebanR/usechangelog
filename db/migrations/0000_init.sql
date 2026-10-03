@@ -1,0 +1,2 @@
+-- Baseline: no tables yet. It gives `db:migrate` a journal to apply on a fresh
+-- branch. The first table (`workspaces`) arrives with #5.

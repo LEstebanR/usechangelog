@@ -37,6 +37,7 @@ Use `.github/ISSUE_TEMPLATE/feature.md` for product work and `.github/ISSUE_TEMP
 ## Rules
 
 - **Specific:** write "15-minute magic link expiry, sign-up on", not "configure auth". Write "`/app` redirects to `/sign-in`", not "protect routes".
+- **Owner steps apart:** anything only the owner can do (a vendor console, a marketplace integration, a secret, a DNS record) goes in a "Lo hace el owner" section, with the exact path or command. Verify console paths in the current docs, and give the API or CLI alternative when there is one, because consoles change.
 - **One outcome per issue.** If "Hecho cuando" needs two unrelated demos, split the issue.
 - **Testable criteria:** every item can be checked as true or false. No "works well" or "looks good".
 - **No invented facts:** if something can't be confirmed before implementing, like an exact table name, say so and make confirming it part of the work.

@@ -24,6 +24,9 @@ Referenciar otros issues por su número de GitHub (#12), no por el número del t
 
 ### A.
 
+## Lo hace el owner
+<!-- Pasos que solo el owner puede hacer: consolas de proveedores, integraciones, secretos, DNS. Con la ruta o el comando exacto, y la alternativa por API o CLI si existe. Borrar si no aplica. -->
+
 ## 3. Hecho cuando
 - [ ] <Algo observable que se puede marcar como verdadero o falso>
 - [ ] Probado en el preview de Vercel del PR
