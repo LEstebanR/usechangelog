@@ -27,12 +27,13 @@ export async function listPosts() {
 
 // What the public sees: published posts only, "Coming soon" first, then newest first.
 // One place for this rule, shared by the header preview, the public page (#7) and the widget (#8).
-export async function listPublishedPosts(workspaceId: string, limit = 10) {
+// `bodyChars` trims each body for previews that only show a few lines.
+export async function listPublishedPosts(workspaceId: string, { limit = 10, bodyChars }: { limit?: number; bodyChars?: number } = {}) {
   return getDb()
     .select({
       id: posts.id,
       title: posts.title,
-      body: posts.body,
+      body: bodyChars ? sql<string>`left(${posts.body}, ${bodyChars})` : posts.body,
       category: posts.category,
       type: posts.type,
       publishedOn: posts.publishedOn,

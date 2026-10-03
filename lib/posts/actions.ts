@@ -2,9 +2,10 @@
 
 import { and, eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
-import { notFound, redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 import { getDb } from "@/db";
 import { posts } from "@/db/schema";
+import { redirectWithNotice } from "@/lib/notice";
 import { requireWorkspace } from "@/lib/workspace/server";
 import { parsePostForm, type PostFormState } from "./form";
 import { requirePost, UUID } from "./server";
@@ -36,20 +37,24 @@ export async function savePost(
       ? publish(publishedOn ?? existing?.publishedOn ?? null, today)
       : { status, publishedOn };
 
+  // The header preview (in the layout) only shows published posts.
+  const touchesPublic = next.status === "published" || existing?.status === "published";
+  const revalidate = () => revalidatePath("/app", touchesPublic ? "layout" : "page");
+
   const db = getDb();
   if (!existing) {
     await db.insert(posts).values({ workspaceId: workspace.id, ...fields, ...next });
-    revalidatePath("/app", "layout");
-    redirect(`/app?done=${next.status === "published" ? "published" : "drafted"}`);
+    revalidate();
+    redirectWithNotice(next.status === "published" ? "published" : "drafted");
   }
 
   await db
     .update(posts)
     .set({ ...fields, ...next })
     .where(and(eq(posts.id, existing.id), eq(posts.workspaceId, workspace.id)));
-  revalidatePath("/app", "layout");
+  revalidate();
   // Publishing is done with the post: back to the list, like creating one.
-  if (intent === "publish") redirect("/app?done=published");
+  if (intent === "publish") redirectWithNotice("published");
   const notice = { publish: "Published.", unpublish: "Moved back to draft.", save: status === "published" ? "Changes saved." : "Draft saved." }[intent];
   return { values: { ...state.values, publishedOn: next.publishedOn ?? "" }, notice };
 }
@@ -61,8 +66,8 @@ export async function deletePost(id: string) {
   const deleted = await getDb()
     .delete(posts)
     .where(and(eq(posts.id, id), eq(posts.workspaceId, workspace.id)))
-    .returning({ id: posts.id });
+    .returning({ status: posts.status });
   if (!deleted.length) notFound();
-  revalidatePath("/app", "layout");
-  redirect("/app?done=deleted");
+  revalidatePath("/app", deleted[0].status === "published" ? "layout" : "page");
+  redirectWithNotice("deleted");
 }

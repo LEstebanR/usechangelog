@@ -7,6 +7,7 @@ import { getDb } from "@/db";
 import { violatedUniqueConstraint } from "@/db/errors";
 import { workspaces } from "@/db/schema";
 import { requireUser } from "@/lib/auth/server";
+import { redirectWithNotice } from "@/lib/notice";
 import { parseForm, type WorkspaceFormState } from "./form";
 import { SLUG_TAKEN } from "./slug";
 
@@ -51,5 +52,5 @@ export async function updateWorkspace(
     return slugTakenOrThrow(error, state);
   }
   revalidatePath("/app", "layout");
-  redirect("/app?done=settings");
+  redirectWithNotice("settings");
 }

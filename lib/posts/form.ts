@@ -34,7 +34,7 @@ export const LABELS = {
   coming: "Coming soon",
 } as const satisfies Record<Category | PostType, string>;
 
-const oneOf = <T extends string>(list: readonly T[], value: unknown, fallback: T): T =>
+export const oneOf = <T extends string>(list: readonly T[], value: unknown, fallback: T): T =>
   list.includes(value as T) ? (value as T) : fallback;
 
 export function parsePostForm(formData: FormData): PostFormState & { intent: Intent; today: string } {
@@ -66,14 +66,14 @@ function todayFor(local: string): string {
 }
 
 // Dates are days, "YYYY-MM-DD", stored in a Postgres `date` column.
-export function isDay(day: string) {
+function isDay(day: string) {
   return /^\d{4}-\d{2}-\d{2}$/.test(day) && toDay(new Date(`${day}T00:00:00Z`)) === day;
 }
 
 export const toDay = (date: Date) => (Number.isNaN(date.getTime()) ? "" : date.toISOString().slice(0, 10));
 
-export const formatDay = (day: string) =>
-  new Date(`${day}T00:00:00Z`).toLocaleDateString("en-US", {
+export const formatDay = (day: string, locale = "en-US") =>
+  new Date(`${day}T00:00:00Z`).toLocaleDateString(locale, {
     month: "short",
     day: "numeric",
     year: "numeric",

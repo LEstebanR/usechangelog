@@ -3,6 +3,7 @@
 import { useActionState, useSyncExternalStore } from "react";
 import { BODY_MAX, CATEGORIES, LABELS, TITLE_MAX, TYPES, type PostFormState } from "@/lib/posts/form";
 import { inputClass, primaryButtonClass, secondaryButtonClass } from "../../form-styles";
+import { Chips } from "../chips";
 
 type Props = {
   action: (state: PostFormState, formData: FormData) => Promise<PostFormState>;
@@ -71,8 +72,8 @@ export function PostForm({ action, initial, status }: Props) {
       </div>
 
       <aside className="flex flex-col gap-6 self-start border border-hairline bg-canvas p-6 lg:sticky lg:top-6">
-        <Chips name="category" legend="Category" options={CATEGORIES} value={v.category} />
-        <Chips name="type" legend="Type" options={TYPES} value={v.type} />
+        <Chips name="category" legend="Category" options={CATEGORIES} value={v.category} label={(o) => LABELS[o]} chipClass={tagChip} />
+        <Chips name="type" legend="Type" options={TYPES} value={v.type} label={(o) => LABELS[o]} chipClass={tagChip} />
 
         <div className="flex flex-col gap-2">
           <label htmlFor="publishedOn" className="text-sm font-medium">Date</label>
@@ -115,24 +116,9 @@ export function PostForm({ action, initial, status }: Props) {
   );
 }
 
+const tagChip = (option: keyof typeof chipOn) =>
+  `px-2.5 py-1 font-display text-xs font-medium uppercase tracking-wider ${chipOn[option]}`;
+
 const noSubscribe = () => () => {};
 // "YYYY-MM-DD" in the browser's time zone.
 const localDay = () => new Date().toLocaleDateString("en-CA");
-
-function Chips({ name, legend, options, value }: { name: string; legend: string; options: readonly (keyof typeof chipOn)[]; value: string }) {
-  return (
-    <fieldset className="flex flex-col gap-2">
-      <legend className="mb-2 text-sm font-medium">{legend}</legend>
-      <div className="flex flex-wrap gap-1.5">
-        {options.map((option) => (
-          <label key={option} className="cursor-pointer">
-            <input type="radio" name={name} value={option} defaultChecked={value === option} className="peer sr-only" />
-            <span className={`block border border-hairline px-2.5 py-1 font-display text-xs font-medium uppercase tracking-wider text-graphite transition-colors hover:text-ink peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-blue ${chipOn[option]}`}>
-              {LABELS[option]}
-            </span>
-          </label>
-        ))}
-      </div>
-    </fieldset>
-  );
-}

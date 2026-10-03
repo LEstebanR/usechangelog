@@ -19,7 +19,7 @@ export default async function AppLayout({ children }: LayoutProps<"/app">) {
   // Display only (not an access check): what the workspace's users will see.
   const workspace = await getCurrentWorkspace();
   const [posts, url] = workspace
-    ? await Promise.all([listPublishedPosts(workspace.id), publicUrl(workspace.slug)])
+    ? await Promise.all([listPublishedPosts(workspace.id, { bodyChars: 300 }), publicUrl(workspace.slug)])
     : [[], ""];
 
   return (

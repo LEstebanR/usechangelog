@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import type { Category, PostType } from "@/lib/posts/form";
+import { formatDay, type Category, type PostType } from "@/lib/posts/form";
 import { WIDGET_COPY, type WidgetLang } from "@/lib/widget/copy";
 
 type Post = { id: string; title: string; body: string; category: Category; type: PostType; publishedOn: string };
@@ -159,11 +159,5 @@ function Section({ label, posts, coming = false, lang, allUpdatesUrl }: {
         ))}
       </ol>
     </section>
-  );
-}
-
-function formatDay(day: string, lang: WidgetLang) {
-  return new Intl.DateTimeFormat(lang, { month: "short", day: "numeric", year: "numeric", timeZone: "UTC" }).format(
-    new Date(`${day}T00:00:00Z`),
   );
 }

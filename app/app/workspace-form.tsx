@@ -6,6 +6,7 @@ import type { WorkspaceFormState } from "@/lib/workspace/form";
 import { NAME_MAX, SLUG_MAX, slugify } from "@/lib/workspace/slug";
 import { inputClass, primaryButtonClass } from "../form-styles";
 import { SubmitButton } from "../submit-button";
+import { Chips } from "./chips";
 
 type Props = {
   action: (state: WorkspaceFormState, formData: FormData) => Promise<WorkspaceFormState>;
@@ -95,28 +96,15 @@ export function WorkspaceForm({ action, initial, origin, submitLabel, showWidget
       </div>
 
       {showWidgetLang && (
-        <fieldset className="flex flex-col gap-2">
-          <legend className="mb-2 text-sm font-medium">Widget language</legend>
-          <div className="flex flex-wrap gap-1.5">
-            {WIDGET_LANGS.map((lang) => (
-              <label key={lang} className="cursor-pointer">
-                <input
-                  type="radio"
-                  name="widgetLang"
-                  value={lang}
-                  defaultChecked={state.values.widgetLang === lang}
-                  className="peer sr-only"
-                />
-                <span className="block border border-hairline px-3 py-1.5 text-sm text-graphite transition-colors hover:text-ink peer-checked:border-ink peer-checked:bg-ink peer-checked:text-canvas peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-blue">
-                  {LANG_NAMES[lang]}
-                </span>
-              </label>
-            ))}
-          </div>
-          <p className="text-sm text-graphite">
-            The widget&apos;s own words: its button, title and dates. Your posts show as you wrote them.
-          </p>
-        </fieldset>
+        <Chips
+          name="widgetLang"
+          legend="Widget language"
+          options={WIDGET_LANGS}
+          value={state.values.widgetLang}
+          label={(lang) => LANG_NAMES[lang]}
+          chipClass={() => "px-3 py-1.5 text-sm peer-checked:border-ink peer-checked:bg-ink peer-checked:text-canvas"}
+          hint="The widget's own words: its button, title and dates. Your posts show as you wrote them."
+        />
       )}
 
       <div>

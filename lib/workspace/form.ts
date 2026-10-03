@@ -1,3 +1,4 @@
+import { oneOf } from "@/lib/posts/form";
 import { WIDGET_LANGS, type WidgetLang } from "@/lib/widget/copy";
 import { NAME_MAX, slugify, validateSlug } from "./slug";
 
@@ -11,8 +12,7 @@ export function parseForm(formData: FormData): WorkspaceFormState {
   const name = String(formData.get("name") ?? "").trim();
   const slugInput = String(formData.get("slug") ?? "").trim() || slugify(name);
   const slug = validateSlug(slugInput);
-  const lang = formData.get("widgetLang");
-  const widgetLang: WidgetLang = WIDGET_LANGS.includes(lang as WidgetLang) ? (lang as WidgetLang) : "en";
+  const widgetLang: WidgetLang = oneOf(WIDGET_LANGS, formData.get("widgetLang"), "en");
   const values = { name, slug: slug.ok ? slug.slug : slugInput, widgetLang };
   const errors = {
     ...(!name ? { name: "Add a name." } : name.length > NAME_MAX ? { name: `Keep it under ${NAME_MAX} characters.` } : {}),

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { noticeText } from "@/lib/notice";
 import { formatDay, toDay } from "@/lib/posts/form";
 import { listPosts } from "@/lib/posts/server";
 import { publicUrl } from "@/lib/site";
@@ -6,18 +7,9 @@ import { requireWorkspace } from "@/lib/workspace/server";
 import { primaryButtonClass } from "../form-styles";
 import { PostTags } from "./post-tags";
 
-// Set by the post actions after a redirect back here.
-const notices = {
-  published: "Post published.",
-  drafted: "Draft saved.",
-  deleted: "Post deleted.",
-  settings: "Settings saved.",
-} as const;
-
 export default async function AppPage({ searchParams }: PageProps<"/app">) {
   const workspace = await requireWorkspace();
-  const { done } = await searchParams;
-  const notice = typeof done === "string" ? notices[done as keyof typeof notices] : undefined;
+  const notice = noticeText((await searchParams).done);
   const [posts, url] = await Promise.all([listPosts(), publicUrl(workspace.slug)]);
 
   return (
