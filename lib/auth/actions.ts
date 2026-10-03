@@ -8,8 +8,7 @@ export async function sendMagicLink(formData: FormData) {
   const email = String(formData.get("email") ?? "").trim();
   if (!email) redirect("/sign-in?error=MISSING_EMAIL");
 
-  // Neon resolves relative URLs against its own domain, so they must be absolute.
-  // An expired or used link comes back to /sign-in with an `error` param.
+  // Absolute: Neon resolves relative URLs against its own domain.
   const origin = await getOrigin();
   const { error } = await getAuth().signIn.magicLink({
     email,

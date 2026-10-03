@@ -1,4 +1,5 @@
 import { createNeonAuth } from "@neondatabase/auth/next/server";
+import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { connection } from "next/server";
 import { cache } from "react";
@@ -9,6 +10,9 @@ function lazy<T>(create: () => T) {
   let value: T | undefined;
   return () => (value ??= create());
 }
+
+// Set by Neon Auth after sign-in (the SDK doesn't export the name).
+const SESSION_COOKIE = "__Secure-neon-auth.session_token";
 
 export const getAuth = lazy(() => {
   const baseUrl = process.env.NEON_AUTH_BASE_URL;
@@ -26,6 +30,8 @@ export const getAuthMiddleware = lazy(() => getAuth().middleware({ loginUrl: "/s
 // deduped across a layout and page in the same request.
 export const getUser = cache(async () => {
   await connection();
+  // No session token, no session: skip the round trip to Neon.
+  if (!(await cookies()).has(SESSION_COOKIE)) return null;
   const { data } = await getAuth().getSession();
   return data?.user ?? null;
 });
