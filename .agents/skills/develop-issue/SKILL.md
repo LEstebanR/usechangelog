@@ -12,6 +12,7 @@ Goal: a PR, ready for review and not merged, that meets every "Hecho cuando" ite
 - **The issue is approved.** The owner said so in this conversation, or the issue says so. If not, stop and ask.
 - **Its dependencies are done.** For every `#n` under "Depende de", the issue is closed, or its PR is merged into `main`. If one is missing, stop and say which.
 - **Its infrastructure is ready.** If the issue needs external services or env vars (look for a "Lo hace el owner" section), check them before planning: `vercel env ls` for env var names, and the vendor's dashboard or CLI for services. List what's missing in the plan as owner steps, with exact commands, so the owner can do them while you code.
+- **Auth on the preview.** If the PR touches sign-in or `/app` and will be checked on its preview, add an owner step to the plan: in Neon, on the branch previews use, Better Auth → Domains → `https://usechangelog-git-<branch>-lestebanrs-projects.vercel.app`. Neon has no wildcard that covers preview URLs.
 - **Resuming:** if a branch or PR for this issue already exists, continue there; don't start over.
 
 ## 2. Read before writing code
@@ -46,6 +47,7 @@ Goal: a PR, ready for review and not merged, that meets every "Hecho cuando" ite
 
 - Run the `verifier` agent, or the same commands it runs: lint, typecheck, build, and tests if they exist. Everything must pass.
 - For runtime behavior, use the `next-dev-loop` skill against `next dev`.
+- For anything behind sign-in, `bun run smoke <email> [base-url]` signs in with a real magic link (you paste it from the email) and checks `/app` and onboarding. It reuses the saved session, so it only spends a Neon email when the session has expired; don't sign in by hand for each check. It never writes to the database.
 
 ## 6. Open the PR and verify on the preview
 

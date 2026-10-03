@@ -1,7 +1,7 @@
 "use server";
 
-import { headers } from "next/headers";
 import { redirect } from "next/navigation";
+import { getOrigin } from "@/lib/site";
 import { getAuth } from "./server";
 
 export async function sendMagicLink(formData: FormData) {
@@ -24,15 +24,6 @@ export async function sendMagicLink(formData: FormData) {
     redirect("/sign-in?error=SEND_FAILED");
   }
   redirect("/sign-in?sent=1");
-}
-
-// The site's origin, from the request: the Server Action POST carries `origin`.
-async function getOrigin() {
-  const h = await headers();
-  const origin = h.get("origin");
-  if (origin) return origin;
-  const host = h.get("x-forwarded-host") ?? h.get("host");
-  return `${h.get("x-forwarded-proto") ?? "https"}://${host}`;
 }
 
 export async function signOut() {
