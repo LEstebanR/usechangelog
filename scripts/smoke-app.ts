@@ -1,8 +1,11 @@
 // Signed-in smoke test for /app, against `next dev` or a preview.
 //   bun run smoke <email> [base-url]
-// Requests a magic link, asks you to paste the link from the email, signs in,
-// then checks the /app redirects and the onboarding validation errors.
+// Reuses the session saved by the last run (.smoke-session-*.json, git-ignored),
+// so it only sends a magic link when that session has expired. Then it asks you
+// to paste the link from the email (or takes it from SMOKE_LINK), signs in, and
+// checks the /app redirects and the onboarding validation errors.
 // It never creates a workspace, so it can run against any branch.
+import { existsSync, readFileSync, writeFileSync } from "node:fs";
 
 const [email, base = "http://localhost:3000"] = process.argv.slice(2);
 if (!email) {
@@ -11,7 +14,12 @@ if (!email) {
 }
 
 const host = new URL(base).host;
-const jar = new Map<string, string>();
+// One saved session per email and host, so local and preview runs don't mix.
+const sessionFile = `.smoke-session-${email.replace(/[^a-z0-9]+/gi, "_")}-${host.replace(/[^a-z0-9]+/gi, "_")}.json`;
+const jar = new Map<string, string>(
+  existsSync(sessionFile) ? Object.entries(JSON.parse(readFileSync(sessionFile, "utf8"))) : [],
+);
+const saveSession = () => writeFileSync(sessionFile, JSON.stringify(Object.fromEntries(jar)));
 const cookieHeader = () => [...jar].map(([k, v]) => `${k}=${v}`).join("; ");
 const keepCookies = (res: Response, url: string) => {
   if (new URL(url).host !== host) return;
@@ -41,17 +49,27 @@ const check = (name: string, ok: boolean, detail = "") => {
   console.log(`${ok ? "✓" : "✗"} ${name}${detail ? ` (${detail})` : ""}`);
 };
 
-// 1. Sign in.
-const sent = await fetch(`${base}/api/auth/sign-in/magic-link`, {
-  method: "POST",
-  headers: { "content-type": "application/json", origin: base },
-  body: JSON.stringify({ email, callbackURL: `${base}/auth/callback`, errorCallbackURL: `${base}/sign-in` }),
-});
-check("magic link requested", sent.ok, `HTTP ${sent.status}`);
-const link = prompt(`Paste the sign-in link sent to ${email}:`)?.trim();
-if (!link) process.exit(1);
-const landed = await go(link);
-check("signed in", new URL(landed.url).pathname.startsWith("/app"), new URL(landed.url).pathname);
+// 1. Sign in: reuse the saved session, or spend one magic link email.
+const isSignedIn = async () => !new URL((await go(`${base}/app`)).url).pathname.startsWith("/sign-in");
+if (jar.size && (await isSignedIn())) {
+  console.log(`✓ reused the saved session (${sessionFile})`);
+} else {
+  jar.clear();
+  let link = process.env.SMOKE_LINK?.trim();
+  if (!link) {
+    const sent = await fetch(`${base}/api/auth/sign-in/magic-link`, {
+      method: "POST",
+      headers: { "content-type": "application/json", origin: base },
+      body: JSON.stringify({ email, callbackURL: `${base}/auth/callback`, errorCallbackURL: `${base}/sign-in` }),
+    });
+    check("magic link requested", sent.ok, `HTTP ${sent.status}`);
+    link = prompt(`Paste the sign-in link sent to ${email}:`)?.trim();
+  }
+  if (!link) process.exit(1);
+  const landed = await go(link);
+  check("signed in", new URL(landed.url).pathname.startsWith("/app"), new URL(landed.url).pathname);
+}
+saveSession();
 
 // 2. Redirects: with no workspace everything goes to onboarding, with one onboarding goes to /app.
 const app = await go(`${base}/app/settings`);
@@ -86,6 +104,7 @@ for (const slug of ["my--slug", "-x", "ab", "a".repeat(41)]) {
 }
 check("an empty name is rejected", (await submit({ name: "", slug: "smoke-test" })).includes("characters"));
 
+saveSession();
 console.log(failed ? `\n${failed} check(s) failed` : "\nAll checks passed");
 process.exit(failed ? 1 : 0);
 

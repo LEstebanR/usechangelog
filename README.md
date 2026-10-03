@@ -127,7 +127,7 @@ Open http://localhost:3000.
 | `bun run check` | Lint, typecheck and build: the same checks CI runs |
 | `bun run db:generate` | Generate a migration from `db/schema.ts` |
 | `bun run db:migrate` | Apply pending migrations (uses `DATABASE_URL_UNPOOLED`) |
-| `bun run smoke <email> [base-url]` | Signed-in smoke test of `/app`: asks for the magic link from the email, never writes data |
+| `bun run smoke <email> [base-url]` | Signed-in smoke test of `/app`. Reuses the last session (`.smoke-session-*.json`, git-ignored), so it only sends a magic link when that expires; `SMOKE_LINK=<link>` skips the request. Never writes data |
 
 ### Environment variables
 

@@ -47,7 +47,7 @@ Goal: a PR, ready for review and not merged, that meets every "Hecho cuando" ite
 
 - Run the `verifier` agent, or the same commands it runs: lint, typecheck, build, and tests if they exist. Everything must pass.
 - For runtime behavior, use the `next-dev-loop` skill against `next dev`.
-- For anything behind sign-in, `bun run smoke <email> [base-url]` signs in with a real magic link (you paste it from the email) and checks `/app` and onboarding. It never writes to the database.
+- For anything behind sign-in, `bun run smoke <email> [base-url]` signs in with a real magic link (you paste it from the email) and checks `/app` and onboarding. It reuses the saved session, so it only spends a Neon email when the session has expired; don't sign in by hand for each check. It never writes to the database.
 
 ## 6. Open the PR and verify on the preview
 

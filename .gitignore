@@ -40,3 +40,6 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Saved sessions from `bun run smoke`
+.smoke-session-*.json
