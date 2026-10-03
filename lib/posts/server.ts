@@ -27,14 +27,13 @@ export async function listPosts() {
 
 // What the public sees: published posts only, "Coming soon" first, then newest first.
 // One place for this rule, shared by the header preview, the public page (#7) and the widget (#8).
-// `limit` caps the list (all posts without it); `bodyChars` trims each body for previews
-// that only show a few lines.
-export async function listPublishedPosts(workspaceId: string, { limit, bodyChars }: { limit?: number; bodyChars?: number } = {}) {
+// `limit` caps the list; without it, every published post.
+export async function listPublishedPosts(workspaceId: string, { limit }: { limit?: number } = {}) {
   const query = getDb()
     .select({
       id: posts.id,
       title: posts.title,
-      body: bodyChars ? sql<string>`left(${posts.body}, ${bodyChars})` : posts.body,
+      body: posts.body,
       category: posts.category,
       type: posts.type,
       publishedOn: posts.publishedOn,
