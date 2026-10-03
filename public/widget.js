@@ -75,7 +75,6 @@
     ".close{display:grid;place-items:center;width:32px;height:32px;margin-right:-8px;border:0;background:none;color:#5a6170;cursor:pointer}" +
     ".close:hover{color:#0e1116}" +
     ".list{flex:1;overflow-y:auto;border-top:1px solid #e4e7ec}" +
-    ".empty{margin:0;padding:48px 24px;text-align:center;color:#5a6170}" +
     "h3{position:sticky;top:0;margin:0;padding:16px 24px 8px;border-bottom:1px solid #e4e7ec;background:rgb(255 255 255/.95);font-size:12px;font-weight:500;letter-spacing:.04em;text-transform:uppercase;color:#5a6170}" +
     "ol{margin:0;padding:0;list-style:none}" +
     "ol>li{padding:20px 24px;border-top:1px solid #e4e7ec}" +
@@ -132,6 +131,8 @@
   }
 
   function mount(data) {
+    // Turned off in settings, or nothing published yet: show nothing, and it's not an error.
+    if (data.enabled === false || !data.posts || !data.posts.length) return;
     var t = data.copy;
     var host = document.createElement("div");
     host.setAttribute("data-usechangelog", "");
@@ -150,7 +151,8 @@
       "<div class=head><div><p class=title>" + esc(t.title) + "</p><p class=name>" + esc(data.name) + "</p></div>" +
       "<button type=button class=close aria-label='" + esc(t.close) + "'><svg viewBox='0 0 10 10' width=12 height=12 aria-hidden=true><path d='M1 1l8 8M9 1l-8 8' stroke=currentColor stroke-width=1.4 /></svg></button></div>" +
       "<div class=list>" +
-      (data.posts.length ? section(t.tags.coming, coming, data) + section(t.latest, shipped, data) : "<p class=empty>" + esc(t.empty) + "</p>") +
+      section(t.tags.coming, coming, data) +
+      section(t.latest, shipped, data) +
       "</div><div class=foot><a class=all target=_blank rel=noopener href='" + esc(data.url) + "'>" + esc(t.all) + " →</a></div></div></div>";
 
     if (selector && !document.querySelector(selector)) {

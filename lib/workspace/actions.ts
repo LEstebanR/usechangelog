@@ -38,6 +38,14 @@ export async function createWorkspace(
   redirect("/app");
 }
 
+// Turns the widget on or off on the customer's site; their snippet stays in place.
+export async function setWidgetEnabled(formData: FormData) {
+  const user = await requireUser();
+  const enabled = formData.get("enabled") === "true";
+  await getDb().update(workspaces).set({ widgetEnabled: enabled }).where(eq(workspaces.ownerId, user.id));
+  revalidatePath("/app", "layout");
+}
+
 export async function updateWorkspace(
   _prev: WorkspaceFormState,
   formData: FormData,

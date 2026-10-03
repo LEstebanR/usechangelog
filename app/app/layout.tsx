@@ -37,6 +37,7 @@ export default async function AppLayout({ children }: LayoutProps<"/app">) {
               slug={workspace.slug}
               name={workspace.name}
               lang={workspace.widgetLang}
+              enabled={workspace.widgetEnabled}
               total={total}
               allUpdatesUrl={url}
               posts={posts.map(({ body, ...p }) => ({ ...p, html: renderMarkdown(body), publishedOn: p.publishedOn ?? "" }))}

@@ -36,7 +36,13 @@ export async function getWorkspaceBySlug(slug: string) {
 // A workspace by its widget key, for the widget (#8). No session needed.
 export async function getWorkspaceByWidgetKey(key: string) {
   const [workspace] = await getDb()
-    .select({ id: workspaces.id, name: workspaces.name, slug: workspaces.slug, widgetLang: workspaces.widgetLang })
+    .select({
+      id: workspaces.id,
+      name: workspaces.name,
+      slug: workspaces.slug,
+      widgetLang: workspaces.widgetLang,
+      widgetEnabled: workspaces.widgetEnabled,
+    })
     .from(workspaces)
     .where(eq(workspaces.widgetKey, key))
     .limit(1);

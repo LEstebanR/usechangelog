@@ -17,10 +17,12 @@ const pill = {
 
 // A header button named after the workspace slug that opens the "What's new" panel
 // exactly as your users will see it: published posts only, in the workspace's widget language.
-export function WhatsNewPreview({ slug, name, lang, total, allUpdatesUrl, posts }: {
+export function WhatsNewPreview({ slug, name, lang, enabled, total, allUpdatesUrl, posts }: {
   slug: string;
   name: string;
   lang: WidgetLang;
+  // Off in settings: the widget shows nothing on the customer's site.
+  enabled: boolean;
   // All published posts; the panel lists the latest 10, like the widget.
   total: number;
   allUpdatesUrl: string;
@@ -61,12 +63,15 @@ export function WhatsNewPreview({ slug, name, lang, total, allUpdatesUrl, posts 
         onClick={() => setOpen((o) => !o)}
         aria-expanded={open}
         aria-haspopup="dialog"
-        title="Preview what your users see"
+        title={enabled ? "Preview what your users see" : "The widget is off: your users don't see it"}
         className="flex items-center gap-2 border border-hairline px-3 py-2 text-sm font-medium transition-colors hover:border-ink"
       >
         <span aria-hidden="true" className="size-2 bg-blue" />
         <span className="max-w-40 truncate">/{slug}</span>
         <span className="tabular-nums text-graphite">{total}</span>
+        {!enabled && (
+          <span className="border border-hairline px-1.5 py-0.5 text-xs uppercase tracking-wider text-graphite">Off</span>
+        )}
       </button>
 
       {open && (

@@ -1,5 +1,5 @@
 import { randomBytes } from "node:crypto";
-import { date, index, pgEnum, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
+import { boolean, date, index, pgEnum, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
 import { CATEGORIES, TYPES } from "@/lib/posts/form";
 import { WIDGET_LANGS } from "@/lib/widget/copy";
 import { user } from "./neon-auth";
@@ -24,6 +24,8 @@ export const workspaces = pgTable("workspaces", {
     .$defaultFn(() => randomBytes(16).toString("base64url")),
   // Language of the widget's chrome (#8), set in settings.
   widgetLang: widgetLang("widget_lang").notNull().default("en"),
+  // Off hides the widget on the customer's site without touching their snippet (#8).
+  widgetEnabled: boolean("widget_enabled").notNull().default(true),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true })
     .notNull()

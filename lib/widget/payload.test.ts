@@ -15,6 +15,7 @@ const post = {
 describe("widgetPayload", () => {
   test("links to the public page and renders bodies safely", () => {
     const payload = widgetPayload({ workspace, posts: [post], origin: "https://usechangelog.com", lang: null });
+    expect(payload.enabled).toBe(true);
     expect(payload.url).toBe("https://usechangelog.com/acme");
     expect(payload.name).toBe("Acme");
     expect(payload.posts[0].html).toBe("<p>Now <strong>live</strong>. &lt;script&gt;alert(1)&lt;/script&gt;</p>\n");

@@ -15,6 +15,7 @@ export function widgetPayload({ workspace, posts, origin, lang }: {
 }) {
   const resolved = oneOf(WIDGET_LANGS, lang, workspace.widgetLang);
   return {
+    enabled: true,
     name: workspace.name,
     url: `${origin}/${workspace.slug}`,
     lang: resolved,
