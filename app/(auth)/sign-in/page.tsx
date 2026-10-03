@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { redirect } from "next/navigation";
+import { redirect, unstable_rethrow } from "next/navigation";
 import { sendMagicLink } from "@/lib/auth/actions";
 import { getUser } from "@/lib/auth/server";
 import { SubmitButton } from "../../submit-button";
@@ -17,7 +17,10 @@ const fallbackError = "Something went wrong with that link. Enter your email to 
 export default async function SignInPage({ searchParams }: PageProps<"/sign-in">) {
   // The proxy doesn't refresh the session on the login URL, and the SDK can
   // try to set a cookie mid-render, which throws. Show the form then.
-  const user = await getUser().catch(() => null);
+  const user = await getUser().catch((error: unknown) => {
+    unstable_rethrow(error);
+    return null;
+  });
   if (user) redirect("/app");
 
   const { error, sent } = await searchParams;
