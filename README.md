@@ -13,6 +13,16 @@ npm run dev
 
 Open http://localhost:3000.
 
+## Checks
+
+CI runs on every pull request and on pushes to `main` (`.github/workflows/ci.yml`). To run the same checks locally:
+
+```bash
+npm run lint && npm run typecheck && npm run build
+```
+
+`typecheck` runs `next typegen` first so route types like `LayoutProps` exist before `tsc --noEmit`.
+
 ## Deploy
 
 Production (Vercel): https://usechangelog-xi.vercel.app
