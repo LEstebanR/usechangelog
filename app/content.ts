@@ -49,7 +49,7 @@ export const steps = [
   },
   {
     title: "Embed the widget",
-    text: "Add one script tag. Your app gets a small “What’s new” panel with an unread badge.",
+    text: "Add one script tag. Your app gets a small “What’s new” panel with your latest posts.",
   },
 ];
 
@@ -78,8 +78,8 @@ export const posts: Post[] = [
   {
     tag: "Coming soon",
     date: "Q4 2026",
-    title: "Email digests",
-    body: "Send subscribers a short weekly summary of new posts, straight from your changelog.",
+    title: "Dark mode",
+    body: "Acme will follow your system theme, with a manual switch in settings for when you want the opposite.",
   },
 ];
 

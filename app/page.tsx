@@ -116,7 +116,7 @@ export default function Home() {
         Skip to content
       </a>
 
-      <header className="border-b border-hairline">
+      <header className="sticky top-0 z-40 border-b border-hairline bg-canvas">
         <div
           className={`${container} flex items-center justify-between gap-6 py-4`}
         >
@@ -269,7 +269,7 @@ export default function Home() {
         <section
           id="how"
           aria-labelledby="how-title"
-          className="scroll-mt-6 border-t border-hairline"
+          className="border-t border-hairline"
         >
           <div className={`${container} py-20 md:py-28`}>
             <SectionHead
@@ -307,7 +307,7 @@ export default function Home() {
         <section
           id="changelog"
           aria-labelledby="changelog-title"
-          className="scroll-mt-6 border-t border-hairline bg-blue-wash/85"
+          className="border-t border-hairline bg-blue-wash/85"
         >
           <div className={`${container} py-20 md:py-28`}>
             <SectionHead
@@ -375,7 +375,7 @@ export default function Home() {
         <section
           id="widget"
           aria-labelledby="widget-title"
-          className="scroll-mt-6 border-t border-hairline"
+          className="border-t border-hairline"
         >
           <div className={`${container} py-20 md:py-28`}>
             <SectionHead
@@ -404,16 +404,13 @@ export default function Home() {
 
               <div
                 role="img"
-                aria-label="Mock of the What’s new widget, showing two unread posts"
+                aria-label="Mock of the What’s new widget, showing the latest posts"
                 data-reveal="open"
                 style={delay(250)}
                 className="border border-ink bg-canvas lg:col-span-4"
               >
-                <div className="flex items-center justify-between border-b border-ink px-4 py-3">
+                <div className="border-b border-ink px-4 py-3">
                   <span className="font-display font-medium">What’s new</span>
-                  <span className="bg-blue px-2 py-0.5 font-display text-xs font-medium tabular-nums text-canvas">
-                    2 unread
-                  </span>
                 </div>
                 <div className="divide-y divide-hairline">
                   {posts.slice(0, 2).map((post) => (
@@ -476,7 +473,7 @@ export default function Home() {
         <section
           id="get-started"
           aria-labelledby="get-started-title"
-          className="scroll-mt-6 border-t border-ink"
+          className="border-t border-ink"
         >
           <div
             className={`${container} grid gap-y-6 py-16 md:grid-cols-12 md:py-20`}
@@ -491,6 +488,10 @@ export default function Home() {
               >
                 Start your changelog.
               </h2>
+              <p className="mt-4 max-w-xl text-lg leading-relaxed text-graphite">
+                Publishing is part of a monthly plan. Pricing will be shared at
+                launch.
+              </p>
               <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-4">
                 <button
                   type="button"

@@ -20,6 +20,8 @@
 
 html {
   scroll-behavior: smooth;
+  /* Keeps anchors and focused elements clear of the sticky header. */
+  scroll-padding-top: 5.5rem;
 }
 
 @media (prefers-reduced-motion: reduce) {
