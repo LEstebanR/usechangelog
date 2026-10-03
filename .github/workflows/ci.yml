@@ -5,10 +5,11 @@ on:
   push:
     branches: [main]
 
+# PR runs share a group per branch, so a new push cancels the old run.
+# Pushes to main get a group per commit, so every merge keeps its own result.
 concurrency:
-  group: ci-${{ github.ref }}
-  # Only PR runs are superseded; every push to main keeps its own result.
-  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+  group: ci-${{ github.event_name == 'pull_request' && github.ref || github.sha }}
+  cancel-in-progress: true
 
 jobs:
   # One job per check so each shows up as its own status on the PR.
