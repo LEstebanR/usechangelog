@@ -15,6 +15,7 @@
   --color-clay: #9a3f12;
   --color-clay-wash: #fbefe7;
   --color-violet: #5b3fa8;
+  --color-violet-wash: #f1edfa;
   --font-display: var(--font-funnel-display), system-ui, sans-serif;
   --font-sans: var(--font-instrument-sans), system-ui, sans-serif;
 }

@@ -6,12 +6,12 @@ import { WIDGET_COPY, type WidgetLang } from "@/lib/widget/copy";
 
 type Post = { id: string; title: string; body: string; category: Category; type: PostType; publishedOn: string };
 
-// Category color: a bar beside the post and a dot before its label. Fixed is green
-// (a resolved problem reads as good news); Improved is violet so the two never blur.
-const accent = {
-  new: { bar: "bg-blue", dot: "bg-blue", text: "text-blue" },
-  improved: { bar: "bg-violet", dot: "bg-violet", text: "text-violet" },
-  fixed: { bar: "bg-green", dot: "bg-green", text: "text-green" },
+// Category color as a soft pill with strong text. Fixed is green (a resolved problem
+// reads as good news); Improved is violet so the two never blur.
+const pill = {
+  new: "bg-blue-wash text-blue",
+  improved: "bg-violet-wash text-violet",
+  fixed: "bg-green-wash text-green",
 } as const;
 
 // A header button named after the workspace slug that opens the "What's new" panel
@@ -96,7 +96,7 @@ export function WhatsNewPreview({ slug, name, lang, allUpdatesUrl, posts }: {
 
           <div className="flex-1 overflow-y-auto border-t border-hairline">
             {posts.length === 0 && <p className="px-6 py-12 text-center text-[0.95rem] text-graphite">{t.empty}</p>}
-            {coming.length > 0 && <Section label={t.tags.coming} dashed posts={coming} lang={lang} allUpdatesUrl={allUpdatesUrl} />}
+            {coming.length > 0 && <Section label={t.tags.coming} coming posts={coming} lang={lang} allUpdatesUrl={allUpdatesUrl} />}
             {shipped.length > 0 && <Section label={t.latest} posts={shipped} lang={lang} allUpdatesUrl={allUpdatesUrl} />}
           </div>
 
@@ -114,55 +114,49 @@ export function WhatsNewPreview({ slug, name, lang, allUpdatesUrl, posts }: {
   );
 }
 
-function Section({ label, posts, dashed = false, lang, allUpdatesUrl }: {
+function Section({ label, posts, coming = false, lang, allUpdatesUrl }: {
   label: string;
   posts: Post[];
-  dashed?: boolean;
+  coming?: boolean;
   lang: WidgetLang;
   allUpdatesUrl: string;
 }) {
   const t = WIDGET_COPY[lang];
   return (
     <section>
-      <h3 className="sticky top-0 z-10 bg-canvas/95 px-6 pt-4 pb-2 text-xs font-medium tracking-wide text-graphite uppercase backdrop-blur">
+      <h3 className="sticky top-0 z-10 border-b border-hairline bg-canvas/95 px-6 pt-4 pb-2 text-xs font-medium tracking-wide text-graphite uppercase backdrop-blur">
         {label}
       </h3>
-      <ol className="flex flex-col gap-1 px-3 pb-3">
-        {posts.map((post) => {
-          const color = accent[post.category];
-          return (
-            <li key={post.id} className="relative px-3 py-3">
-              <span
-                aria-hidden="true"
-                className={`absolute top-3 bottom-3 left-0 w-0.5 ${dashed ? "border-l-2 border-dashed border-graphite/60" : color.bar}`}
-              />
-              <p className="flex items-center gap-2 text-[0.8rem]">
-                <span aria-hidden="true" className={`size-1.5 ${color.dot}`} />
-                <span className={`font-medium ${color.text}`}>{t.tags[post.category]}</span>
-                {post.publishedOn && (
-                  <>
-                    <span aria-hidden="true" className="text-hairline">·</span>
-                    <time dateTime={post.publishedOn} className="tabular-nums text-graphite">
-                      {formatDay(post.publishedOn, lang)}
-                    </time>
-                  </>
-                )}
-              </p>
-              <p className="mt-1.5 text-[1.0625rem] font-semibold leading-snug text-ink">{post.title}</p>
-              {/* Plain text until #7's renderMarkdown lands. */}
-              {post.body && (
-                <>
-                  <p className="mt-1.5 line-clamp-4 text-[0.9375rem] leading-relaxed whitespace-pre-line text-ink/75">
-                    {post.body}
-                  </p>
-                  <a href={allUpdatesUrl} className="mt-1.5 inline-block text-sm font-medium text-blue hover:underline">
-                    {t.more}
-                  </a>
-                </>
+      <ol className="divide-y divide-hairline">
+        {posts.map((post) => (
+          <li key={post.id} className="px-6 py-5">
+            <p className="flex flex-wrap items-center gap-2 text-[0.8125rem]">
+              <span className={`px-2 py-0.5 font-medium ${pill[post.category]}`}>{t.tags[post.category]}</span>
+              {coming && (
+                <span className="border border-dashed border-graphite/60 px-2 py-0.5 font-medium text-ink">
+                  {t.tags.coming}
+                </span>
               )}
-            </li>
-          );
-        })}
+              {post.publishedOn && (
+                <time dateTime={post.publishedOn} className="ml-auto tabular-nums text-graphite">
+                  {formatDay(post.publishedOn, lang)}
+                </time>
+              )}
+            </p>
+            <p className="mt-2.5 text-[1.0625rem] font-semibold leading-snug text-ink">{post.title}</p>
+            {/* Plain text until #7's renderMarkdown lands. */}
+            {post.body && (
+              <>
+                <p className="mt-1.5 line-clamp-4 text-[0.9375rem] leading-relaxed whitespace-pre-line text-ink/75">
+                  {post.body}
+                </p>
+                <a href={allUpdatesUrl} className="mt-1.5 inline-block text-sm font-medium text-blue hover:underline">
+                  {t.more}
+                </a>
+              </>
+            )}
+          </li>
+        ))}
       </ol>
     </section>
   );
