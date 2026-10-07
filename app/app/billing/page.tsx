@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { getPlan } from "@/lib/billing/polar";
-import { hasSubscription, type SubscriptionStatus } from "@/lib/billing/status";
+import { canPublish, hasSubscription, type SubscriptionStatus } from "@/lib/billing/status";
 import { formatDay, toDay } from "@/lib/posts/form";
 import { requireWorkspace } from "@/lib/workspace/server";
 import { primaryButtonClass, secondaryButtonClass } from "../../form-styles";
@@ -57,6 +58,11 @@ export default async function BillingPage({ searchParams }: PageProps<"/app/bill
                 Subscribe
               </button>
             </form>
+          )}
+          {(shown === "activating" || canPublish(workspace)) && (
+            <Link href="/app" className={shown === "activating" || checkout === "success" ? primaryButtonClass : secondaryButtonClass}>
+              Go to your posts
+            </Link>
           )}
           {workspace.polarCustomerId && (
             <form action="/api/polar/portal">

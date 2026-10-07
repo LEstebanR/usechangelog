@@ -21,14 +21,6 @@ export default async function AppPage({ searchParams }: PageProps<"/app">) {
             <a href={url} className="text-blue underline underline-offset-4">
               {url}
             </a>
-            {" · "}
-            <Link href="/app/settings" className="hover:text-ink">
-              Settings
-            </Link>
-            {" · "}
-            <Link href="/app/billing" className="hover:text-ink">
-              Billing
-            </Link>
           </p>
         </div>
         {posts.length > 0 && (

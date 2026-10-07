@@ -10,6 +10,7 @@ import { EnterSubmits } from "../enter-submits";
 import { secondaryButtonClass } from "../form-styles";
 import { SubmitButton } from "../submit-button";
 import { SiteHeader } from "../wordmark";
+import { AppNav } from "./app-nav";
 import { WhatsNewPreview } from "./whats-new-preview";
 
 export const metadata: Metadata = { title: "UseChangelog" };
@@ -31,7 +32,7 @@ export default async function AppLayout({ children }: LayoutProps<"/app">) {
   return (
     <div className="min-h-dvh bg-wash">
       <EnterSubmits />
-      <SiteHeader>
+      <SiteHeader home="/app">
         <div className="flex items-center gap-3">
           {workspace && (
             <WhatsNewPreview
@@ -55,6 +56,7 @@ export default async function AppLayout({ children }: LayoutProps<"/app">) {
           </form>
         </div>
       </SiteHeader>
+      {workspace && <AppNav />}
       {(workspace?.subscriptionStatus === "past_due" || workspace?.subscriptionStatus === "canceled") && (
         <BillingBanner {...billingFix(workspace.subscriptionStatus)} />
       )}
