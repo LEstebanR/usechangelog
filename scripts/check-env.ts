@@ -1,3 +1,5 @@
+import { neon } from "@neondatabase/serverless";
+
 // Runs first in `vercel-build`: a malformed env var fails the deploy with a clear
 // message instead of failing at runtime (where the driver echoes the URL, password
 // included). It never prints a value. CI builds without secrets and skips this.
@@ -23,8 +25,25 @@ const problems = checks.flatMap(([name, pattern, hint]) => {
   return pattern.test(value) ? [] : [`${name} looks wrong: expected ${hint}.`];
 });
 
+// Locally, also check the database and auth answer: a deleted or expired Neon branch otherwise
+// shows up as "We couldn't send the link" on sign-in. Vercel skips this; its build migrates next.
+if (!problems.length && !process.env.VERCEL) problems.push(...(await reachability()));
+
 if (problems.length) {
   console.error(`Environment check failed (${process.env.VERCEL_ENV ?? "local"}):\n- ${problems.join("\n- ")}`);
   process.exit(1);
 }
 console.log("Environment check passed.");
+
+async function reachability() {
+  const found: string[] = [];
+  try {
+    await neon(process.env.DATABASE_URL!)`select 1`;
+  } catch (error) {
+    // The driver's message names the cause (password, endpoint) but never the URL.
+    found.push(`DATABASE_URL doesn't answer (${(error as Error).message.slice(0, 120)}). Check the Neon branch still exists: neonctl branches list.`);
+  }
+  const auth = await fetch(`${process.env.NEON_AUTH_BASE_URL}/ok`).catch(() => null);
+  if (!auth?.ok) found.push(`NEON_AUTH_BASE_URL doesn't answer (${auth?.status ?? "no response"}). Check Neon Auth is on for that branch.`);
+  return found;
+}

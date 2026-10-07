@@ -139,7 +139,8 @@ Open http://localhost:3000.
 | `bun run test` | Unit tests with `bun test` (`*.test.ts`) |
 | `bun run db:generate` | Generate a migration from `db/schema.ts` |
 | `bun run db:migrate` | Apply pending migrations (uses `DATABASE_URL_UNPOOLED`) |
-| `bun run check-env` | Check the required env vars and their format, without printing them. Vercel runs it before migrating |
+| `bun run check-env` | Check the required env vars and their format, without printing them. Locally it also checks the database and auth answer. Vercel runs it before migrating |
+| `bun run polar:state <slug>` | Read only: a workspace's subscription in our database next to what Polar has, and what differs |
 | `bun run widget-test <widget-key> [base-url] [port]` | Host pages on another origin (`localhost:5050`) that load the widget: floating button, trigger + Spanish, hostile CSS, invalid key. For a protected preview, set `VERCEL_AUTOMATION_BYPASS_SECRET` |
 | `bun run smoke <email> [base-url]` | Signed-in smoke test of `/app`. Reuses the last session (`.smoke-session-*.json`, git-ignored), so it only sends a magic link when that expires; `SMOKE_LINK=<link>` skips the request. Never writes data, and refuses production URLs unless `SMOKE_ALLOW_PRODUCTION=1` |
 
@@ -158,6 +159,22 @@ The landing needs none. The variables arrive with the product issues, each docum
 | `VERCEL_AUTOMATION_BYPASS_SECRET` | Optional, local only: `bun run widget-test` against a protected preview | Manually, in `.env.local` | [#8](https://github.com/LEstebanR/usechangelog/issues/8) |
 
 For local work, copy `.env.example` to `.env.local`. Real `.env*` files are git-ignored.
+
+### Local database
+
+Local dev and previews share the `develop` Neon branch. It must not expire: create or recreate it with `neonctl branches create --name develop --parent production`, not from the Neon console (its "Automatically delete branch after" is on by default). Then copy its connection strings and auth URL into `.env.local`, run `bun run db:migrate`, and add `http://localhost:3000` to its auth domains (`neonctl neon-auth domain add http://localhost:3000 --branch develop`).
+
+### Billing webhooks locally
+
+Polar can't reach `localhost`, so the [Polar CLI](https://polar.sh/docs/integrate/cli/webhooks) forwards sandbox events:
+
+```bash
+polar listen http://localhost:3000/api/polar/webhook
+```
+
+- It asks for the environment (Sandbox) and the organization interactively, so run it in its own terminal, not through a tool without a keyboard.
+- It prints its own secret. Put that one in `.env.local` as `POLAR_WEBHOOK_SECRET`; the secret of the sandbox endpoint in the Polar dashboard is for previews.
+- Pay with Polar's test card `4242 4242 4242 4242`, any future date and any CVC. `bun run polar:state <slug>` shows whether the webhook landed.
 
 ## Deployment
 
