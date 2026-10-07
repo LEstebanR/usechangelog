@@ -16,7 +16,7 @@ export default async function BillingPage({ searchParams }: PageProps<"/app/bill
   const pastDue = status === "past_due";
   const backFromCheckout = checkout === "success";
   // Back from the checkout before the webhook has landed, or a free trial.
-  const shown = backFromCheckout && status !== "active" ? "activating" : status === "active" && workspace.trialEndsAt ? "trial" : status;
+  const shown = backFromCheckout && !hasSubscription(workspace) ? "activating" : status === "active" && workspace.trialEndsAt ? "trial" : status;
   const { dot, title, detail } = STATUS[shown];
   const day = (date: Date | null) => (date ? formatDay(toDay(date)) : "");
   const dates = { periodEnd: day(workspace.currentPeriodEnd), trialEnd: day(workspace.trialEndsAt), canceling: workspace.cancelAtPeriodEnd, price };

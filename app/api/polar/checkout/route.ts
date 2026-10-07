@@ -12,11 +12,11 @@ import { requireWorkspace } from "@/lib/workspace/server";
 // the env, and an edited URL changes nothing.
 export async function GET(request: NextRequest) {
   const [user, workspace] = await Promise.all([requireUser(), requireWorkspace()]);
-  // One subscription per workspace: an active or failing one is managed in the portal.
-  // Polar is asked too, for a payment whose webhook hasn't landed yet.
-  if (hasSubscription(workspace) || (await hasActiveSubscriptionInPolar(workspace.id))) {
-    redirect("/app/billing?checkout=success");
-  }
+  // One subscription per workspace: an active or failing one is managed in the portal,
+  // so billing shows its real state. Polar is asked too, for a payment whose webhook
+  // hasn't landed yet: that one is still activating.
+  if (hasSubscription(workspace)) redirect("/app/billing");
+  if (await hasActiveSubscriptionInPolar(workspace.id)) redirect("/app/billing?checkout=success");
 
   const { accessToken, productId, environment } = polarConfig();
   const origin = await getOrigin();
