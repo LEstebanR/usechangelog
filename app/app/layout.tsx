@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { signOut } from "@/lib/auth/actions";
+import { billingFix } from "@/lib/billing/status";
 import { requireUser } from "@/lib/auth/server";
 import { renderMarkdown } from "@/lib/markdown";
 import { countPublishedPosts, listPublishedPosts } from "@/lib/posts/server";
@@ -9,6 +10,7 @@ import { EnterSubmits } from "../enter-submits";
 import { secondaryButtonClass } from "../form-styles";
 import { SubmitButton } from "../submit-button";
 import { SiteHeader } from "../wordmark";
+import { AppNav } from "./app-nav";
 import { WhatsNewPreview } from "./whats-new-preview";
 
 export const metadata: Metadata = { title: "UseChangelog" };
@@ -30,7 +32,7 @@ export default async function AppLayout({ children }: LayoutProps<"/app">) {
   return (
     <div className="min-h-dvh bg-wash">
       <EnterSubmits />
-      <SiteHeader>
+      <SiteHeader home="/app">
         <div className="flex items-center gap-3">
           {workspace && (
             <WhatsNewPreview
@@ -54,7 +56,27 @@ export default async function AppLayout({ children }: LayoutProps<"/app">) {
           </form>
         </div>
       </SiteHeader>
+      {workspace && <AppNav />}
+      {(workspace?.subscriptionStatus === "past_due" || workspace?.subscriptionStatus === "canceled") && (
+        <BillingBanner {...billingFix(workspace.subscriptionStatus)} />
+      )}
       <main className="mx-auto max-w-6xl px-6 py-16">{children}</main>
+    </div>
+  );
+}
+
+// A paid workspace that stopped paying (#16): its page and widget are off until it's fixed.
+// A workspace that never subscribed (`none`) gets no banner; it learns on its first publish.
+function BillingBanner({ problem, href, cta }: ReturnType<typeof billingFix>) {
+  return (
+    <div role="status" className="border-b border-clay/40 bg-clay-wash">
+      <p className="mx-auto max-w-6xl px-6 py-3 text-sm text-clay">
+        {problem}, so your changelog page and widget aren&apos;t showing anything in public. Your posts are
+        safe.{" "}
+        <a href={href} className="font-medium underline underline-offset-4">
+          {cta}
+        </a>
+      </p>
     </div>
   );
 }

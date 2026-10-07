@@ -16,7 +16,7 @@ The product rules and the out-of-scope list live in `AGENTS.md` → **Product ru
   - States `draft` and `published`. Drafts are never public. The publish date is set on the first publish and can be edited.
 - **Public page:** `usechangelog.com/{slug}` lists the workspace's published posts, newest first.
 - **Widget:** one script tag that shows the latest published posts in a "What's new" panel.
-- **Billing:** one monthly plan through Polar, gating publishing, the page and the widget (see `polar-billing`).
+- **Billing:** one monthly plan through Polar, with an optional free trial set in Polar, gating publishing, the page and the widget (see `polar-billing`).
 - **Landing and legal:** a marketing page with a sign-up CTA, plus privacy and terms pages.
 
 ## When a change isn't on this list

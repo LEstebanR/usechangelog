@@ -1,4 +1,5 @@
 import type { NextRequest } from "next/server";
+import { canPublish } from "@/lib/billing/status";
 import { listPublishedPosts } from "@/lib/posts/server";
 import { widgetPayload } from "@/lib/widget/payload";
 import { getWorkspaceByWidgetKey } from "@/lib/workspace/server";
@@ -14,8 +15,11 @@ const HEADERS = {
 export async function GET(request: NextRequest, { params }: RouteContext<"/api/widget/[key]">) {
   const workspace = await getWorkspaceByWidgetKey((await params).key);
   if (!workspace) return Response.json({}, { status: 404, headers: HEADERS });
-  // Turned off in settings: the snippet stays on the site and shows nothing (#16 reuses this).
-  if (!workspace.widgetEnabled) return Response.json({ enabled: false }, { headers: HEADERS });
+  // Turned off in settings, or no active subscription (#16): the snippet stays on the site
+  // and shows nothing, with no error in the console.
+  if (!workspace.widgetEnabled || !canPublish(workspace)) {
+    return Response.json({ enabled: false }, { headers: HEADERS });
+  }
 
   const posts = await listPublishedPosts(workspace.id, { limit: 10 });
   const body = widgetPayload({

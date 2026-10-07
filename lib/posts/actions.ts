@@ -5,12 +5,13 @@ import { revalidatePath } from "next/cache";
 import { notFound } from "next/navigation";
 import { getDb } from "@/db";
 import { posts } from "@/db/schema";
+import { canPublish } from "@/lib/billing/status";
 import { redirectWithNotice } from "@/lib/notice";
 import { requireWorkspace } from "@/lib/workspace/server";
 import { parsePostForm, type PostFormState } from "./form";
 import { requirePost, UUID } from "./server";
 
-// The only place a post becomes public. #16 wraps this with the subscription check.
+// The only place a post becomes public; savePost checks the subscription first (#16).
 // A published post always has a date: the one given, or today.
 function publish(publishedOn: string | null, today: string) {
   return { status: "published" as const, publishedOn: publishedOn ?? today };
@@ -36,6 +37,12 @@ export async function savePost(
     status === "published"
       ? publish(publishedOn ?? existing?.publishedOn ?? null, today)
       : { status, publishedOn };
+
+  // Going public needs an active subscription (#16). Nothing is saved, the form keeps what
+  // was typed. Drafts, edits to a published post and unpublishing work in every state.
+  if (next.status === "published" && existing?.status !== "published" && !canPublish(workspace)) {
+    return { values: state.values, blocked: workspace.subscriptionStatus };
+  }
 
   // The header preview (in the layout) only shows published posts.
   const touchesPublic = next.status === "published" || existing?.status === "published";

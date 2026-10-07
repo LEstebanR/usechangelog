@@ -1,5 +1,6 @@
 import { randomBytes } from "node:crypto";
 import { boolean, date, index, pgEnum, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
+import { SUBSCRIPTION_STATUSES } from "@/lib/billing/status";
 import { CATEGORIES, TYPES } from "@/lib/posts/form";
 import { WIDGET_LANGS } from "@/lib/widget/copy";
 import { user } from "./neon-auth";
@@ -7,6 +8,7 @@ import { user } from "./neon-auth";
 // Our tables, in the `public` schema. Users live in Neon's schema (`./neon-auth`).
 
 export const widgetLang = pgEnum("widget_lang", WIDGET_LANGS);
+export const subscriptionStatus = pgEnum("subscription_status", SUBSCRIPTION_STATUSES);
 
 // One per user (unique owner_id). Deleting the user deletes the workspace (#31).
 export const workspaces = pgTable("workspaces", {
@@ -26,6 +28,16 @@ export const workspaces = pgTable("workspaces", {
   widgetLang: widgetLang("widget_lang").notNull().default("en"),
   // Off hides the widget on the customer's site without touching their snippet (#8).
   widgetEnabled: boolean("widget_enabled").notNull().default(true),
+  // Billing (#15). Only the Polar webhook writes these; the workspace id is Polar's external_id.
+  polarCustomerId: text("polar_customer_id"),
+  polarSubscriptionId: text("polar_subscription_id"),
+  subscriptionStatus: subscriptionStatus("subscription_status").notNull().default("none"),
+  currentPeriodEnd: timestamp("current_period_end", { withTimezone: true }),
+  cancelAtPeriodEnd: boolean("cancel_at_period_end").notNull().default(false),
+  // End of the free trial, while there is one (the trial is set on the product in Polar).
+  trialEndsAt: timestamp("trial_ends_at", { withTimezone: true }),
+  // Polar's modified_at of the last event applied: older or retried events never overwrite it.
+  subscriptionUpdatedAt: timestamp("subscription_updated_at", { withTimezone: true }),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true })
     .notNull()

@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState, useSyncExternalStore } from "react";
+import { billingFix } from "@/lib/billing/status";
 import { BODY_MAX, CATEGORIES, LABELS, TITLE_MAX, TYPES, type PostFormState } from "@/lib/posts/form";
 import { inputClass, primaryButtonClass, secondaryButtonClass } from "../../form-styles";
 import { TAG_PALETTE } from "../../tag";
@@ -29,6 +30,7 @@ export function PostForm({ action, initial, status }: Props) {
   // The author's local day, so a post published tonight isn't dated tomorrow (UTC).
   const today = useSyncExternalStore(noSubscribe, localDay, () => "");
   const published = status === "published";
+  const fix = state.blocked && billingFix(state.blocked);
 
   return (
     <form
@@ -109,7 +111,16 @@ export function PostForm({ action, initial, status }: Props) {
             </button>
           )}
           <p role="status" className="min-h-5 text-sm text-graphite">
-            {pending ? "Saving…" : state.notice && <span className="text-green">{state.notice}</span>}
+            {pending ? (
+              "Saving…"
+            ) : fix ? (
+              <span className="text-clay">
+                {fix.problem}. <a href={fix.href} className="underline underline-offset-4">{fix.cta}</a> to
+                publish, or save it as a draft meanwhile.
+              </span>
+            ) : (
+              state.notice && <span className="text-green">{state.notice}</span>
+            )}
           </p>
         </div>
       </aside>

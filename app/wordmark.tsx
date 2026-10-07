@@ -29,11 +29,11 @@ export function Wordmark({ href = "/", animated = false }: { href?: string; anim
 }
 
 // The top bar of the app and auth pages.
-export function SiteHeader({ children }: { children?: React.ReactNode }) {
+export function SiteHeader({ home = "/", children }: { home?: string; children?: React.ReactNode }) {
   return (
     <header className="border-b border-hairline bg-canvas">
       <div className="mx-auto flex h-(--header-h) max-w-6xl items-center justify-between gap-6 px-6">
-        <Wordmark />
+        <Wordmark href={home} />
         {children}
       </div>
     </header>

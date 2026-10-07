@@ -20,13 +20,13 @@ This list is the source of truth. The skills in `.agents/skills/` add implementa
 - **Public page:** the slug lives in the path (`usechangelog.com/{slug}`), never in a subdomain.
 - **Auth:** Neon Managed Better Auth with magic link only. No passwords, SSO or social login. See `.agents/skills/auth`.
 - **Billing:** Polar, never Stripe. One monthly plan. The price is never hardcoded in code or copy; it comes from Polar. See `.agents/skills/polar-billing`.
-- **Paywall:** sign-up is free. Publishing, the public page and the widget require a subscription in state `active`. `past_due`, `canceled` and `none` can't publish.
+- **Paywall:** sign-up is free. Publishing, the public page and the widget require a subscription in state `active`. A free trial counts as `active`; whether there is one, and how long, is set on the product in Polar, never in code. `past_due`, `canceled` and `none` can't publish.
 - **Out of scope:**
   - waitlist, voting, comments, reactions
   - RSS or feeds, email digests, scheduled posts
   - custom domains, unread badge
   - teams or roles, SSO or social login
-  - Stripe, trials or a free tier that publishes
+  - Stripe, or a free tier that publishes without a subscription
   - Check `.agents/skills/mvp-scope` for what *is* in before adding a feature.
 - **Language:** the app, landing, legal pages and public page are English only. Posts are never translated. The one exception is the widget chrome (its button, title, tags and dates): English by default, or Spanish, Portuguese, French or German, chosen per workspace in settings (`lib/widget/copy.ts`).
 
@@ -36,6 +36,7 @@ This list is the source of truth. The skills in `.agents/skills/` add implementa
 - **SSR first:** read data in Server Components and write it with Server Actions posted from plain forms. Use a client component only for a small interactive island (a pending button, a toggle), and prefer a server form over a client UI library.
 - **Access checks in pages, not layouts:** every page and Server Action under `/app` calls `requireUser()` or `requireWorkspace()` itself. Layouts don't re-run on client navigation and don't stop nested routes from rendering, so a layout check protects nothing.
 - **Migrations in an open PR:** if a migration hasn't reached `main`, change it by regenerating it (delete the file, its snapshot and its journal entry, then `bun run db:generate`) instead of stacking a fix-up migration. Re-apply it on `develop` only after telling the owner, since local dev and previews share that database; never drop or alter tables there while the owner is using the app.
+- **The `develop` Neon branch is permanent:** local dev and previews share it. Create or recreate it with `neonctl branches create --name develop --parent production` (no expiration), never from the Neon console, whose "Automatically delete branch after" is on by default and deleted the previous one after a day. Protect it in Neon if the plan allows.
 - **Env vars are checked before deploying:** `vercel-build` runs `bun run check-env` (`scripts/check-env.ts`) first. Add every new required var there with its expected format.
 - **No env vars at import time:** create clients (auth, database, SDKs) on first use, so `bun run build` passes without secrets.
 

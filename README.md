@@ -68,7 +68,7 @@ The public page and the widget only serve posts while the workspace has an **act
 | Package manager | [Bun](https://bun.sh) | ✅ In use |
 | Database | [Neon](https://neon.com) Postgres, with Drizzle ORM and migrations in the repo | ✅ In use |
 | Auth | Neon Managed Better Auth, magic link only | ✅ In use |
-| Payments | [Polar](https://polar.sh) as merchant of record: one monthly plan, sandbox on previews | 🛠 Planned ([#14](https://github.com/LEstebanR/usechangelog/issues/14), [#15](https://github.com/LEstebanR/usechangelog/issues/15), [#17](https://github.com/LEstebanR/usechangelog/issues/17)) |
+| Payments | [Polar](https://polar.sh) as merchant of record: one monthly plan, sandbox on previews | ✅ In use |
 
 The reasoning behind each choice is in its issue. For example, [#4](https://github.com/LEstebanR/usechangelog/issues/4) explains why it's Neon's auth and not Clerk.
 
@@ -88,13 +88,15 @@ app/
   markdown-body.tsx     A post body rendered from Markdown (styles in markdown-styles.ts)
   [slug]/               The public changelog at /{slug}, rendered on every request
   api/widget/[key]/     Public widget data (CORS open, 60-second CDN cache)
+  api/polar/            Polar checkout, customer portal and webhook (the only writer of subscription state)
   icon.svg, apple-icon.png, opengraph-image.png
   (auth)/sign-in/       Magic link sign-in
-  app/                  The signed-in app: /app (posts), /app/posts/new, /app/posts/[id], /app/onboarding, /app/settings
+  app/                  The signed-in app: /app (posts), /app/posts/new, /app/posts/[id], /app/onboarding, /app/settings, /app/billing
   api/auth/[...path]/   Auth handler, proxied to Neon
 lib/auth/               Server auth client and Server Actions (sign in, sign out)
 lib/workspace/          Slug rules, form parsing, getCurrentWorkspace(), getWorkspaceBySlug() and workspace Server Actions
 lib/posts/              Post form parsing, workspace-scoped queries and post Server Actions
+lib/billing/            Polar config, mapPolarStatus(), canPublish() (the one publish gate) and the webhook handler
 lib/markdown.ts         renderMarkdown(): safe Markdown to HTML for the public page and the widget
 lib/widget/             The widget's words in 5 languages and the API payload
 public/widget.js        The embeddable "What's new" widget (vanilla JS, Shadow DOM)
@@ -137,7 +139,8 @@ Open http://localhost:3000.
 | `bun run test` | Unit tests with `bun test` (`*.test.ts`) |
 | `bun run db:generate` | Generate a migration from `db/schema.ts` |
 | `bun run db:migrate` | Apply pending migrations (uses `DATABASE_URL_UNPOOLED`) |
-| `bun run check-env` | Check the required env vars and their format, without printing them. Vercel runs it before migrating |
+| `bun run check-env` | Check the required env vars and their format, without printing them. Locally it also checks the database and auth answer. Vercel runs it before migrating |
+| `bun run polar:state <slug>` | Read only: a workspace's subscription in our database next to what Polar has, and what differs |
 | `bun run widget-test <widget-key> [base-url] [port]` | Host pages on another origin (`localhost:5050`) that load the widget: floating button, trigger + Spanish, hostile CSS, invalid key. For a protected preview, set `VERCEL_AUTOMATION_BYPASS_SECRET` |
 | `bun run smoke <email> [base-url]` | Signed-in smoke test of `/app`. Reuses the last session (`.smoke-session-*.json`, git-ignored), so it only sends a magic link when that expires; `SMOKE_LINK=<link>` skips the request. Never writes data, and refuses production URLs unless `SMOKE_ALLOW_PRODUCTION=1` |
 
@@ -157,11 +160,28 @@ The landing needs none. The variables arrive with the product issues, each docum
 
 For local work, copy `.env.example` to `.env.local`. Real `.env*` files are git-ignored.
 
+### Local database
+
+Local dev and previews share the `develop` Neon branch. It must not expire: create or recreate it with `neonctl branches create --name develop --parent production`, not from the Neon console (its "Automatically delete branch after" is on by default). Then copy its connection strings and auth URL into `.env.local`, run `bun run db:migrate`, and add `http://localhost:3000` to its auth domains (`neonctl neon-auth domain add http://localhost:3000 --branch develop`).
+
+### Billing webhooks locally
+
+Polar can't reach `localhost`, so the [Polar CLI](https://polar.sh/docs/integrate/cli/webhooks) forwards sandbox events:
+
+```bash
+polar listen http://localhost:3000/api/polar/webhook
+```
+
+- It asks for the environment (Sandbox) and the organization interactively, so run it in its own terminal, not through a tool without a keyboard.
+- It prints its own secret. Put that one in `.env.local` as `POLAR_WEBHOOK_SECRET`; the secret of the sandbox endpoint in the Polar dashboard is for previews.
+- Pay with Polar's test card `4242 4242 4242 4242`, any future date and any CVC. `bun run polar:state <slug>` shows whether the webhook landed.
+
 ## Deployment
 
 - **Production:** https://usechangelog-xi.vercel.app, deployed from `main`. There's no custom domain yet; [#24](https://github.com/LEstebanR/usechangelog/issues/24) covers it.
 - **Previews:** every pull request gets its own Vercel preview, with its own Neon branch and auth. Its URL goes in the PR description.
 - **Migrations:** Vercel runs `vercel-build`: it checks the env vars (`check-env`), applies pending migrations to the deployment's database, then runs `next build`.
+- **Billing:** Production uses Polar's production organization; previews and local use its sandbox (`POLAR_SERVER`, enforced by `check-env`). Polar sends webhooks to `/api/polar/webhook`; for a protected preview, the sandbox endpoint uses the branch URL with `?x-vercel-protection-bypass=<secret>`. Locally, `polar listen` forwards them.
 - **CI:** [GitHub Actions](.github/workflows/ci.yml) runs `lint`, `typecheck`, `build` and `test` as separate checks on every PR and on each push to `main`.
 
 ## Roadmap
@@ -197,7 +217,7 @@ Kept out on purpose:
 - RSS, email digests, scheduled posts;
 - custom domains per workspace, an unread badge in the widget;
 - teams and roles, SSO;
-- Stripe, trials, a free tier that publishes;
+- Stripe, a free tier that publishes without a subscription;
 - translations, apart from the widget's Spanish chrome.
 
 The full list lives in [`AGENTS.md`](AGENTS.md#product-rules).
