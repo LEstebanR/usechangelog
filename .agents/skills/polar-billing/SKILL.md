@@ -40,6 +40,8 @@ The billing rules (Polar only, one monthly plan, sign-up free, only `active` pub
 
 Coupons, multiple plans, annual billing, usage-based billing, seat pricing.
 
+The one exception to "no coupons" is Polar's account review: their team asks for a 100% code to go through the checkout. `POLAR_ALLOW_DISCOUNT_CODES=true` in Production turns the code field on for that time only; delete it once the account is approved.
+
 ## Final step: improvements
 
 Before finishing, look back at the result, at how the work went, and at this skill. List up to 5 concrete improvements, each with what would change and why. Ask the owner which ones to apply. Apply only those; if they want none, stop.
