@@ -7,12 +7,16 @@ describe("mapPolarStatus", () => {
     expect(mapPolarStatus("active")).toBe("active");
   });
 
+  test("a free trial publishes like active", () => {
+    expect(mapPolarStatus("trialing")).toBe("active");
+  });
+
   test("past_due stays past_due", () => {
     expect(mapPolarStatus("past_due")).toBe("past_due");
   });
 
   test("everything else is canceled", () => {
-    for (const status of ["canceled", "unpaid", "incomplete_expired", "paused", "incomplete", "trialing", "new"]) {
+    for (const status of ["canceled", "unpaid", "incomplete_expired", "paused", "incomplete", "new"]) {
       expect(mapPolarStatus(status)).toBe("canceled");
     }
   });

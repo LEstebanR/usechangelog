@@ -4,4 +4,5 @@ ALTER TABLE "workspaces" ADD COLUMN "polar_subscription_id" text;--> statement-b
 ALTER TABLE "workspaces" ADD COLUMN "subscription_status" "subscription_status" DEFAULT 'none' NOT NULL;--> statement-breakpoint
 ALTER TABLE "workspaces" ADD COLUMN "current_period_end" timestamp with time zone;--> statement-breakpoint
 ALTER TABLE "workspaces" ADD COLUMN "cancel_at_period_end" boolean DEFAULT false NOT NULL;--> statement-breakpoint
+ALTER TABLE "workspaces" ADD COLUMN "trial_ends_at" timestamp with time zone;--> statement-breakpoint
 ALTER TABLE "workspaces" ADD COLUMN "subscription_updated_at" timestamp with time zone;

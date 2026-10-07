@@ -200,7 +200,7 @@ Kept out on purpose:
 - RSS, email digests, scheduled posts;
 - custom domains per workspace, an unread badge in the widget;
 - teams and roles, SSO;
-- Stripe, trials, a free tier that publishes;
+- Stripe, a free tier that publishes without a subscription;
 - translations, apart from the widget's Spanish chrome.
 
 The full list lives in [`AGENTS.md`](AGENTS.md#product-rules).

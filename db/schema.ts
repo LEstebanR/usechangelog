@@ -34,6 +34,8 @@ export const workspaces = pgTable("workspaces", {
   subscriptionStatus: subscriptionStatus("subscription_status").notNull().default("none"),
   currentPeriodEnd: timestamp("current_period_end", { withTimezone: true }),
   cancelAtPeriodEnd: boolean("cancel_at_period_end").notNull().default(false),
+  // End of the free trial, while there is one (the trial is set on the product in Polar).
+  trialEndsAt: timestamp("trial_ends_at", { withTimezone: true }),
   // Polar's modified_at of the last event applied: older or retried events never overwrite it.
   subscriptionUpdatedAt: timestamp("subscription_updated_at", { withTimezone: true }),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),

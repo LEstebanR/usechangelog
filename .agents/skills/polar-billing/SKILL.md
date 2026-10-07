@@ -24,13 +24,14 @@ The billing rules (Polar only, one monthly plan, sign-up free, only `active` pub
 
 ## Our rules
 
-- **Product:** reference it by an env var. If the price has to be shown, read it from Polar.
+- **Product:** reference it by an env var. If the price or the free trial has to be shown, read it from Polar.
+- **Free trial:** optional, set on the product in Polar. Polar's `trialing` maps to `active` (it publishes); the webhook stores the trial's end so the billing page can show it.
 - **Checkout:** start it from the signed-in app with the workspace owner's identity. Pass our account or workspace id so the webhook can map back to it.
 - **Webhook:**
   - It is the only writer of subscription state.
   - Verify the signature with the webhook secret before reading the payload. Reject unsigned or invalid requests.
   - Handlers must be idempotent, because Polar retries deliveries.
-- **Stored state:** one per workspace: `active | past_due | canceled | none` (`none` means no subscription yet). Map Polar's status in a single function; anything not clearly active or past due is `canceled`.
+- **Stored state:** one per workspace: `active | past_due | canceled | none` (`none` means no subscription yet). Map Polar's status in a single function; `trialing` is `active`, and anything not clearly active or past due is `canceled`.
 - **Gate:** check the stored state in one place, server-side. For `past_due`, show a banner that links to the portal. Drafts stay editable in every state.
 - **Customer portal:** the only place to change the payment method or cancel. Link to it from the app; don't build our own billing UI.
 - **Env vars:** access token, webhook secret and product id.

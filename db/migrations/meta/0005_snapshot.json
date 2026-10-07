@@ -1,5 +1,5 @@
 {
-  "id": "b47da17e-a86e-4f80-82e7-2e27e9b2bf26",
+  "id": "18c5b009-2337-4732-b117-7ec5b2613a18",
   "prevId": "bc602fab-92f4-4755-a46d-570f5640b802",
   "version": "7",
   "dialect": "postgresql",
@@ -210,6 +210,12 @@
           "primaryKey": false,
           "notNull": true,
           "default": false
+        },
+        "trial_ends_at": {
+          "name": "trial_ends_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
         },
         "subscription_updated_at": {
           "name": "subscription_updated_at",

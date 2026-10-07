@@ -31,6 +31,7 @@ export async function applySubscription(subscription: Subscription) {
       subscriptionStatus: status,
       currentPeriodEnd: new Date(subscription.current_period_end),
       cancelAtPeriodEnd: subscription.cancel_at_period_end,
+      trialEndsAt: subscription.status === "trialing" && subscription.trial_end ? new Date(subscription.trial_end) : null,
       subscriptionUpdatedAt: at,
     })
     .where(

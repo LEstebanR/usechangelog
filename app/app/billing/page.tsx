@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { getPlanPrice } from "@/lib/billing/polar";
+import { getPlan } from "@/lib/billing/polar";
 import { hasSubscription, type SubscriptionStatus } from "@/lib/billing/status";
 import { formatDay, toDay } from "@/lib/posts/form";
 import { requireWorkspace } from "@/lib/workspace/server";
@@ -10,13 +10,19 @@ export const metadata: Metadata = { title: "Billing — UseChangelog" };
 // The plan (#14), its real state from the webhook (#15) and the way to Polar's portal (#17).
 export default async function BillingPage({ searchParams }: PageProps<"/app/billing">) {
   // The price doesn't depend on the workspace: read both at once.
-  const [workspace, price, { checkout }] = await Promise.all([requireWorkspace(), getPlanPrice(), searchParams]);
+  const [workspace, { price, trial }, { checkout }] = await Promise.all([requireWorkspace(), getPlan(), searchParams]);
   const status = workspace.subscriptionStatus;
   const pastDue = status === "past_due";
   const periodEnd = workspace.currentPeriodEnd && formatDay(toDay(workspace.currentPeriodEnd));
+  const trialEnd = workspace.trialEndsAt && formatDay(toDay(workspace.trialEndsAt));
   // Back from the checkout before the webhook has landed.
   const shown = checkout === "success" && status !== "active" ? "activating" : status;
-  const { dot, title, detail } = STATUS[shown];
+  const activeDates = workspace.cancelAtPeriodEnd
+    ? periodEnd && `Ends on ${periodEnd}.`
+    : trialEnd
+      ? `Your trial ends on ${trialEnd}. Then the monthly plan starts${price ? ` at ${price}` : ""}.`
+      : periodEnd && `Renews on ${periodEnd}.`;
+  const { dot, title, detail } = STATUS[shown === "active" && trialEnd ? "trial" : shown];
 
   return (
     <div className="mx-auto flex max-w-lg flex-col gap-8">
@@ -27,6 +33,7 @@ export default async function BillingPage({ searchParams }: PageProps<"/app/bill
           <h2 className="font-display text-xl font-medium">Monthly plan</h2>
           {price && <p className="font-display text-lg tabular-nums">{price}</p>}
         </div>
+        {trial && !hasSubscription(workspace) && <p className="mt-1 text-sm font-medium text-green">Starts with a {trial}.</p>}
         <p className="mt-2 text-sm text-graphite">
           Publish posts, your public changelog page and the widget on your site.
         </p>
@@ -37,9 +44,7 @@ export default async function BillingPage({ searchParams }: PageProps<"/app/bill
             {title}
           </p>
           <p className="mt-1 text-graphite">
-            {shown === "active"
-              ? periodEnd && (workspace.cancelAtPeriodEnd ? `Ends on ${periodEnd}.` : `Renews on ${periodEnd}.`)
-              : detail}
+            {shown === "active" ? activeDates : detail}
           </p>
         </div>
 
@@ -69,11 +74,12 @@ export default async function BillingPage({ searchParams }: PageProps<"/app/bill
   );
 }
 
-// What the status box says for each state. Active adds its renewal or end date.
+// What the status box says for each state. Active and trial add their dates.
 const STATUS = {
-  activating: { dot: "bg-blue", title: "Payment received, activating…", detail: "This takes a few seconds. Reload the page to see it." },
+  activating: { dot: "bg-blue", title: "Subscription received, activating…", detail: "This takes a few seconds. Reload the page to see it." },
   active: { dot: "bg-green", title: "Active", detail: "" },
+  trial: { dot: "bg-green", title: "Free trial", detail: "" },
   past_due: { dot: "bg-clay", title: "Payment failed", detail: "Update your card to keep publishing. Until then, nothing shows in public." },
   canceled: { dot: "border border-graphite", title: "No subscription", detail: "Subscribe to publish. Your drafts stay here meanwhile." },
   none: { dot: "border border-graphite", title: "No subscription", detail: "Subscribe to publish. Your drafts stay here meanwhile." },
-} satisfies Record<SubscriptionStatus | "activating", { dot: string; title: string; detail: string }>;
+} satisfies Record<SubscriptionStatus | "activating" | "trial", { dot: string; title: string; detail: string }>;
