@@ -433,8 +433,15 @@ export default function Home() {
           <span translate="no" className="font-display font-medium text-ink">
             {brand}
           </span>
-          <span className="tabular-nums">
-            © {footer.year} {brand}
+          <span className="flex flex-wrap items-center gap-x-3 gap-y-1">
+            <span className="tabular-nums">
+              © {footer.year} {brand}
+            </span>
+            <span aria-hidden="true">·</span>
+            <a href={footer.credit.href} className="hover:text-ink">
+              Made with <span aria-hidden="true" className="text-clay">♥</span>
+              <span className="sr-only">love</span> by <span className="font-medium text-ink">{footer.credit.name}</span>
+            </a>
           </span>
         </div>
       </footer>

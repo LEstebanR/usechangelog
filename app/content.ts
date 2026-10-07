@@ -151,4 +151,6 @@ export const closing = {
 
 export const footer = {
   year: 2026,
+  // The maker's credit, next to the copyright.
+  credit: { name: "LEsteban", href: "https://www.lesteban.dev" },
 };
