@@ -154,6 +154,7 @@ The landing needs none. The variables arrive with the product issues, each docum
 | `NEON_AUTH_BASE_URL` | Auth endpoint | Neon ↔ Vercel integration | [#4](https://github.com/LEstebanR/usechangelog/issues/4) |
 | `NEON_AUTH_COOKIE_SECRET` | Session cookie signing | Manually | [#4](https://github.com/LEstebanR/usechangelog/issues/4) |
 | `POLAR_ACCESS_TOKEN`, `POLAR_PRODUCT_ID`, `POLAR_SERVER` | Checkout and portal (`sandbox` on previews) | Manually | [#14](https://github.com/LEstebanR/usechangelog/issues/14) |
+| `POLAR_ALLOW_DISCOUNT_CODES` | Optional and temporary: `true` shows the discount code field in the checkout while Polar reviews the account; delete it once approved | Manually, Production only | — |
 | `POLAR_WEBHOOK_SECRET` | Webhook signature check | Manually | [#15](https://github.com/LEstebanR/usechangelog/issues/15) |
 | `NEXT_PUBLIC_SITE_URL` | Canonical URL and metadata | Manually | [#13](https://github.com/LEstebanR/usechangelog/issues/13) |
 | `SIGN_IN_ALLOWED_EMAILS` | Before launch, the only emails production signs in (comma-separated); unset means nobody. Ignored on previews and locally | Manually, Production only | [#9](https://github.com/LEstebanR/usechangelog/issues/9) |

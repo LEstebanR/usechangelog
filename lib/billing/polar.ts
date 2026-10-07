@@ -29,6 +29,10 @@ export async function hasActiveSubscriptionInPolar(workspaceId: string) {
   return items.length > 0;
 }
 
+// Off: no coupons in the MVP. Only while Polar reviews the account, POLAR_ALLOW_DISCOUNT_CODES=true
+// lets their team use a 100% code to go through the checkout. Remove it once approved.
+export const discountCodesAllowed = () => process.env.POLAR_ALLOW_DISCOUNT_CODES === "true";
+
 export function webhookSecret() {
   const secret = process.env.POLAR_WEBHOOK_SECRET;
   if (!secret) throw new Error("POLAR_WEBHOOK_SECRET is not set");

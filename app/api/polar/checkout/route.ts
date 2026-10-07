@@ -2,14 +2,14 @@ import { Checkout } from "@polar-sh/nextjs";
 import { redirect } from "next/navigation";
 import { NextRequest } from "next/server";
 import { requireUser } from "@/lib/auth/server";
-import { hasActiveSubscriptionInPolar, polarConfig } from "@/lib/billing/polar";
+import { discountCodesAllowed, hasActiveSubscriptionInPolar, polarConfig } from "@/lib/billing/polar";
 import { hasSubscription } from "@/lib/billing/status";
 import { getOrigin } from "@/lib/site";
 import { requireWorkspace } from "@/lib/workspace/server";
 
 // Subscribe (#14). The helper reads the checkout from the query string, so we never pass
 // it the incoming one: the product, the workspace and the email come from the session and
-// the env, and an edited URL changes nothing.
+// the env, and an edited URL changes nothing. Discount codes stay off (see discountCodesAllowed).
 export async function GET(request: NextRequest) {
   const [user, workspace] = await Promise.all([requireUser(), requireWorkspace()]);
   // One subscription per workspace: an active or failing one is managed in the portal,
@@ -25,7 +25,7 @@ export async function GET(request: NextRequest) {
   // The webhook (#15) finds the workspace by this id, never by email.
   url.searchParams.set("external_customer_id", workspace.id);
   url.searchParams.set("customer_email", user.email);
-  url.searchParams.set("allow_discount_codes", "false");
+  url.searchParams.set("allow_discount_codes", String(discountCodesAllowed()));
 
   return Checkout({
     accessToken,
