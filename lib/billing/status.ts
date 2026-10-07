@@ -14,6 +14,11 @@ export function mapPolarStatus(status: string | null | undefined): SubscriptionS
   return "canceled";
 }
 
+// When a subscription's free trial ends, while it's in one; null otherwise. Polar can keep
+// trial_end after the trial converts, so the status decides.
+export const trialEnd = (subscription: { status: string; trial_end: string | Date | null }) =>
+  subscription.status === "trialing" && subscription.trial_end ? new Date(subscription.trial_end) : null;
+
 type WithStatus = { subscriptionStatus: SubscriptionStatus };
 
 // The one rule for what goes public: publishing, the public page and the widget (#16).

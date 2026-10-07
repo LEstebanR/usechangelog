@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { getPlan } from "@/lib/billing/polar";
-import { canPublish, hasSubscription, type SubscriptionStatus } from "@/lib/billing/status";
+import { hasSubscription, type SubscriptionStatus } from "@/lib/billing/status";
 import { formatDay, toDay } from "@/lib/posts/form";
 import { requireWorkspace } from "@/lib/workspace/server";
 import { primaryButtonClass, secondaryButtonClass } from "../../form-styles";
@@ -14,16 +14,12 @@ export default async function BillingPage({ searchParams }: PageProps<"/app/bill
   const [workspace, { price, trial }, { checkout }] = await Promise.all([requireWorkspace(), getPlan(), searchParams]);
   const status = workspace.subscriptionStatus;
   const pastDue = status === "past_due";
-  const periodEnd = workspace.currentPeriodEnd && formatDay(toDay(workspace.currentPeriodEnd));
-  const trialEnd = workspace.trialEndsAt && formatDay(toDay(workspace.trialEndsAt));
-  // Back from the checkout before the webhook has landed.
-  const shown = checkout === "success" && status !== "active" ? "activating" : status;
-  const activeDates = workspace.cancelAtPeriodEnd
-    ? periodEnd && `Ends on ${periodEnd}.`
-    : trialEnd
-      ? `Your trial ends on ${trialEnd}. Then the monthly plan starts${price ? ` at ${price}` : ""}.`
-      : periodEnd && `Renews on ${periodEnd}.`;
-  const { dot, title, detail } = STATUS[shown === "active" && trialEnd ? "trial" : shown];
+  const backFromCheckout = checkout === "success";
+  // Back from the checkout before the webhook has landed, or a free trial.
+  const shown = backFromCheckout && status !== "active" ? "activating" : status === "active" && workspace.trialEndsAt ? "trial" : status;
+  const { dot, title, detail } = STATUS[shown];
+  const day = (date: Date | null) => (date ? formatDay(toDay(date)) : "");
+  const dates = { periodEnd: day(workspace.currentPeriodEnd), trialEnd: day(workspace.trialEndsAt), canceling: workspace.cancelAtPeriodEnd, price };
 
   return (
     <div className="mx-auto flex max-w-lg flex-col gap-8">
@@ -45,22 +41,22 @@ export default async function BillingPage({ searchParams }: PageProps<"/app/bill
             {title}
           </p>
           <p className="mt-1 text-graphite">
-            {shown === "active" ? activeDates : detail}
+            {detail(dates)}
           </p>
         </div>
 
         {/* GET forms, not links: Next would prefetch a link, and these routes open a checkout
             or a portal session. They take everything from the session, never from the form. */}
         <div className="mt-6 flex flex-wrap gap-3">
-          {!hasSubscription(workspace) && shown !== "activating" && (
+          {!hasSubscription(workspace) && !backFromCheckout && (
             <form action="/api/polar/checkout">
               <button type="submit" className={primaryButtonClass}>
                 Subscribe
               </button>
             </form>
           )}
-          {(shown === "activating" || canPublish(workspace)) && (
-            <Link href="/app" className={shown === "activating" || checkout === "success" ? primaryButtonClass : secondaryButtonClass}>
+          {backFromCheckout && (
+            <Link href="/app" className={primaryButtonClass}>
               Go to your posts
             </Link>
           )}
@@ -80,12 +76,25 @@ export default async function BillingPage({ searchParams }: PageProps<"/app/bill
   );
 }
 
-// What the status box says for each state. Active and trial add their dates.
-const STATUS = {
-  activating: { dot: "bg-blue", title: "Subscription received, activating…", detail: "This takes a few seconds. Reload the page to see it." },
-  active: { dot: "bg-green", title: "Active", detail: "" },
-  trial: { dot: "bg-green", title: "Free trial", detail: "" },
-  past_due: { dot: "bg-clay", title: "Payment failed", detail: "Update your card to keep publishing. Until then, nothing shows in public." },
-  canceled: { dot: "border border-graphite", title: "No subscription", detail: "Subscribe to publish. Your drafts stay here meanwhile." },
-  none: { dot: "border border-graphite", title: "No subscription", detail: "Subscribe to publish. Your drafts stay here meanwhile." },
-} satisfies Record<SubscriptionStatus | "activating" | "trial", { dot: string; title: string; detail: string }>;
+type Dates = { periodEnd: string; trialEnd: string; canceling: boolean; price: string | null };
+
+// What the status box says for each state; active and trial add their dates.
+const STATUS: Record<SubscriptionStatus | "activating" | "trial", { dot: string; title: string; detail: (d: Dates) => string }> = {
+  activating: { dot: "bg-blue", title: "Subscription received, activating…", detail: () => "This takes a few seconds. Reload the page to see it." },
+  active: {
+    dot: "bg-green",
+    title: "Active",
+    detail: (d) => (d.periodEnd ? `${d.canceling ? "Ends" : "Renews"} on ${d.periodEnd}.` : ""),
+  },
+  trial: {
+    dot: "bg-green",
+    title: "Free trial",
+    detail: (d) =>
+      d.canceling
+        ? `Ends on ${d.trialEnd}.`
+        : `Your trial ends on ${d.trialEnd}. Then the monthly plan starts${d.price ? ` at ${d.price}` : ""}.`,
+  },
+  past_due: { dot: "bg-clay", title: "Payment failed", detail: () => "Update your card to keep publishing. Until then, nothing shows in public." },
+  canceled: { dot: "border border-graphite", title: "No subscription", detail: () => "Subscribe to publish. Your drafts stay here meanwhile." },
+  none: { dot: "border border-graphite", title: "No subscription", detail: () => "Subscribe to publish. Your drafts stay here meanwhile." },
+};

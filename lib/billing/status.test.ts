@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { billingFix, canPublish, hasSubscription, mapPolarStatus } from "./status";
+import { billingFix, canPublish, hasSubscription, mapPolarStatus, trialEnd } from "./status";
 
 describe("mapPolarStatus", () => {
   test("active stays active, also when it cancels at the period end", () => {
@@ -51,5 +51,13 @@ describe("billingFix", () => {
     expect(billingFix("past_due").href).toBe("/api/polar/portal");
     expect(billingFix("canceled").href).toBe("/app/billing");
     expect(billingFix("none").href).toBe("/app/billing");
+  });
+});
+
+describe("trialEnd", () => {
+  test("only while trialing", () => {
+    expect(trialEnd({ status: "trialing", trial_end: "2026-10-22T00:00:00Z" })?.toISOString()).toBe("2026-10-22T00:00:00.000Z");
+    expect(trialEnd({ status: "active", trial_end: "2026-10-22T00:00:00Z" })).toBeNull();
+    expect(trialEnd({ status: "trialing", trial_end: null })).toBeNull();
   });
 });

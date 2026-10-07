@@ -47,7 +47,7 @@ export async function getPlan() {
     const price = product.prices.find((p): p is models.ProductPriceFixed => p.amount_type === "fixed" && !p.is_archived);
     return {
       price: price ? `${formatAmount(price.price_amount, price.price_currency)} / ${product.recurring_interval ?? "month"}` : null,
-      trial: product.trial_interval ? trialLabel(product.trial_interval, product.trial_interval_count ?? 1) : null,
+      trial: product.trial_interval ? `${product.trial_interval_count ?? 1}-${product.trial_interval} free trial` : null,
     };
   } catch (error) {
     console.error("Couldn't read the plan from Polar", error);
@@ -61,6 +61,3 @@ const formatAmount = (cents: number, currency: string) =>
     currency: currency.toUpperCase(),
     minimumFractionDigits: cents % 100 ? 2 : 0,
   }).format(cents / 100);
-
-// "15-day free trial", "1-month free trial".
-const trialLabel = (interval: string, count: number) => `${count}-${interval} free trial`;
