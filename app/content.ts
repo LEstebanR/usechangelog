@@ -144,7 +144,9 @@ export const closing = {
   label: "Next",
   title: "Start your changelog.",
   plan: "Publishing is part of a monthly plan. Pricing will be shared at launch.",
-  status: "Sign-up isn’t open yet. We’re building the first version.",
+  // Until sign-up opens (#9).
+  cta: "Launching soon",
+  status: "We’re getting ready to launch. Sign-up opens soon.",
 };
 
 export const footer = {

@@ -18,8 +18,8 @@ const description =
   "A public changelog and an in-app widget for indie hackers and small product teams.";
 
 export const metadata: Metadata = {
-  // Production URL until usechangelog.com is connected.
-  metadataBase: new URL("https://usechangelog-xi.vercel.app"),
+  // The production domain; usechangelog.com redirects here.
+  metadataBase: new URL("https://www.usechangelog.com"),
   title,
   description,
   openGraph: {

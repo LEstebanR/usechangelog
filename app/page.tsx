@@ -416,7 +416,7 @@ export default function Home() {
                 aria-describedby="signup-status"
                 className="cursor-not-allowed border border-hairline bg-wash px-6 py-3.5 font-medium text-graphite"
               >
-                {hero.primaryCta.label}
+                {closing.cta}
               </button>
               <p id="signup-status" className="text-graphite">
                 {closing.status}
