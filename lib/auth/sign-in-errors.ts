@@ -5,6 +5,7 @@ const messages: Record<string, string> = {
   INVALID_TOKEN: "That sign-in link was already used or isn't valid. Enter your email to get a new one.",
   MISSING_EMAIL: "Enter your email address.",
   INVALID_EMAIL: "That doesn't look like an email address. Check it and try again.",
+  NOT_OPEN: "UseChangelog isn\u2019t open yet. We\u2019re launching soon, and sign-up opens then.",
   SEND_FAILED: "We couldn't send the link. Check the address and try again.",
 };
 

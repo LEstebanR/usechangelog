@@ -17,7 +17,7 @@ An issue is ready when someone can develop it without asking questions, and the 
    - Read the current docs (`WebFetch`/`WebSearch`, or `node_modules/next/dist/docs/` for Next.js).
    - Cite them in **References**.
    - Never state a limit or a price from memory.
-4. **When there's a choice of tool or approach,** compare 2–3 real options against this project's constraints: `*.vercel.app` with no own domain, a solo developer, the MVP scope, the services we already use. Pick one and say what we give up.
+4. **When there's a choice of tool or approach,** compare 2–3 real options against this project's constraints: the `www.usechangelog.com` domain (no email domain yet, #24), a solo developer, the MVP scope, the services we already use. Pick one and say what we give up.
 
 ## Structure
 

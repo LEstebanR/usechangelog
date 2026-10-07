@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  <a href="https://usechangelog-xi.vercel.app"><strong>Live site</strong></a> ·
+  <a href="https://www.usechangelog.com"><strong>Live site</strong></a> ·
   <a href="https://github.com/LEstebanR/usechangelog/issues">Roadmap</a> ·
   <a href="#run-locally">Run locally</a> ·
   <a href="#contributing">Contributing</a>
@@ -23,7 +23,7 @@
 
 ## Status
 
-> **The landing page is live; the product is in development.** Sign-up isn't open yet. The MVP is built issue by issue, in the order listed in [Roadmap](#roadmap).
+> **Launching soon.** The landing is live at [usechangelog.com](https://www.usechangelog.com) and the product works end to end, billing included. Until sign-up opens ([#9](https://github.com/LEstebanR/usechangelog/issues/9)), production only signs in the emails in `SIGN_IN_ALLOWED_EMAILS`. The MVP is built issue by issue, in the order listed in [Roadmap](#roadmap).
 
 ## What it is
 
@@ -156,6 +156,7 @@ The landing needs none. The variables arrive with the product issues, each docum
 | `POLAR_ACCESS_TOKEN`, `POLAR_PRODUCT_ID`, `POLAR_SERVER` | Checkout and portal (`sandbox` on previews) | Manually | [#14](https://github.com/LEstebanR/usechangelog/issues/14) |
 | `POLAR_WEBHOOK_SECRET` | Webhook signature check | Manually | [#15](https://github.com/LEstebanR/usechangelog/issues/15) |
 | `NEXT_PUBLIC_SITE_URL` | Canonical URL and metadata | Manually | [#13](https://github.com/LEstebanR/usechangelog/issues/13) |
+| `SIGN_IN_ALLOWED_EMAILS` | Before launch, the only emails production signs in (comma-separated); unset means nobody. Ignored on previews and locally | Manually, Production only | [#9](https://github.com/LEstebanR/usechangelog/issues/9) |
 | `VERCEL_AUTOMATION_BYPASS_SECRET` | Optional, local only: `bun run widget-test` against a protected preview | Manually, in `.env.local` | [#8](https://github.com/LEstebanR/usechangelog/issues/8) |
 
 For local work, copy `.env.example` to `.env.local`. Real `.env*` files are git-ignored.
@@ -178,7 +179,7 @@ polar listen http://localhost:3000/api/polar/webhook
 
 ## Deployment
 
-- **Production:** https://usechangelog-xi.vercel.app, deployed from `main`. There's no custom domain yet; [#24](https://github.com/LEstebanR/usechangelog/issues/24) covers it.
+- **Production:** https://www.usechangelog.com (`usechangelog.com` redirects there), deployed from `main`. Neon Auth on the `production` branch trusts `https://www.usechangelog.com`, and the Polar production webhook points to `https://www.usechangelog.com/api/polar/webhook`; a webhook doesn't follow the redirect. The branded auth email is still [#24](https://github.com/LEstebanR/usechangelog/issues/24).
 - **Previews:** every pull request gets its own Vercel preview, with its own Neon branch and auth. Its URL goes in the PR description.
 - **Migrations:** Vercel runs `vercel-build`: it checks the env vars (`check-env`), applies pending migrations to the deployment's database, then runs `next build`.
 - **Billing:** Production uses Polar's production organization; previews and local use its sandbox (`POLAR_SERVER`, enforced by `check-env`). Polar sends webhooks to `/api/polar/webhook`; for a protected preview, the sandbox endpoint uses the branch URL with `?x-vercel-protection-bypass=<secret>`. Locally, `polar listen` forwards them.
