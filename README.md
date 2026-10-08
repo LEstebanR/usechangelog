@@ -83,6 +83,7 @@ app/
   privacy/, terms/      Privacy policy and terms (shell in legal-page.tsx)
   site-footer.tsx       Footer of the landing, the public page and the legal pages (brand, Privacy · Terms)
   layout-styles.ts      Page width and gutters shared by those pages
+  sitemap.ts, robots.ts SEO: the public pages and changelogs with a post; /app, sign-in and /api blocked
   globals.css           Design tokens (@theme) and motion
   latest.tsx            Rotating "Latest from Acme" feed in the hero
   reveal.tsx            Scroll reveals (IntersectionObserver)

@@ -1,8 +1,14 @@
 import type { Metadata } from "next";
 import { legal } from "../content";
 import { LegalMail, LegalPage } from "../legal-page";
+import { siteOpenGraph } from "../metadata";
 
-export const metadata: Metadata = { title: "Privacy — UseChangelog" };
+export const metadata: Metadata = {
+  title: "Privacy — UseChangelog",
+  description: "What UseChangelog stores, what it uses it for, and who processes it.",
+  alternates: { canonical: "/privacy" },
+  openGraph: { ...siteOpenGraph, title: "Privacy — UseChangelog", description: "What UseChangelog stores, what it uses it for, and who processes it.", url: "/privacy" },
+};
 
 // Plain-language privacy policy (#18). Not legal advice; the owner approves the text.
 export default function PrivacyPage() {

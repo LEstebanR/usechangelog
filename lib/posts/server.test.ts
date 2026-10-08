@@ -2,7 +2,7 @@ import { describe, expect, test } from "bun:test";
 
 // The query is only built, never run: no database in CI. The client needs a URL to exist.
 process.env.DATABASE_URL ??= "postgresql://test:test@localhost/test";
-const { listPublishedPosts } = await import("./server");
+const { listPublicChangelogs, listPublishedPosts } = await import("./server");
 
 const workspaceId = "00000000-0000-0000-0000-000000000000";
 
@@ -28,5 +28,24 @@ describe("listPublishedPosts", () => {
 
   test("the body is selected (the page and the widget render it)", () => {
     expect(listPublishedPosts(workspaceId).toSQL().sql).toContain('"body"');
+  });
+});
+
+describe("listPublicChangelogs (sitemap)", () => {
+  const { sql, params } = listPublicChangelogs().toSQL();
+
+  test("only workspaces with an active subscription", () => {
+    expect(sql).toContain('"workspaces"."subscription_status" = $');
+    expect(params).toContain("active");
+  });
+
+  test("only with at least one published post, joined per workspace", () => {
+    expect(sql).toMatch(/inner join "posts" on \("posts"\."workspace_id" = "workspaces"\."id" and "posts"\."status" = \$\d\)/);
+    expect(params).toContain("published");
+  });
+
+  test("one row per slug, with its newest publish date", () => {
+    expect(sql).toContain('max("posts"."published_on")');
+    expect(sql).toContain('group by "workspaces"."slug"');
   });
 });

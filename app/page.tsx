@@ -89,9 +89,9 @@ function Section({
 }
 
 
-// The landing's own og:url, resolved against metadataBase: production's URL or the preview's
-// (#13). Other pages get theirs with #19.
-export const metadata: Metadata = { openGraph: { ...siteOpenGraph, url: "/" } };
+// The landing's canonical and og:url, resolved against metadataBase: production's URL or
+// the preview's (#13, #19).
+export const metadata: Metadata = { alternates: { canonical: "/" }, openGraph: { ...siteOpenGraph, url: "/" } };
 
 // The landing is static, refreshed every hour so the plan's price follows Polar (#9).
 export const revalidate = 3600;

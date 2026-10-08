@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { notFound, permanentRedirect } from "next/navigation";
 import { canPublish } from "@/lib/billing/status";
 import { formatDay, LABELS } from "@/lib/posts/form";
-import { listPublishedPosts } from "@/lib/posts/server";
+import { countPublishedPosts, listPublishedPosts } from "@/lib/posts/server";
 import { getWorkspaceBySlug } from "@/lib/workspace/server";
 import { PostTags } from "../app/post-tags";
 import { Grid } from "../grid";
@@ -19,18 +19,23 @@ export const dynamic = "force-dynamic";
 type Post = Awaited<ReturnType<typeof listPublishedPosts>>[number];
 
 
-// Each changelog shares as itself: its workspace's name and its own URL. Pages that 404
-// (unknown or unpaid) get the 404's metadata.
+// Each changelog shares as itself: its workspace's name, its own URL and canonical (#19).
+// Pages that 404 (unknown or unpaid) get the 404's metadata. A paid changelog with nothing
+// published yet isn't indexed until it has a post.
 export async function generateMetadata({ params }: PageProps<"/[slug]">): Promise<Metadata> {
   const { slug } = await params;
   const workspace = await getWorkspaceBySlug(slug.toLowerCase());
   if (!workspace || !canPublish(workspace)) return {};
-  const title = `${workspace.name} changelog`;
+  const path = `/${slug.toLowerCase()}`;
+  const title = `${workspace.name} Changelog`;
   const description = `What's new in ${workspace.name}: what shipped, and what's coming.`;
+  const hasPosts = (await countPublishedPosts(workspace.id)) > 0;
   return {
     title,
     description,
-    openGraph: { ...siteOpenGraph, title, description, url: `/${slug.toLowerCase()}` },
+    alternates: { canonical: path },
+    openGraph: { ...siteOpenGraph, title, description, url: path },
+    ...(hasPosts ? {} : { robots: { index: false, follow: true } }),
   };
 }
 
