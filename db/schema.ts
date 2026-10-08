@@ -1,6 +1,7 @@
 import { randomBytes } from "node:crypto";
 import { boolean, date, index, pgEnum, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
 import { SUBSCRIPTION_STATUSES } from "@/lib/billing/status";
+import { FEEDBACK_KINDS } from "@/lib/feedback/form";
 import { CATEGORIES, TYPES } from "@/lib/posts/form";
 import { WIDGET_LANGS } from "@/lib/widget/copy";
 import { user } from "./neon-auth";
@@ -73,3 +74,38 @@ export const posts = pgTable(
   },
   (t) => [index("posts_workspace_status_published_idx").on(t.workspaceId, t.status, t.publishedOn.desc())],
 );
+
+export const feedbackKind = pgEnum("feedback_kind", FEEDBACK_KINDS);
+
+// What signed-in users write to us from the app (#28). Private: never shown in public.
+// Deleting the user deletes their messages; deleting a workspace keeps them, without it.
+export const feedback = pgTable(
+  "feedback",
+  {
+    id: uuid().primaryKey().defaultRandom(),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    // Null when it was sent before onboarding.
+    workspaceId: uuid("workspace_id").references(() => workspaces.id, { onDelete: "set null" }),
+    kind: feedbackKind().notNull().default("other"),
+    message: text().notNull(),
+    // The app route it was sent from, e.g. /app/settings.
+    page: text().notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  // The rate limit counts a user's messages in the last hour.
+  (t) => [index("feedback_user_created_idx").on(t.userId, t.createdAt)],
+);
+
+// Our own staff roles, not customers' (no teams or roles for customers, see AGENTS.md).
+// One row per user that has one; nobody has a role by default. Granted with `bun run admin:grant`.
+export const userRole = pgEnum("user_role", ["admin"]);
+
+export const userRoles = pgTable("user_roles", {
+  userId: uuid("user_id")
+    .primaryKey()
+    .references(() => user.id, { onDelete: "cascade" }),
+  role: userRole().notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+});

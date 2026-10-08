@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { signOut } from "@/lib/auth/actions";
 import { billingFix } from "@/lib/billing/status";
+import { isAdmin } from "@/lib/auth/roles";
 import { requireUser } from "@/lib/auth/server";
 import { renderMarkdown } from "@/lib/markdown";
 import { countPublishedPosts, listPublishedPosts } from "@/lib/posts/server";
@@ -20,7 +21,7 @@ export const metadata: Metadata = { title: "UseChangelog" };
 export default async function AppLayout({ children }: LayoutProps<"/app">) {
   const user = await requireUser();
   // Display only (not an access check): what the workspace's users will see.
-  const workspace = await getCurrentWorkspace();
+  const [workspace, admin] = await Promise.all([getCurrentWorkspace(), isAdmin(user.id)]);
   const [posts, total, url] = workspace
     ? await Promise.all([
         listPublishedPosts(workspace.id, { limit: 10 }),
@@ -56,7 +57,7 @@ export default async function AppLayout({ children }: LayoutProps<"/app">) {
           </form>
         </div>
       </SiteHeader>
-      {workspace && <AppNav />}
+      <AppNav hasWorkspace={Boolean(workspace)} admin={admin} />
       {(workspace?.subscriptionStatus === "past_due" || workspace?.subscriptionStatus === "canceled") && (
         <BillingBanner {...billingFix(workspace.subscriptionStatus)} />
       )}

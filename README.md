@@ -84,6 +84,7 @@ app/
   privacy/, terms/      Privacy policy and terms (shell in legal-page.tsx)
   site-footer.tsx       Footer of the landing, the public page and the legal pages (brand, Privacy · Terms)
   layout-styles.ts      Page width and gutters shared by those pages
+  app/admin/           Admin only: the feedback users send (#28)
   sitemap.ts, robots.ts SEO: the public pages and changelogs with a post; /app, sign-in and /api blocked
   globals.css           Design tokens (@theme) and motion
   latest.tsx            Rotating "Latest from Acme" feed in the hero
@@ -145,6 +146,7 @@ Open http://localhost:3000.
 | `bun run db:generate` | Generate a migration from `db/schema.ts` |
 | `bun run db:migrate` | Apply pending migrations (uses `DATABASE_URL_UNPOOLED`) |
 | `bun run check-env` | Check the required env vars and their format, without printing them. Locally it also checks the database and auth answer. Vercel runs it before migrating |
+| `bun run admin:grant <email>` | Gives an existing user the staff `admin` role (see [Admin](#admin)) |
 | `bun run polar:state <slug>` | Read only: a workspace's subscription in our database next to what Polar has, and what differs. Uses `.env.local` (develop + sandbox); for production, see below |
 | `bun run widget-test <widget-key> [base-url] [port]` | Host pages on another origin (`localhost:5050`) that load the widget: floating button, trigger + Spanish, hostile CSS, invalid key. For a protected preview, set `VERCEL_AUTOMATION_BYPASS_SECRET` |
 | `bun run smoke <email> [base-url]` | Signed-in smoke test of `/app`. Reuses the last session (`.smoke-session-*.json`, git-ignored), so it only sends a magic link when that expires; `SMOKE_LINK=<link>` skips the request. Never writes data, and refuses production URLs unless `SMOKE_ALLOW_PRODUCTION=1` |
@@ -175,6 +177,36 @@ Every variable the code reads is in `.env.example`, by name only. `bun run check
 4. Polar: the sandbox organization's token and product. For the webhook secret, see [Billing webhooks locally](#billing-webhooks-locally).
 5. Leave `NEXT_PUBLIC_SITE_URL` and the optional ones empty.
 6. `bun run check-env`, then `bun run dev`.
+
+### Reading feedback
+
+Users send feedback from **Feedback** in the app's nav (#28). Every message is in the `feedback` table, and admins read them at `/app/admin` (see below). To query them in Neon's SQL editor:
+
+```sql
+select f.created_at, f.kind, u.email, w.slug, f.page, f.message
+from feedback f
+join neon_auth."user" u on u.id = f.user_id
+left join workspaces w on w.id = f.workspace_id
+order by f.created_at desc
+limit 50;
+```
+
+Answer by email, by hand.
+
+### Admin
+
+`admin` is our own staff role, in the `user_roles` table (customers never have one). An admin sees an **Admin** tab in the app, and `/app/admin` lists the feedback, newest first, filterable by kind; anyone else gets a 404 there.
+
+Grant it to someone who has signed in at least once on that environment:
+
+```bash
+bun run admin:grant you@example.com            # develop (.env.local)
+vercel env pull /tmp/usechangelog.prod.env --environment=production
+set -a && . /tmp/usechangelog.prod.env && set +a && bun run admin:grant you@example.com
+rm /tmp/usechangelog.prod.env                    # production
+```
+
+To take it away, delete the user's row from `user_roles`.
 
 ### Checking a production subscription
 

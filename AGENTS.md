@@ -17,6 +17,7 @@ Changelog and product announcements for small teams: a public changelog page and
 This list is the source of truth. The skills in `.agents/skills/` add implementation detail and don't restate these rules.
 
 - **Account model:** one account, one workspace. No teams, no organizations.
+- **Staff role:** `admin` (table `user_roles`) is for us, not for customers. Admins read the feedback at `/app/admin`; anyone else gets a 404 there. Grant it with `bun run admin:grant <email>`.
 - **Public page:** the slug lives in the path (`usechangelog.com/{slug}`), never in a subdomain.
 - **Auth:** Neon Managed Better Auth with magic link only. No passwords, SSO or social login. See `.agents/skills/auth`.
 - **Billing:** Polar, never Stripe. One monthly plan. The price is never hardcoded in code or copy; it comes from Polar. See `.agents/skills/polar-billing`.

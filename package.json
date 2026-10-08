@@ -17,7 +17,8 @@
     "smoke": "bun scripts/smoke-app.ts",
     "widget-test": "bun scripts/widget-test.ts",
     "check-env": "bun scripts/check-env.ts",
-    "polar:state": "bun scripts/polar-state.ts"
+    "polar:state": "bun scripts/polar-state.ts",
+    "admin:grant": "bun scripts/admin-grant.ts"
   },
   "dependencies": {
     "@neondatabase/auth": "0.5.0-beta",
