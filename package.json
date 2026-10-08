@@ -24,6 +24,7 @@
     "@neondatabase/serverless": "1.2.0",
     "@polar-sh/nextjs": "1.0.1",
     "@polar-sh/sdk": "1.0.2",
+    "@vercel/analytics": "2.0.1",
     "drizzle-orm": "0.45.3",
     "markdown-it": "15.0.2",
     "next": "16.3.8",

@@ -69,6 +69,7 @@ The public page and the widget only serve posts while the workspace has an **act
 | Database | [Neon](https://neon.com) Postgres, with Drizzle ORM and migrations in the repo | ✅ In use |
 | Auth | Neon Managed Better Auth, magic link only | ✅ In use |
 | Payments | [Polar](https://polar.sh) as merchant of record: one monthly plan, sandbox on previews | ✅ In use |
+| Analytics | [Vercel Web Analytics](https://vercel.com/docs/analytics): cookieless page views on the site and public changelogs (`@vercel/analytics`) | ✅ In use |
 
 The reasoning behind each choice is in its issue. For example, [#4](https://github.com/LEstebanR/usechangelog/issues/4) explains why it's Neon's auth and not Clerk.
 
