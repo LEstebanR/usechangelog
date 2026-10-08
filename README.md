@@ -23,7 +23,7 @@
 
 ## Status
 
-> **Launching soon.** The landing is live at [usechangelog.com](https://www.usechangelog.com) and the product works end to end, billing included. Until sign-up opens ([#9](https://github.com/LEstebanR/usechangelog/issues/9)), production only signs in the emails in `SIGN_IN_ALLOWED_EMAILS`. The MVP is built issue by issue, in the order listed in [Roadmap](#roadmap).
+> **Early access.** [usechangelog.com](https://www.usechangelog.com) is live and the product works end to end, billing included. Sign-up is open; the public launch is [#9](https://github.com/LEstebanR/usechangelog/issues/9). The MVP is built issue by issue, in the order listed in [Roadmap](#roadmap).
 
 ## What it is
 
@@ -157,7 +157,6 @@ The landing needs none. The variables arrive with the product issues, each docum
 | `POLAR_ALLOW_DISCOUNT_CODES` | Optional and temporary: `true` shows the discount code field in the checkout while Polar reviews the account; delete it once approved | Manually, Production only | — |
 | `POLAR_WEBHOOK_SECRET` | Webhook signature check | Manually | [#15](https://github.com/LEstebanR/usechangelog/issues/15) |
 | `NEXT_PUBLIC_SITE_URL` | Canonical URL and metadata | Manually | [#13](https://github.com/LEstebanR/usechangelog/issues/13) |
-| `SIGN_IN_ALLOWED_EMAILS` | Before launch, the only emails production signs in (comma-separated); unset means nobody. Ignored on previews and locally | Manually, Production only | [#9](https://github.com/LEstebanR/usechangelog/issues/9) |
 | `VERCEL_AUTOMATION_BYPASS_SECRET` | Optional, local only: `bun run widget-test` against a protected preview | Manually, in `.env.local` | [#8](https://github.com/LEstebanR/usechangelog/issues/8) |
 
 For local work, copy `.env.example` to `.env.local`. Real `.env*` files are git-ignored.

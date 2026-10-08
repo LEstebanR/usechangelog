@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { redirect, unstable_rethrow } from "next/navigation";
 import { sendMagicLink } from "@/lib/auth/actions";
-import { signInIsRestricted } from "@/lib/auth/early-access";
 import { getUser } from "@/lib/auth/server";
 import { signInErrorMessage } from "@/lib/auth/sign-in-errors";
 import { inputClass, primaryButtonClass } from "../../form-styles";
@@ -22,9 +21,7 @@ export default async function SignInPage({ searchParams }: PageProps<"/sign-in">
   const errorMessage = signInErrorMessage(error);
   const copy = sent
     ? { intro: "Check your email. We sent you a sign-in link that works for 15 minutes.", cta: "Send another link" }
-    : signInIsRestricted()
-      ? { intro: "UseChangelog is launching soon. Until then, sign-in is open to early access only.", cta: "Send magic link" }
-      : { intro: "New or returning, enter your email and we\u2019ll send you a sign-in link.", cta: "Send magic link" };
+    : { intro: "New or returning, enter your email and we\u2019ll send you a sign-in link.", cta: "Send magic link" };
 
   return (
     <div className="w-full max-w-sm border border-hairline bg-canvas p-8">
