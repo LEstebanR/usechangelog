@@ -28,7 +28,13 @@ export async function listPosts() {
 // What the public sees: published posts only, "Coming soon" first, then newest first.
 // One place for this rule, shared by the header preview, the public page (#7) and the widget (#8).
 // `limit` caps the list; without it, every published post.
-export async function listPublishedPosts(workspaceId: string, { limit }: { limit?: number } = {}) {
+export async function listPublishedPosts(workspaceId: string, options: { limit?: number } = {}) {
+  return publishedPostsQuery(workspaceId, options);
+}
+
+// The query behind listPublishedPosts, built but not run, so the rule can be tested
+// without a database (#12).
+export function publishedPostsQuery(workspaceId: string, { limit }: { limit?: number } = {}) {
   const query = getDb()
     .select({
       id: posts.id,

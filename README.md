@@ -138,7 +138,7 @@ Open http://localhost:3000.
 | `bun run start` | Serve the production build |
 | `bun run lint` | ESLint |
 | `bun run typecheck` | `next typegen` + `tsc --noEmit` (typegen creates route types like `LayoutProps` on a clean checkout) |
-| `bun run check` | Lint, typecheck and build |
+| `bun run check` | Lint, typecheck, build and tests |
 | `bun run test` | Unit tests with `bun test` (`*.test.ts`) |
 | `bun run db:generate` | Generate a migration from `db/schema.ts` |
 | `bun run db:migrate` | Apply pending migrations (uses `DATABASE_URL_UNPOOLED`) |
