@@ -1,10 +1,8 @@
 import type { Metadata } from "next";
 import { legal } from "../content";
-import { LegalPage } from "../legal-page";
+import { LegalMail, LegalPage } from "../legal-page";
 
 export const metadata: Metadata = { title: "Terms — UseChangelog" };
-
-const mail = <a href={`mailto:${legal.contact}`}>{legal.contact}</a>;
 
 // Short terms of service (#18). Not legal advice; the owner approves the text.
 // Billing matches the product: one monthly plan through Polar, access until the period ends (#15).
@@ -13,7 +11,7 @@ export default function TermsPage() {
     <LegalPage label="Terms" title="The short version, in full.">
       <p>
         These terms cover your use of UseChangelog, operated by {legal.operator}. By creating an account you agree
-        to them. Questions go to {mail}.
+        to them. Questions go to <LegalMail />.
       </p>
 
       <h2>The service</h2>

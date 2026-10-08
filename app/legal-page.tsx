@@ -44,10 +44,11 @@ export function LegalPage({ label, title, children }: { label: string; title: st
   );
 }
 
-// Privacy · Terms, for every footer that needs them: the landing, /sign-in and the public page.
-export function LegalLinks({ className = "" }: { className?: string }) {
+// Privacy · Terms, in the footers of the landing, the public page and the legal pages.
+// /sign-in links them inside its own sentence.
+export function LegalLinks() {
   return (
-    <span className={`flex gap-4 ${className}`}>
+    <span className="flex gap-4">
       {legal.links.map(({ href, label }) => (
         <Link key={href} href={href} className="hover:text-ink">
           {label}
@@ -56,3 +57,6 @@ export function LegalLinks({ className = "" }: { className?: string }) {
     </span>
   );
 }
+
+// The contact address, as a mailto link, for the text of the legal pages.
+export const LegalMail = () => <a href={`mailto:${legal.contact}`}>{legal.contact}</a>;

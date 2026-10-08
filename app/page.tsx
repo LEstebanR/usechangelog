@@ -1,17 +1,4 @@
-import {
-  audience,
-  brand,
-  closing,
-  example,
-  footer,
-  hero,
-  how,
-  posts,
-  problem,
-  publicPath,
-  shippedPosts,
-  widget,
-} from "./content";
+import { audience, brand, closing, example, footer, hero, how, posts, problem, publicPath, shippedPosts, signIn, widget } from "./content";
 import { Latest } from "./latest";
 import { Reveal } from "./reveal";
 import { SectionLabel } from "./section-label";
@@ -127,6 +114,9 @@ export default function Home() {
                 {link.label}
               </a>
             ))}
+            <a href={signIn.href} className="text-graphite hover:text-ink">
+              {signIn.label}
+            </a>
             <a
               href={hero.primaryCta.href}
               className="motion-press border border-ink px-4 py-2 font-medium transition-colors hover:bg-ink hover:text-canvas"
@@ -411,14 +401,13 @@ export default function Home() {
         >
           <Indented className="mt-8">
             <div className="flex flex-wrap items-center gap-x-6 gap-y-4">
-              <button
-                type="button"
-                disabled
+              <a
+                href={hero.primaryCta.href}
                 aria-describedby="signup-status"
-                className="cursor-not-allowed border border-hairline bg-wash px-6 py-3.5 font-medium text-graphite"
+                className="motion-press bg-blue px-6 py-3.5 font-medium text-canvas transition-colors hover:bg-ink"
               >
-                {closing.cta}
-              </button>
+                {hero.primaryCta.label}
+              </a>
               <p id="signup-status" className="text-graphite">
                 {closing.status}
               </p>

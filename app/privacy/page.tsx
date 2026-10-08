@@ -1,10 +1,8 @@
 import type { Metadata } from "next";
 import { legal } from "../content";
-import { LegalPage } from "../legal-page";
+import { LegalMail, LegalPage } from "../legal-page";
 
 export const metadata: Metadata = { title: "Privacy — UseChangelog" };
-
-const mail = <a href={`mailto:${legal.contact}`}>{legal.contact}</a>;
 
 // Plain-language privacy policy (#18). Not legal advice; the owner approves the text.
 export default function PrivacyPage() {
@@ -12,7 +10,7 @@ export default function PrivacyPage() {
     <LegalPage label="Privacy" title="What we keep, and why.">
       <p>
         UseChangelog is operated by {legal.operator}. This page explains what we store, what we use it for and who
-        processes it for us. Questions go to {mail}.
+        processes it for us. Questions go to <LegalMail />.
       </p>
 
       <h2>What we store</h2>
@@ -26,7 +24,7 @@ export default function PrivacyPage() {
           Your subscription: the customer and subscription ids Polar gives us, and its status and dates. We never see
           or store your card details.
         </li>
-        <li>The emails you send to {mail}.</li>
+        <li>The emails you send to <LegalMail />.</li>
       </ul>
 
       <h2>What we use it for</h2>
@@ -64,7 +62,7 @@ export default function PrivacyPage() {
 
       <h2>Deleting your account</h2>
       <p>
-        Email {mail} from your account&apos;s address and we&apos;ll delete your account, your workspace and its
+        Email <LegalMail /> from your account&apos;s address and we&apos;ll delete your account, your workspace and its
         posts. To stop paying, cancel your subscription first in Billing → Manage subscription. Polar keeps its own
         records of your payments, as the law requires.
       </p>

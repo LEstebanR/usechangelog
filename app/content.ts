@@ -17,7 +17,7 @@ export const hero = {
   headline: "Tell your users what shipped.",
   subhead:
     "UseChangelog gives your product a public changelog and an in-app widget. Write a post once, and people see it on your site and inside your app.",
-  primaryCta: { label: "Get started", href: "#get-started" },
+  primaryCta: { label: "Get started", href: "/signup" },
   secondaryCta: { label: "See a changelog", href: "#changelog" },
   facts: [
     { term: "Setup", value: "One script tag" },
@@ -144,10 +144,11 @@ export const closing = {
   label: "Next",
   title: "Start your changelog.",
   plan: "Publishing is part of a monthly plan. Pricing will be shared at launch.",
-  // Until sign-up opens (#9).
-  cta: "Launching soon",
-  status: "We’re getting ready to launch. Sign-up opens soon.",
+  // Early access until the launch (#9): sign-up is open, the product is still settling in.
+  status: "We’re in early access while we launch. Sign up free; publishing needs the monthly plan.",
 };
+
+export const signIn = { label: "Sign in", href: "/sign-in" };
 
 // Who runs UseChangelog, and the legal pages (#18). The date changes whenever their text does.
 export const legal = {
