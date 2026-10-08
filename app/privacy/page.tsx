@@ -7,7 +7,7 @@ export const metadata: Metadata = { title: "Privacy — UseChangelog" };
 // Plain-language privacy policy (#18). Not legal advice; the owner approves the text.
 export default function PrivacyPage() {
   return (
-    <LegalPage label="Privacy" title="What we keep, and why.">
+    <LegalPage label="Privacy" title="What we keep, and why." updated="October 7, 2026">
       <p>
         UseChangelog is operated by {legal.operator}. This page explains what we store, what we use it for and who
         processes it for us. Questions go to <LegalMail />.
@@ -58,7 +58,7 @@ export default function PrivacyPage() {
       </p>
 
       <h2>Cookies</h2>
-      <p>Only the session cookie that keeps you signed in. No analytics and no advertising cookies.</p>
+      <p>Only the cookies that keep you signed in. No analytics and no advertising cookies.</p>
 
       <h2>Deleting your account</h2>
       <p>

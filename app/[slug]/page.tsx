@@ -1,14 +1,13 @@
-import Link from "next/link";
 import { notFound, permanentRedirect } from "next/navigation";
 import { canPublish } from "@/lib/billing/status";
 import { formatDay, LABELS } from "@/lib/posts/form";
 import { listPublishedPosts } from "@/lib/posts/server";
 import { getWorkspaceBySlug } from "@/lib/workspace/server";
 import { PostTags } from "../app/post-tags";
-import { brand } from "../content";
 import { Grid } from "../grid";
-import { LegalLinks } from "../legal-page";
+import { container } from "../layout-styles";
 import { MarkdownBody } from "../markdown-body";
+import { SiteFooter } from "../site-footer";
 import { SectionLabel } from "../section-label";
 
 // Always fresh: publishing shows up on the next reload. Without this, Next would cache
@@ -17,7 +16,6 @@ export const dynamic = "force-dynamic";
 
 type Post = Awaited<ReturnType<typeof listPublishedPosts>>[number];
 
-const container = "mx-auto w-full max-w-6xl px-5 sm:px-8";
 
 // A workspace's public changelog: "Coming soon" first, then what shipped, newest first.
 // Unknown slugs get the 404, and so do workspaces without an active subscription (#16):
@@ -58,17 +56,7 @@ export default async function PublicChangelog({ params }: PageProps<"/[slug]">) 
         )}
       </main>
 
-      <footer className="border-t border-hairline bg-canvas">
-        <div className={`${container} flex flex-wrap gap-x-6 gap-y-2 py-8 text-sm text-graphite`}>
-          <Link href="/" className="hover:text-ink">
-            Powered by{" "}
-            <span translate="no" className="font-display font-medium text-ink">
-              {brand}
-            </span>
-          </Link>
-          <LegalLinks />
-        </div>
-      </footer>
+      <SiteFooter prefix="Powered by" />
     </div>
   );
 }

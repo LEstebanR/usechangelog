@@ -1,15 +1,20 @@
-import Link from "next/link";
-import { brand, legal } from "./content";
+import { legal } from "./content";
 import { Grid } from "./grid";
+import { container } from "./layout-styles";
 import { markdownClass } from "./markdown-styles";
 import { SectionLabel } from "./section-label";
+import { SiteFooter } from "./site-footer";
 import { SiteHeader } from "./wordmark";
-
-const container = "mx-auto w-full max-w-6xl px-5 sm:px-8";
 
 // The shell of /privacy and /terms (#18): the landing's grid and type, a label on the left
 // and the text in the content column, like the landing's sections.
-export function LegalPage({ label, title, children }: { label: string; title: string; children: React.ReactNode }) {
+// `updated` is the day this page's text last changed; each page keeps its own.
+export function LegalPage({ label, title, updated, children }: {
+  label: string;
+  title: string;
+  updated: string;
+  children: React.ReactNode;
+}) {
   return (
     <div className="flex min-h-dvh flex-col">
       <SiteHeader />
@@ -20,7 +25,7 @@ export function LegalPage({ label, title, children }: { label: string; title: st
             <SectionLabel className="self-start md:col-span-3 md:pt-4">{label}</SectionLabel>
             <div className="md:col-span-9">
               <h1 className="text-balance font-display text-4xl font-medium tracking-tight sm:text-5xl">{title}</h1>
-              <p className="mt-4 text-sm text-graphite">Last updated {legal.updated}</p>
+              <p className="mt-4 text-sm text-graphite">Last updated {updated}</p>
               <div
                 className={`mt-10 max-w-2xl text-graphite ${markdownClass} [&_h2]:mt-10 [&_h2]:font-display [&_h2]:text-xl [&_h2]:font-medium [&_h2]:tracking-tight [&_h2]:text-ink`}
               >
@@ -30,31 +35,8 @@ export function LegalPage({ label, title, children }: { label: string; title: st
           </div>
         </div>
       </main>
-      <footer className="border-t border-hairline bg-canvas">
-        <div className={`${container} flex flex-wrap gap-x-6 gap-y-2 py-8 text-sm text-graphite`}>
-          <Link href="/" className="hover:text-ink">
-            <span translate="no" className="font-display font-medium text-ink">
-              {brand}
-            </span>
-          </Link>
-          <LegalLinks />
-        </div>
-      </footer>
+      <SiteFooter />
     </div>
-  );
-}
-
-// Privacy · Terms, in the footers of the landing, the public page and the legal pages.
-// /sign-in links them inside its own sentence.
-export function LegalLinks() {
-  return (
-    <span className="flex gap-4">
-      {legal.links.map(({ href, label }) => (
-        <Link key={href} href={href} className="hover:text-ink">
-          {label}
-        </Link>
-      ))}
-    </span>
   );
 }
 
