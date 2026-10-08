@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { notFound, permanentRedirect } from "next/navigation";
 import { canPublish } from "@/lib/billing/status";
 import { formatDay, LABELS } from "@/lib/posts/form";
@@ -7,6 +8,7 @@ import { PostTags } from "../app/post-tags";
 import { Grid } from "../grid";
 import { container } from "../layout-styles";
 import { MarkdownBody } from "../markdown-body";
+import { siteOpenGraph } from "../metadata";
 import { SiteFooter } from "../site-footer";
 import { SectionLabel } from "../section-label";
 
@@ -16,6 +18,21 @@ export const dynamic = "force-dynamic";
 
 type Post = Awaited<ReturnType<typeof listPublishedPosts>>[number];
 
+
+// Each changelog shares as itself: its workspace's name and its own URL. Pages that 404
+// (unknown or unpaid) get the 404's metadata.
+export async function generateMetadata({ params }: PageProps<"/[slug]">): Promise<Metadata> {
+  const { slug } = await params;
+  const workspace = await getWorkspaceBySlug(slug.toLowerCase());
+  if (!workspace || !canPublish(workspace)) return {};
+  const title = `${workspace.name} changelog`;
+  const description = `What's new in ${workspace.name}: what shipped, and what's coming.`;
+  return {
+    title,
+    description,
+    openGraph: { ...siteOpenGraph, title, description, url: `/${slug.toLowerCase()}` },
+  };
+}
 
 // A workspace's public changelog: "Coming soon" first, then what shipped, newest first.
 // Unknown slugs get the 404, and so do workspaces without an active subscription (#16):

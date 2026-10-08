@@ -24,14 +24,15 @@ export async function requireWorkspace() {
 }
 
 // A workspace by its public slug, for the public page (#7). No session needed.
-export async function getWorkspaceBySlug(slug: string) {
+// Cached per request: the page and its metadata both read it.
+export const getWorkspaceBySlug = cache(async (slug: string) => {
   const [workspace] = await getDb()
     .select({ id: workspaces.id, name: workspaces.name, subscriptionStatus: workspaces.subscriptionStatus })
     .from(workspaces)
     .where(eq(workspaces.slug, slug))
     .limit(1);
   return workspace ?? null;
-}
+});
 
 // A workspace by its widget key, for the widget (#8). No session needed.
 export async function getWorkspaceByWidgetKey(key: string) {

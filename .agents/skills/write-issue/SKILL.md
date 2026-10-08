@@ -41,6 +41,7 @@ Use `.github/ISSUE_TEMPLATE/feature.md` for product work and `.github/ISSUE_TEMP
 - **Vendor settings vs code:** for every decision a vendor can also hold (a price, a free trial, a plan interval, a token scope, webhook events), say where it lives: "configured in Polar, read by the code" or "in code". A decision that lives in the vendor can change without a code change, so the issue should say what the code does if it changes.
 - **One outcome per issue.** If "Hecho cuando" needs two unrelated demos, split the issue.
 - **Testable criteria:** every item can be checked as true or false. No "works well" or "looks good".
+- **Checkable by the developer:** a "Hecho cuando" item is something the PR can show: a test, a preview check, a command's output. What only a person can do (a run by someone who didn't write the code, a real payment, the owner's approval of a text) goes under "Lo hace el owner", and "Hecho cuando" says only that it was handed over.
 - **No invented facts:** if something can't be confirmed before implementing, like an exact table name, say so and make confirming it part of the work.
 - **Real names:** tables, columns, routes and functions that already exist are named exactly as in the code (`db/schema.ts` for columns, e.g. `published_on`, not `published_at`). Check them before writing.
 - **Changing a decision:** if a rewrite changes a decision from the previous version, say so at the top in one line, and list the affected issues and PRs in "Impacto".

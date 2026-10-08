@@ -143,7 +143,7 @@ Open http://localhost:3000.
 | `bun run db:generate` | Generate a migration from `db/schema.ts` |
 | `bun run db:migrate` | Apply pending migrations (uses `DATABASE_URL_UNPOOLED`) |
 | `bun run check-env` | Check the required env vars and their format, without printing them. Locally it also checks the database and auth answer. Vercel runs it before migrating |
-| `bun run polar:state <slug>` | Read only: a workspace's subscription in our database next to what Polar has, and what differs |
+| `bun run polar:state <slug>` | Read only: a workspace's subscription in our database next to what Polar has, and what differs. Uses `.env.local` (develop + sandbox); for production, see below |
 | `bun run widget-test <widget-key> [base-url] [port]` | Host pages on another origin (`localhost:5050`) that load the widget: floating button, trigger + Spanish, hostile CSS, invalid key. For a protected preview, set `VERCEL_AUTOMATION_BYPASS_SECRET` |
 | `bun run smoke <email> [base-url]` | Signed-in smoke test of `/app`. Reuses the last session (`.smoke-session-*.json`, git-ignored), so it only sends a magic link when that expires; `SMOKE_LINK=<link>` skips the request. Never writes data, and refuses production URLs unless `SMOKE_ALLOW_PRODUCTION=1` |
 
@@ -173,6 +173,18 @@ Every variable the code reads is in `.env.example`, by name only. `bun run check
 4. Polar: the sandbox organization's token and product. For the webhook secret, see [Billing webhooks locally](#billing-webhooks-locally).
 5. Leave `NEXT_PUBLIC_SITE_URL` and the optional ones empty.
 6. `bun run check-env`, then `bun run dev`.
+
+### Checking a production subscription
+
+`bun run polar:state <slug>` reads whatever env it runs with. To point it at production without keeping production secrets around:
+
+```bash
+vercel env pull /tmp/usechangelog.prod.env --environment=production
+set -a && . /tmp/usechangelog.prod.env && set +a && bun run polar:state <slug>
+rm /tmp/usechangelog.prod.env
+```
+
+It never writes. Delete the file right after: it holds production's database and Polar credentials.
 
 ### Local database
 
