@@ -112,10 +112,10 @@ export default async function Home() {
 
       <header className="sticky top-0 z-40 border-b border-hairline bg-canvas">
         <div
-          className={`${container} flex h-(--header-h) items-center justify-between gap-6`}
+          className={`${container} flex h-(--header-h) items-center justify-between gap-3 sm:gap-6`}
         >
           <Wordmark href="#" animated />
-          <nav aria-label="Main" className="flex items-center gap-8 text-sm">
+          <nav aria-label="Main" className="flex items-center gap-4 text-sm sm:gap-8">
             {navLinks.map((link) => (
               <a
                 key={link.href}
@@ -125,12 +125,13 @@ export default async function Home() {
                 {link.label}
               </a>
             ))}
-            <a href={signIn.href} className="text-graphite hover:text-ink">
+            {/* Same page as Get started (one magic link flow), so phones show only Get started. */}
+            <a href={signIn.href} className="hidden whitespace-nowrap text-graphite hover:text-ink sm:inline">
               {signIn.label}
             </a>
             <a
               href={hero.primaryCta.href}
-              className="motion-press border border-ink px-4 py-2 font-medium transition-colors hover:bg-ink hover:text-canvas"
+              className="motion-press whitespace-nowrap border border-ink px-4 py-2 font-medium transition-colors hover:bg-ink hover:text-canvas"
             >
               {hero.primaryCta.label}
             </a>

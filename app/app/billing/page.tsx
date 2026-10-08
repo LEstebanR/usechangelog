@@ -47,7 +47,8 @@ export default async function BillingPage({ searchParams }: PageProps<"/app/bill
 
         {/* GET forms, not links: Next would prefetch a link, and these routes open a checkout
             or a portal session. They take everything from the session, never from the form. */}
-        <div className="mt-6 flex flex-wrap gap-3">
+        {/* Stacked and full width on a phone, side by side from sm. */}
+        <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:flex-wrap [&>*]:w-full sm:[&>*]:w-auto [&_button]:w-full">
           {!hasSubscription(workspace) && !backFromCheckout && (
             <form action="/api/polar/checkout">
               <button type="submit" className={primaryButtonClass}>

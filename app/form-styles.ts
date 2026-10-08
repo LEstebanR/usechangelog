@@ -2,8 +2,12 @@
 export const inputClass =
   "border border-hairline bg-canvas px-3 py-2 placeholder:text-graphite/70 focus:border-blue aria-invalid:border-clay";
 
+// Buttons and button-looking links share a box: one line, centred, so a label like
+// "Sign out" never wraps on a phone and links line up with real buttons.
+const buttonBox = "inline-flex items-center justify-center whitespace-nowrap text-center";
+
 export const primaryButtonClass =
-  "motion-press bg-blue px-4 py-2.5 font-medium text-canvas transition-opacity hover:opacity-90 disabled:opacity-60";
+  `${buttonBox} motion-press bg-blue px-4 py-2.5 font-medium text-canvas transition-opacity hover:opacity-90 disabled:opacity-60`;
 
 export const secondaryButtonClass =
-  "motion-press border border-ink px-4 py-2.5 font-medium transition-colors hover:bg-ink hover:text-canvas disabled:opacity-50";
+  `${buttonBox} motion-press border border-ink px-4 py-2.5 font-medium transition-colors hover:bg-ink hover:text-canvas disabled:opacity-50`;

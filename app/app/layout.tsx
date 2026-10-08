@@ -32,8 +32,8 @@ export default async function AppLayout({ children }: LayoutProps<"/app">) {
   return (
     <div className="min-h-dvh bg-wash">
       <EnterSubmits />
-      <SiteHeader home="/app">
-        <div className="flex items-center gap-3">
+      <SiteHeader home="/app" compact>
+        <div className="flex items-center gap-2 sm:gap-3">
           {workspace && (
             <WhatsNewPreview
               slug={workspace.slug}
