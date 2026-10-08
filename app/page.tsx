@@ -1,3 +1,4 @@
+import { readPlan } from "@/lib/billing/polar";
 import { audience, brand, closing, example, footer, hero, how, posts, problem, publicPath, shippedPosts, signIn, widget } from "./content";
 import { Latest } from "./latest";
 import { Reveal } from "./reveal";
@@ -86,7 +87,11 @@ function Section({
 }
 
 
-export default function Home() {
+// The landing is static, refreshed every hour so the plan's price follows Polar (#9).
+export const revalidate = 3600;
+
+export default async function Home() {
+  const { price, trial } = await readPlan();
   return (
     <div className="relative isolate">
       <Grid />
@@ -393,7 +398,7 @@ export default function Home() {
           id="get-started"
           label={closing.label}
           title={closing.title}
-          aside={closing.plan}
+          aside={price ? closing.planWithPrice(price, trial) : closing.plan}
           marker="dashed"
           small
           className="border-t border-ink"

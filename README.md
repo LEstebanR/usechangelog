@@ -23,7 +23,7 @@
 
 ## Status
 
-> **Early access.** [usechangelog.com](https://www.usechangelog.com) is live and the product works end to end, billing included. Sign-up is open; the public launch is [#9](https://github.com/LEstebanR/usechangelog/issues/9). The MVP is built issue by issue, in the order listed in [Roadmap](#roadmap).
+> **Live at [usechangelog.com](https://www.usechangelog.com).** Sign up is free; publishing, the public page and the widget need the monthly plan, billed by Polar. The MVP was built issue by issue, in the order listed in [Roadmap](#roadmap); see [End-to-end check](#end-to-end-check) for how it's verified.
 
 ## What it is
 
@@ -197,6 +197,35 @@ polar listen http://localhost:3000/api/polar/webhook
 - **Migrations:** Vercel runs `vercel-build`: it checks the env vars (`check-env`), applies pending migrations to the deployment's database, then runs `next build`.
 - **Billing:** Production uses Polar's production organization; previews and local use its sandbox (`POLAR_SERVER`, enforced by `check-env`). Polar sends webhooks to `/api/polar/webhook`; for a protected preview, the sandbox endpoint uses the branch URL with `?x-vercel-protection-bypass=<secret>`. Locally, `polar listen` forwards them.
 - **CI:** [GitHub Actions](.github/workflows/ci.yml) runs `lint`, `typecheck`, `build` and `test` as separate checks on every PR and on each push to `main`.
+
+## End-to-end check
+
+The manual run-through of the whole product (#10). Run it on a preview with Polar sandbox before a release, and on production with your own account. There is no demo button and no test data in production. The automated part is `bun run test` (the rules in `lib/`); everything below is what a person checks.
+
+| # | Step | Expected |
+| --- | --- | --- |
+| 1 | Open the landing and click **Get started** | `/signup` lands on `/sign-in`. The closing section shows the plan's price and trial, read from Polar |
+| 2 | Ask for the magic link, open it from the email | You land in `/app` (onboarding the first time) |
+| 3 | Onboarding: name the workspace and pick its slug | `/app` with the public URL `/{slug}` |
+| 4 | Write 4 posts: New, Improved and Fixed as Shipped, and one Coming soon. Try **Publish** | "You don't have an active subscription. Subscribe to publish…", nothing is saved as published |
+| 5 | **Billing → Subscribe**, pay in Polar's checkout (sandbox: `4242 4242 4242 4242`) | Back on `/app/billing`: "Free trial" or "Active" within a few seconds (the webhook) |
+| 6 | Publish the 4 posts, open `/{slug}` | The posts are there, "Coming soon" first |
+| 7 | Install the widget using only **Settings → Widget**: a static HTML page and a Next.js app with a CSP (`bun run widget-test <key> [url]` serves host pages). Also with `lang="es"` | The panel shows the posts, in English and in Spanish, with no errors or warnings in the console |
+| 8 | **Manage subscription → Cancel** in Polar's portal. Then revoke it (Polar → Sales → Subscriptions) | "Ends on <date>" after cancelling. After revoking: `/{slug}` is a 404, the widget shows nothing, and `/app` shows the banner. The posts stay in the app |
+| 9 | Send feedback from the app | After [#28](https://github.com/LEstebanR/usechangelog/issues/28), which isn't built yet |
+| 10 | **Sign out** | `/app` redirects to `/sign-in` |
+
+**Runs so far:**
+- **Local, Polar sandbox, 2026-10-07:**
+  - steps 1–5 and 8 passed, plus the trial, ending the trial with a $9.99 charge, uncancelling and a simulated `past_due` (banner and a link to the portal);
+  - the checkout opened from a tampered URL still used the session's workspace and email.
+  - Step 6 (publishing with a plan) wasn't run, by the owner's choice. Step 7 was verified when the widget shipped (#8, `bun run widget-test`).
+- **Production, 2026-10-08:**
+  - Polar's account review went through the production checkout;
+  - every webhook delivery to `https://www.usechangelog.com/api/polar/webhook` returned 200;
+  - an unsigned request returned 403;
+  - `/`, `/sign-in`, `/privacy` and `/terms` answer.
+  - A full production pass with a real subscription is the owner's to run.
 
 ## Roadmap
 

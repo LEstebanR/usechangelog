@@ -40,11 +40,18 @@ export function webhookSecret() {
 }
 
 // The plan as Polar has it: its price ("$9.99 / month") and free trial ("15-day free trial"),
-// each null when there is none or it can't be read. The billing page then says only
-// "Monthly plan". Neither is ever written in our code.
+// each null when there is none or it can't be read. Pages then say only "Monthly plan".
+// Neither is ever written in our code.
+// For the billing page: per request, never at build.
 export async function getPlan() {
-  // Per request, never at build: the billing page reads it alongside the session.
   await connection();
+  return readPlan();
+}
+
+// For the landing, which caches it for an hour (#9). Without Polar's env vars (CI builds,
+// a fresh clone) it quietly gives nothing.
+export async function readPlan() {
+  if (!process.env.POLAR_ACCESS_TOKEN || !process.env.POLAR_PRODUCT_ID) return { price: null, trial: null };
   try {
     const { accessToken, productId, environment } = polarConfig();
     const product = await getProducts(createPolarCore({ accessToken, environment }))(productId);
