@@ -1,8 +1,13 @@
 import type { Metadata } from "next";
-import { legal } from "../content";
+import { brand, legal } from "../content";
 import { LegalMail, LegalPage } from "../legal-page";
+import { pageMetadata } from "../metadata";
 
-export const metadata: Metadata = { title: "Terms — UseChangelog" };
+export const metadata: Metadata = pageMetadata({
+  title: `Terms — ${brand}`,
+  description: "The terms for using UseChangelog: the service, the monthly plan, cancelling and acceptable use.",
+  path: "/terms",
+});
 
 // Short terms of service (#18). Not legal advice; the owner approves the text.
 // Billing matches the product: one monthly plan through Polar, access until the period ends (#15).

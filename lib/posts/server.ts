@@ -1,7 +1,8 @@
-import { and, count, desc, eq, sql } from "drizzle-orm";
+import { and, count, desc, eq, inArray, max, sql } from "drizzle-orm";
 import { notFound } from "next/navigation";
 import { getDb } from "@/db";
-import { posts } from "@/db/schema";
+import { posts, workspaces } from "@/db/schema";
+import { PUBLIC_STATUSES } from "@/lib/billing/status";
 import { requireWorkspace } from "@/lib/workspace/server";
 
 export const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -52,6 +53,18 @@ export async function countPublishedPosts(workspaceId: string) {
     .from(posts)
     .where(and(eq(posts.workspaceId, workspaceId), eq(posts.status, "published")));
   return total;
+}
+
+// Every changelog that is public and has something on it, for the sitemap (#19): the
+// workspace can publish (PUBLIC_STATUSES, the same rule as canPublish) and has at least one
+// published post. `lastPost` is its newest publish date. Returns the query, like above.
+export function listPublicChangelogs() {
+  return getDb()
+    .select({ slug: workspaces.slug, lastPost: max(posts.publishedOn) })
+    .from(workspaces)
+    .innerJoin(posts, and(eq(posts.workspaceId, workspaces.id), eq(posts.status, "published")))
+    .where(inArray(workspaces.subscriptionStatus, PUBLIC_STATUSES))
+    .groupBy(workspaces.slug);
 }
 
 // A post of the signed-in user's workspace. Anything else, including another

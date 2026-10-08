@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { notFound, permanentRedirect } from "next/navigation";
+import { cache } from "react";
 import { canPublish } from "@/lib/billing/status";
 import { formatDay, LABELS } from "@/lib/posts/form";
 import { listPublishedPosts } from "@/lib/posts/server";
@@ -8,7 +9,7 @@ import { PostTags } from "../app/post-tags";
 import { Grid } from "../grid";
 import { container } from "../layout-styles";
 import { MarkdownBody } from "../markdown-body";
-import { siteOpenGraph } from "../metadata";
+import { pageMetadata } from "../metadata";
 import { SiteFooter } from "../site-footer";
 import { SectionLabel } from "../section-label";
 
@@ -19,20 +20,26 @@ export const dynamic = "force-dynamic";
 type Post = Awaited<ReturnType<typeof listPublishedPosts>>[number];
 
 
-// Each changelog shares as itself: its workspace's name and its own URL. Pages that 404
-// (unknown or unpaid) get the 404's metadata.
+// Each changelog shares as itself: its workspace's name, its own URL and canonical (#19).
+// Pages that 404 (unknown or unpaid) get the 404's metadata. A paid changelog with nothing
+// published yet isn't indexed until it has a post.
 export async function generateMetadata({ params }: PageProps<"/[slug]">): Promise<Metadata> {
-  const { slug } = await params;
-  const workspace = await getWorkspaceBySlug(slug.toLowerCase());
+  const slug = (await params).slug.toLowerCase();
+  const workspace = await getWorkspaceBySlug(slug);
   if (!workspace || !canPublish(workspace)) return {};
-  const title = `${workspace.name} changelog`;
-  const description = `What's new in ${workspace.name}: what shipped, and what's coming.`;
+  const hasPosts = (await getPublicPosts(workspace.id)).length > 0;
   return {
-    title,
-    description,
-    openGraph: { ...siteOpenGraph, title, description, url: `/${slug.toLowerCase()}` },
+    ...pageMetadata({
+      title: `${workspace.name} Changelog`,
+      description: `What's new in ${workspace.name}: what shipped, and what's coming.`,
+      path: `/${slug}`,
+    }),
+    ...(hasPosts ? {} : { robots: { index: false, follow: true } }),
   };
 }
+
+// The page and its metadata both need the posts: one query per request.
+const getPublicPosts = cache(async (workspaceId: string) => await listPublishedPosts(workspaceId));
 
 // A workspace's public changelog: "Coming soon" first, then what shipped, newest first.
 // Unknown slugs get the 404, and so do workspaces without an active subscription (#16):
@@ -43,7 +50,7 @@ export default async function PublicChangelog({ params }: PageProps<"/[slug]">) 
   if (slug !== slug.toLowerCase()) permanentRedirect(`/${encodeURIComponent(slug.toLowerCase())}`);
   const workspace = await getWorkspaceBySlug(slug);
   if (!workspace || !canPublish(workspace)) notFound();
-  const posts = await listPublishedPosts(workspace.id);
+  const posts = await getPublicPosts(workspace.id);
   const coming = posts.filter((p) => p.type === "coming");
   const shipped = posts.filter((p) => p.type !== "coming");
 

@@ -1,8 +1,13 @@
 import type { Metadata } from "next";
-import { legal } from "../content";
+import { brand, legal } from "../content";
 import { LegalMail, LegalPage } from "../legal-page";
+import { pageMetadata } from "../metadata";
 
-export const metadata: Metadata = { title: "Privacy — UseChangelog" };
+export const metadata: Metadata = pageMetadata({
+  title: `Privacy — ${brand}`,
+  description: "What UseChangelog stores, what it uses it for, and who processes it.",
+  path: "/privacy",
+});
 
 // Plain-language privacy policy (#18). Not legal advice; the owner approves the text.
 export default function PrivacyPage() {

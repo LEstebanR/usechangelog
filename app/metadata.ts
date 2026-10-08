@@ -11,3 +11,12 @@ export const siteOpenGraph = {
   title: siteTitle,
   description: siteDescription,
 } as const;
+
+// A page's own title, description, canonical and Open Graph (#19). `path` is resolved
+// against metadataBase, so it points to production or to the preview.
+export const pageMetadata = ({ title, description, path }: { title: string; description: string; path: string }) => ({
+  title,
+  description,
+  alternates: { canonical: path },
+  openGraph: { ...siteOpenGraph, title, description, url: path },
+});
