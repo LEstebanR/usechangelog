@@ -42,7 +42,7 @@ export default async function AppPage({ searchParams }: PageProps<"/app">) {
           <p className="mx-auto mt-2 max-w-sm text-graphite">
             Tell your users what shipped, or what&apos;s coming next.
           </p>
-          <Link href="/app/posts/new" className={`mt-6 inline-block ${primaryButtonClass}`}>
+          <Link href="/app/posts/new" className={`mt-6 ${primaryButtonClass}`}>
             Write your first post
           </Link>
         </div>
