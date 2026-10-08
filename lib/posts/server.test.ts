@@ -1,4 +1,5 @@
 import { describe, expect, test } from "bun:test";
+import { PUBLIC_STATUSES } from "@/lib/billing/status";
 
 // The query is only built, never run: no database in CI. The client needs a URL to exist.
 process.env.DATABASE_URL ??= "postgresql://test:test@localhost/test";
@@ -34,11 +35,13 @@ describe("listPublishedPosts", () => {
 describe("listPublicChangelogs (sitemap)", () => {
   const { sql, params } = listPublicChangelogs().toSQL();
 
-  test("only workspaces with an active subscription", () => {
+  // The same rule as isIndexable (the page's noindex): exactly the statuses that publish...
+  test("only workspaces whose status publishes (PUBLIC_STATUSES)", () => {
     expect(sql).toContain('"workspaces"."subscription_status" in (');
-    expect(params).toContain("active");
+    expect(params.filter((p) => p !== "published")).toEqual([...PUBLIC_STATUSES]);
   });
 
+  // ...and at least one published post.
   test("only with at least one published post, joined per workspace", () => {
     expect(sql).toMatch(/inner join "posts" on \("posts"\."workspace_id" = "workspaces"\."id" and "posts"\."status" = \$\d\)/);
     expect(params).toContain("published");

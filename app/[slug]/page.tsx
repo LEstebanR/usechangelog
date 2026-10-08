@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound, permanentRedirect } from "next/navigation";
 import { cache } from "react";
-import { canPublish } from "@/lib/billing/status";
+import { canPublish, isIndexable } from "@/lib/billing/status";
 import { formatDay, LABELS } from "@/lib/posts/form";
 import { listPublishedPosts } from "@/lib/posts/server";
 import { getWorkspaceBySlug } from "@/lib/workspace/server";
@@ -27,14 +27,14 @@ export async function generateMetadata({ params }: PageProps<"/[slug]">): Promis
   const slug = (await params).slug.toLowerCase();
   const workspace = await getWorkspaceBySlug(slug);
   if (!workspace || !canPublish(workspace)) return {};
-  const hasPosts = (await getPublicPosts(workspace.id)).length > 0;
+  const indexable = isIndexable(workspace, (await getPublicPosts(workspace.id)).length);
   return {
     ...pageMetadata({
       title: `${workspace.name} Changelog`,
       description: `What's new in ${workspace.name}: what shipped, and what's coming.`,
       path: `/${slug}`,
     }),
-    ...(hasPosts ? {} : { robots: { index: false, follow: true } }),
+    ...(indexable ? {} : { robots: { index: false, follow: true } }),
   };
 }
 
