@@ -12,7 +12,7 @@ export const metadata: Metadata = pageMetadata({
 // Plain-language privacy policy (#18). Not legal advice; the owner approves the text.
 export default function PrivacyPage() {
   return (
-    <LegalPage label="Privacy" title="What we keep, and why." updated="October 7, 2026">
+    <LegalPage label="Privacy" title="What we keep, and why." updated="October 8, 2026">
       <p>
         UseChangelog is operated by {legal.operator}. This page explains what we store, what we use it for and who
         processes it for us. Questions go to <LegalMail />.
@@ -28,6 +28,10 @@ export default function PrivacyPage() {
         <li>
           Your subscription: the customer and subscription ids Polar gives us, and its status and dates. We never see
           or store your card details.
+        </li>
+        <li>
+          The feedback you send from the app: your message, its kind, the app page you sent it from, your account
+          and your workspace, so we can answer you.
         </li>
         <li>The emails you send to <LegalMail />.</li>
       </ul>
@@ -54,6 +58,10 @@ export default function PrivacyPage() {
         </li>
         <li>
           <strong>ImprovMX</strong>: forwards the emails sent to our support address.
+        </li>
+        <li>
+          <strong>Slack</strong>: when notifications are on, a copy of each feedback message reaches our team&apos;s
+          Slack, with your email and workspace.
         </li>
       </ul>
 

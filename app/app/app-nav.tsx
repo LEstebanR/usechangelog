@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { FeedbackButton } from "./feedback";
 
 // Each tab and the sections that mark it current, besides its own page. Posts is /app
 // itself plus the post pages, never all of /app.
@@ -13,14 +14,15 @@ const TABS = [
 
 const under = (pathname: string, path: string) => pathname === path || pathname.startsWith(`${path}/`);
 
-// The app's sections. Client only to mark the current tab.
-export function AppNav() {
+// The app's sections, and Feedback on the right (#28). Client only to mark the current tab.
+// Before onboarding there are no tabs yet, but Feedback is still there.
+export function AppNav({ tabs }: { tabs: boolean }) {
   const pathname = usePathname();
 
   return (
     <nav aria-label="App" className="border-b border-hairline bg-canvas">
-      <ul className="mx-auto flex max-w-6xl gap-6 overflow-x-auto px-6">
-        {TABS.map(({ href, label, match }) => (
+      <ul className="mx-auto flex max-w-6xl items-center gap-6 overflow-x-auto px-6">
+        {(tabs ? TABS : []).map(({ href, label, match }) => (
           <li key={href}>
             <Link
               href={href}
@@ -31,6 +33,9 @@ export function AppNav() {
             </Link>
           </li>
         ))}
+        <li className="ml-auto">
+          <FeedbackButton />
+        </li>
       </ul>
     </nav>
   );

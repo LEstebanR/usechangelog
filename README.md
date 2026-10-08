@@ -164,6 +164,7 @@ Every variable the code reads is in `.env.example`, by name only. `bun run check
 | `POLAR_WEBHOOK_SECRET` | Webhook signature check | Sandbox endpoint secret | Production endpoint secret | Polar → Settings → Webhooks. Locally, the secret `polar listen` prints |
 | `POLAR_ALLOW_DISCOUNT_CODES` | Optional and temporary: discount field in the checkout during Polar's account review | — | Only during the review | Set by hand, delete after |
 | `NEXT_PUBLIC_SITE_URL` | Canonical URL for metadata (`metadataBase`, `og:url`) | Unset: the preview's own URL (`VERCEL_URL`) | `https://www.usechangelog.com` | Fixed |
+| `FEEDBACK_SLACK_WEBHOOK_URL` | Optional: a copy of each feedback message in Slack | — (unset, so previews don't post) | A Slack incoming webhook | Slack → Apps → Incoming Webhooks |
 | `VERCEL_AUTOMATION_BYPASS_SECRET` | Optional, local only: `widget-test` and `smoke` against a protected preview | — | — | Vercel → Deployment Protection → Protection Bypass for Automation |
 | `SMOKE_LINK`, `SMOKE_ALLOW_PRODUCTION` | Optional, local only: `bun run smoke` | — | — | You |
 | `VERCEL`, `VERCEL_ENV`, `VERCEL_URL` | Which environment this is | Set by Vercel | Set by Vercel | Never set them yourself |
@@ -175,6 +176,21 @@ Every variable the code reads is in `.env.example`, by name only. `bun run check
 4. Polar: the sandbox organization's token and product. For the webhook secret, see [Billing webhooks locally](#billing-webhooks-locally).
 5. Leave `NEXT_PUBLIC_SITE_URL` and the optional ones empty.
 6. `bun run check-env`, then `bun run dev`.
+
+### Reading feedback
+
+Users send feedback from **Feedback** in the app's nav (#28). Every message is in the `feedback` table, and in Slack when `FEEDBACK_SLACK_WEBHOOK_URL` is set. To read the latest ones in Neon's SQL editor:
+
+```sql
+select f.created_at, f.kind, u.email, w.slug, f.page, f.message
+from feedback f
+join neon_auth."user" u on u.id = f.user_id
+left join workspaces w on w.id = f.workspace_id
+order by f.created_at desc
+limit 50;
+```
+
+Answer by email, by hand.
 
 ### Checking a production subscription
 
