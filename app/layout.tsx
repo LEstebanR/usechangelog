@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import { Analytics } from "@vercel/analytics/next";
 import { Funnel_Display, Instrument_Sans } from "next/font/google";
 import { siteUrl } from "@/lib/site";
 import { siteDescription, siteOpenGraph, siteTitle } from "./metadata";
@@ -35,7 +36,11 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       lang="en"
       className={`${funnelDisplay.variable} ${instrumentSans.variable} antialiased`}
     >
-      <body>{children}</body>
+      <body>
+        {children}
+        {/* Vercel Web Analytics: cookieless page views, only where the project has it enabled. */}
+        <Analytics />
+      </body>
     </html>
   );
 }

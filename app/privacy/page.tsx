@@ -45,7 +45,8 @@ export default function PrivacyPage() {
         </li>
         <li>
           <strong>Vercel</strong>: hosting. Like any web host, it logs the requests made to the app, to your public
-          page and to the widget, including the IP address and browser.
+          page and to the widget, including the IP address and browser. Its Web Analytics also counts page views on
+          our site and on public changelog pages, without cookies and without identifying anyone.
         </li>
         <li>
           <strong>Polar</strong>: payments, as our merchant of record. Polar runs the checkout, invoices and taxes,
@@ -58,12 +59,15 @@ export default function PrivacyPage() {
 
       <h2>The people who read your changelog</h2>
       <p>
-        Your public page and the widget don&apos;t set cookies and don&apos;t track their readers. Their requests only
-        reach our host&apos;s logs, like any web page.
+        Your public page and the widget don&apos;t set cookies and don&apos;t track their readers. Visits to your
+        public page are counted anonymously by Vercel Web Analytics; the widget isn&apos;t counted at all.
       </p>
 
       <h2>Cookies</h2>
-      <p>Only the cookies that keep you signed in. No analytics and no advertising cookies.</p>
+      <p>
+        Only the cookies that keep you signed in. Our page-view counting uses no cookies, and there are no advertising
+        cookies.
+      </p>
 
       <h2>Deleting your account</h2>
       <p>
