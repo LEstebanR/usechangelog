@@ -7,6 +7,7 @@ import { getWorkspaceBySlug } from "@/lib/workspace/server";
 import { PostTags } from "../app/post-tags";
 import { brand } from "../content";
 import { Grid } from "../grid";
+import { LegalLinks } from "../legal-page";
 import { MarkdownBody } from "../markdown-body";
 import { SectionLabel } from "../section-label";
 
@@ -58,13 +59,14 @@ export default async function PublicChangelog({ params }: PageProps<"/[slug]">) 
       </main>
 
       <footer className="border-t border-hairline bg-canvas">
-        <div className={`${container} py-8 text-sm text-graphite`}>
+        <div className={`${container} flex flex-wrap gap-x-6 gap-y-2 py-8 text-sm text-graphite`}>
           <Link href="/" className="hover:text-ink">
             Powered by{" "}
             <span translate="no" className="font-display font-medium text-ink">
               {brand}
             </span>
           </Link>
+          <LegalLinks />
         </div>
       </footer>
     </div>

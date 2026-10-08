@@ -149,6 +149,17 @@ export const closing = {
   status: "We’re getting ready to launch. Sign-up opens soon.",
 };
 
+// Who runs UseChangelog, and the legal pages (#18). The date changes whenever their text does.
+export const legal = {
+  operator: "LEsteban (Luis Esteban Ramírez)",
+  contact: "support@lesteban.dev",
+  updated: "October 7, 2026",
+  links: [
+    { href: "/privacy", label: "Privacy" },
+    { href: "/terms", label: "Terms" },
+  ],
+};
+
 export const footer = {
   year: 2026,
   // The maker's credit, next to the copyright.

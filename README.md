@@ -80,6 +80,7 @@ app/
   content.ts            All landing copy (edit text here, not in page.tsx)
   layout.tsx            Fonts, metadata, Open Graph
   not-found.tsx         404 page (unknown routes and notFound())
+  privacy/, terms/      Privacy policy and terms (shell and Privacy · Terms links in legal-page.tsx)
   globals.css           Design tokens (@theme) and motion
   latest.tsx            Rotating "Latest from Acme" feed in the hero
   reveal.tsx            Scroll reveals (IntersectionObserver)

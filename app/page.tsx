@@ -16,6 +16,7 @@ import { Latest } from "./latest";
 import { Reveal } from "./reveal";
 import { SectionLabel } from "./section-label";
 import { Grid } from "./grid";
+import { LegalLinks } from "./legal-page";
 import { TAG_PALETTE, Tag } from "./tag";
 import { Wordmark } from "./wordmark";
 import type { CSSProperties } from "react";
@@ -434,6 +435,8 @@ export default function Home() {
             {brand}
           </span>
           <span className="flex flex-wrap items-center gap-x-3 gap-y-1">
+            <LegalLinks />
+            <span aria-hidden="true">·</span>
             <span className="tabular-nums">
               © {footer.year} {brand}
             </span>

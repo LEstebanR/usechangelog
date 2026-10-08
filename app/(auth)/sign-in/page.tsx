@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { redirect, unstable_rethrow } from "next/navigation";
 import { sendMagicLink } from "@/lib/auth/actions";
 import { signInIsRestricted } from "@/lib/auth/early-access";
@@ -62,6 +63,18 @@ export default async function SignInPage({ searchParams }: PageProps<"/sign-in">
           {copy.cta}
         </SubmitButton>
       </form>
+
+      <p className="mt-6 text-xs text-graphite">
+        By continuing, you agree to the{" "}
+        <Link href="/terms" className="underline underline-offset-4 hover:text-ink">
+          Terms
+        </Link>{" "}
+        and the{" "}
+        <Link href="/privacy" className="underline underline-offset-4 hover:text-ink">
+          Privacy policy
+        </Link>
+        .
+      </p>
     </div>
   );
 }
