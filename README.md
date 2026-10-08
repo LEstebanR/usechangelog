@@ -201,24 +201,24 @@ Grant it to someone who has signed in at least once on that environment:
 
 ```bash
 bun run admin:grant you@example.com            # develop (.env.local)
-vercel env pull /tmp/usechangelog.prod.env --environment=production
-set -a && . /tmp/usechangelog.prod.env && set +a && bun run admin:grant you@example.com
-rm /tmp/usechangelog.prod.env                    # production
+DATABASE_URL="$(neonctl connection-string production --pooled)" bun run admin:grant you@example.com   # production
 ```
+
+`vercel env pull` doesn't work for this: Vercel marks the database URL as sensitive and pulls it empty.
 
 To take it away, delete the user's row from `user_roles`.
 
 ### Checking a production subscription
 
-`bun run polar:state <slug>` reads whatever env it runs with. To point it at production without keeping production secrets around:
+`bun run polar:state <slug>` reads whatever env it runs with. For production, take the database URL from Neon and Polar's production token from the Polar dashboard. Both stay in your shell, never in a file:
 
 ```bash
-vercel env pull /tmp/usechangelog.prod.env --environment=production
-set -a && . /tmp/usechangelog.prod.env && set +a && bun run polar:state <slug>
-rm /tmp/usechangelog.prod.env
+DATABASE_URL="$(neonctl connection-string production --pooled)" \
+POLAR_SERVER=production POLAR_PRODUCT_ID=<production product id> POLAR_ACCESS_TOKEN=<production token> \
+bun run polar:state <slug>
 ```
 
-It never writes. Delete the file right after: it holds production's database and Polar credentials.
+It never writes. `vercel env pull` won't do: Vercel pulls sensitive values (the database URL) empty.
 
 ### Local database
 
