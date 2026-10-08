@@ -28,7 +28,7 @@ describe("requireUser", () => {
   test("with a session, returns the user", async () => {
     hasCookie = true;
     sessionUser = { id: "u1", email: "owner@example.com" };
-    expect(await requireUser()).toEqual(sessionUser);
+    expect(await requireUser()).toEqual(sessionUser as never);
   });
 
   test("without a session cookie, redirects to /sign-in", async () => {
