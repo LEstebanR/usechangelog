@@ -25,6 +25,8 @@ export const metadata: Metadata = {
   description,
   openGraph: {
     type: "website",
+    // Resolved against metadataBase: production's URL, or the preview's own. Per-page URLs are #19.
+    url: "/",
     siteName: brand,
     title,
     description,
