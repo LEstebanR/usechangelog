@@ -22,7 +22,11 @@ export const trialEnd = (subscription: { status: string; trial_end: string | Dat
 type WithStatus = { subscriptionStatus: SubscriptionStatus };
 
 // The one rule for what goes public: publishing, the public page and the widget (#16).
-export const canPublish = (workspace: WithStatus) => workspace.subscriptionStatus === "active";
+// The statuses that publish. SQL that needs the same rule (the sitemap) uses this list too.
+export const PUBLIC_STATUSES = ["active"] as const satisfies readonly SubscriptionStatus[];
+
+export const canPublish = (workspace: WithStatus) =>
+  (PUBLIC_STATUSES as readonly SubscriptionStatus[]).includes(workspace.subscriptionStatus);
 
 // A live subscription, paid or failing: it's managed in the portal, never checked out again.
 export const hasSubscription = (workspace: WithStatus) =>

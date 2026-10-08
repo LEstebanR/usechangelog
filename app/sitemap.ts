@@ -1,5 +1,6 @@
 import type { MetadataRoute } from "next";
 import { listPublicChangelogs } from "@/lib/posts/server";
+import { legal } from "./content";
 import { siteUrl } from "@/lib/site";
 
 // Refreshed every hour: a changelog's first post shows up here within the hour (#19).
@@ -12,8 +13,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const base = siteUrl();
   const pages: MetadataRoute.Sitemap = [
     { url: `${base}/`, changeFrequency: "weekly", priority: 1 },
-    { url: `${base}/privacy`, changeFrequency: "yearly", priority: 0.2 },
-    { url: `${base}/terms`, changeFrequency: "yearly", priority: 0.2 },
+    ...legal.links.map(({ href }) => ({ url: `${base}${href}`, changeFrequency: "yearly" as const, priority: 0.2 })),
   ];
   if (!process.env.DATABASE_URL) return pages;
   const changelogs = await listPublicChangelogs();
@@ -21,7 +21,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...pages,
     ...changelogs.map(({ slug, lastPost }) => ({
       url: `${base}/${slug}`,
-      ...(lastPost ? { lastModified: lastPost } : {}),
+      lastModified: lastPost ?? undefined,
       changeFrequency: "weekly" as const,
       priority: 0.7,
     })),

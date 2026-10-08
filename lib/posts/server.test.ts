@@ -35,7 +35,7 @@ describe("listPublicChangelogs (sitemap)", () => {
   const { sql, params } = listPublicChangelogs().toSQL();
 
   test("only workspaces with an active subscription", () => {
-    expect(sql).toContain('"workspaces"."subscription_status" = $');
+    expect(sql).toContain('"workspaces"."subscription_status" in (');
     expect(params).toContain("active");
   });
 
