@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { formData } from "@/lib/test/form-data";
-import { parseFeedback, slackText } from "./form";
+import { parseFeedback } from "./form";
 
 describe("parseFeedback", () => {
   test("a valid message keeps its kind and the app page it came from", () => {
@@ -29,16 +29,5 @@ describe("parseFeedback", () => {
   test("app pages are kept", () => {
     expect(parseFeedback(formData({ message: "a".repeat(10), page: "/app" })).page).toBe("/app");
     expect(parseFeedback(formData({ message: "a".repeat(10), page: "/app/posts/abc-123" })).page).toBe("/app/posts/abc-123");
-  });
-});
-
-describe("slackText", () => {
-  test("says the kind, who, which workspace, the page and the message", () => {
-    expect(slackText({ kind: "idea", message: "Dark mode\nplease", page: "/app", email: "a@b.co", workspace: "acme" })).toBe(
-      "*Idea* from a@b.co (acme) on `/app`\n>Dark mode\n>please",
-    );
-    expect(slackText({ kind: "other", message: "hi there!!", page: "/app", email: "a@b.co", workspace: null })).toContain(
-      "(no workspace yet)",
-    );
   });
 });

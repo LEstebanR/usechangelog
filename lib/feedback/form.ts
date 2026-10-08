@@ -28,8 +28,3 @@ export function parseFeedback(formData: FormData) {
         : undefined;
   return { values: { kind, message }, page, error };
 }
-
-// The Slack message: who, from where, what (#28).
-export function slackText(f: { kind: FeedbackKind; message: string; page: string; email: string; workspace: string | null }) {
-  return `*${FEEDBACK_LABELS[f.kind]}* from ${f.email} (${f.workspace ?? "no workspace yet"}) on \`${f.page}\`\n>${f.message.replace(/\n/g, "\n>")}`;
-}

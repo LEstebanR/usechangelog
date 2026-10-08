@@ -59,10 +59,6 @@ export default function PrivacyPage() {
         <li>
           <strong>ImprovMX</strong>: forwards the emails sent to our support address.
         </li>
-        <li>
-          <strong>Slack</strong>: when notifications are on, a copy of each feedback message reaches our team&apos;s
-          Slack, with your email and workspace.
-        </li>
       </ul>
 
       <h2>The people who read your changelog</h2>

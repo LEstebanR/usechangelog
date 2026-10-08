@@ -97,3 +97,15 @@ export const feedback = pgTable(
   // The rate limit counts a user's messages in the last hour.
   (t) => [index("feedback_user_created_idx").on(t.userId, t.createdAt)],
 );
+
+// Our own staff roles, not customers' (no teams or roles for customers, see AGENTS.md).
+// One row per user that has one; nobody has a role by default. Granted with `bun run admin:grant`.
+export const userRole = pgEnum("user_role", ["admin"]);
+
+export const userRoles = pgTable("user_roles", {
+  userId: uuid("user_id")
+    .primaryKey()
+    .references(() => user.id, { onDelete: "cascade" }),
+  role: userRole().notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+});
