@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Funnel_Display, Instrument_Sans } from "next/font/google";
+import { siteUrl } from "@/lib/site";
 import { brand, hero } from "./content";
 import "./globals.css";
 
@@ -18,8 +19,8 @@ const description =
   "A public changelog and an in-app widget for indie hackers and small product teams.";
 
 export const metadata: Metadata = {
-  // The production domain; usechangelog.com redirects here.
-  metadataBase: new URL("https://www.usechangelog.com"),
+  // Production's domain (NEXT_PUBLIC_SITE_URL), or a preview's own URL (#13).
+  metadataBase: new URL(siteUrl()),
   title,
   description,
   openGraph: {

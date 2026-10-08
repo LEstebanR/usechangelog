@@ -149,20 +149,30 @@ Open http://localhost:3000.
 
 ### Environment variables
 
-The landing needs none. The variables arrive with the product issues, each documented in `.env.example` (names only, never values):
+Every variable the code reads is in `.env.example`, by name only. `bun run check-env` checks the required ones and their format without printing them. Vercel runs it before every deploy, and locally it also checks that the database and auth answer.
 
-| Variable | Used for | Set by | Issue |
-| --- | --- | --- | --- |
-| `DATABASE_URL`, `DATABASE_URL_UNPOOLED` | Postgres connection | Neon ↔ Vercel integration | [#4](https://github.com/LEstebanR/usechangelog/issues/4) |
-| `NEON_AUTH_BASE_URL` | Auth endpoint | Neon ↔ Vercel integration | [#4](https://github.com/LEstebanR/usechangelog/issues/4) |
-| `NEON_AUTH_COOKIE_SECRET` | Session cookie signing | Manually | [#4](https://github.com/LEstebanR/usechangelog/issues/4) |
-| `POLAR_ACCESS_TOKEN`, `POLAR_PRODUCT_ID`, `POLAR_SERVER` | Checkout and portal (`sandbox` on previews) | Manually | [#14](https://github.com/LEstebanR/usechangelog/issues/14) |
-| `POLAR_ALLOW_DISCOUNT_CODES` | Optional and temporary: `true` shows the discount code field in the checkout while Polar reviews the account; delete it once approved | Manually, Production only | — |
-| `POLAR_WEBHOOK_SECRET` | Webhook signature check | Manually | [#15](https://github.com/LEstebanR/usechangelog/issues/15) |
-| `NEXT_PUBLIC_SITE_URL` | Canonical URL and metadata | Manually | [#13](https://github.com/LEstebanR/usechangelog/issues/13) |
-| `VERCEL_AUTOMATION_BYPASS_SECRET` | Optional, local only: `bun run widget-test` against a protected preview | Manually, in `.env.local` | [#8](https://github.com/LEstebanR/usechangelog/issues/8) |
+| Variable | Used for | Preview | Production | Where the value comes from |
+| --- | --- | --- | --- | --- |
+| `DATABASE_URL`, `DATABASE_URL_UNPOOLED` | Postgres (pooled for the app, direct for migrations) | `develop` branch | `production` branch | Neon → the branch → Connect |
+| `NEON_AUTH_BASE_URL` | Managed Better Auth endpoint | `develop` branch | `production` branch | Neon → the branch → Auth |
+| `NEON_AUTH_COOKIE_SECRET` | Session cookie signing | Random, 32+ chars | Random, 32+ chars | `openssl rand -base64 32` |
+| `POLAR_ACCESS_TOKEN` | Checkout, portal, plan price | Sandbox token | Production token | Polar → Settings → Developers (scopes: `checkouts:write`, `customer_sessions:write`, `products:read`, `subscriptions:read`) |
+| `POLAR_PRODUCT_ID` | The monthly plan | Sandbox product | Production product | Polar → Products |
+| `POLAR_SERVER` | Which Polar to call | `sandbox` | `production` | Fixed; `check-env` enforces it |
+| `POLAR_WEBHOOK_SECRET` | Webhook signature check | Sandbox endpoint secret | Production endpoint secret | Polar → Settings → Webhooks. Locally, the secret `polar listen` prints |
+| `POLAR_ALLOW_DISCOUNT_CODES` | Optional and temporary: discount field in the checkout during Polar's account review | — | Only during the review | Set by hand, delete after |
+| `NEXT_PUBLIC_SITE_URL` | Canonical URL for metadata (`metadataBase`, `og:url`) | Unset: the preview's own URL (`VERCEL_URL`) | `https://www.usechangelog.com` | Fixed |
+| `VERCEL_AUTOMATION_BYPASS_SECRET` | Optional, local only: `widget-test` and `smoke` against a protected preview | — | — | Vercel → Deployment Protection → Protection Bypass for Automation |
+| `SMOKE_LINK`, `SMOKE_ALLOW_PRODUCTION` | Optional, local only: `bun run smoke` | — | — | You |
+| `VERCEL`, `VERCEL_ENV`, `VERCEL_URL` | Which environment this is | Set by Vercel | Set by Vercel | Never set them yourself |
 
-For local work, copy `.env.example` to `.env.local`. Real `.env*` files are git-ignored.
+**Running locally, step by step:**
+1. `cp .env.example .env.local`.
+2. Fill in the Neon values from the `develop` branch (Connect for the URLs, Auth for the auth URL). If `develop` is missing, see [Local database](#local-database).
+3. `NEON_AUTH_COOKIE_SECRET`: any random 32+ characters.
+4. Polar: the sandbox organization's token and product. For the webhook secret, see [Billing webhooks locally](#billing-webhooks-locally).
+5. Leave `NEXT_PUBLIC_SITE_URL` and the optional ones empty.
+6. `bun run check-env`, then `bun run dev`.
 
 ### Local database
 
