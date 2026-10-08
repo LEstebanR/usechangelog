@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { billingFix, canPublish, hasSubscription, mapPolarStatus, trialEnd } from "./status";
+import { billingFix, canPublish, hasSubscription, isIndexable, mapPolarStatus, PUBLIC_STATUSES, trialEnd } from "./status";
 
 describe("mapPolarStatus", () => {
   test("active stays active, also when it cancels at the period end", () => {
@@ -59,5 +59,22 @@ describe("trialEnd", () => {
     expect(trialEnd({ status: "trialing", trial_end: "2026-10-22T00:00:00Z" })?.toISOString()).toBe("2026-10-22T00:00:00.000Z");
     expect(trialEnd({ status: "active", trial_end: "2026-10-22T00:00:00Z" })).toBeNull();
     expect(trialEnd({ status: "trialing", trial_end: null })).toBeNull();
+  });
+});
+
+describe("isIndexable", () => {
+  test("a changelog that can publish and has a post", () => {
+    expect(isIndexable({ subscriptionStatus: "active" }, 1)).toBe(true);
+    expect(isIndexable({ subscriptionStatus: "active" }, 0)).toBe(false);
+  });
+
+  test("never without a status that publishes, whatever its posts", () => {
+    for (const status of ["past_due", "canceled", "none"] as const) {
+      expect(isIndexable({ subscriptionStatus: status }, 5)).toBe(false);
+    }
+  });
+
+  test("follows PUBLIC_STATUSES, the list the sitemap query uses", () => {
+    for (const status of PUBLIC_STATUSES) expect(isIndexable({ subscriptionStatus: status }, 1)).toBe(true);
   });
 });

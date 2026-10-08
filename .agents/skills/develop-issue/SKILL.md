@@ -41,6 +41,7 @@ Goal: a PR, ready for review and not merged, that meets every "Hecho cuando" ite
 ## 4. Implement
 
 - **Follow the plan.** Make small commits with clear English messages and the attribution lines the session asks for.
+- **Prefix rules vs public slugs:** public changelogs live at `/{slug}`, at the root. A rule that matches by prefix (robots.txt `Disallow`, the proxy `matcher`, a rewrite or redirect) can catch a slug that merely starts like a route: `/app` also matches `/apple`. Anchor it (`/app$` and `/app/`, or `/app/:path*`) and add a test with a lookalike slug.
 - **Stay inside the issue.** If you find something broken or odd outside it, mention it in the report; don't fix it.
 - **Decisions belong to the owner.** If the work needs a change to a decision in the issue (a different tool, schema or route), stop and ask before doing it.
 - **No secrets in git.** New env var names go in `.env.example`, without values.

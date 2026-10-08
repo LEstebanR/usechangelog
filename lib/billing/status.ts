@@ -28,6 +28,12 @@ export const PUBLIC_STATUSES = ["active"] as const satisfies readonly Subscripti
 export const canPublish = (workspace: WithStatus) =>
   (PUBLIC_STATUSES as readonly SubscriptionStatus[]).includes(workspace.subscriptionStatus);
 
+// What search engines may index (#19): a changelog that can publish and has a published
+// post. The page's noindex uses this; the sitemap query applies the same two conditions in
+// SQL (PUBLIC_STATUSES and an inner join on published posts), and a test keeps them aligned.
+export const isIndexable = (workspace: WithStatus, publishedPosts: number) =>
+  canPublish(workspace) && publishedPosts > 0;
+
 // A live subscription, paid or failing: it's managed in the portal, never checked out again.
 export const hasSubscription = (workspace: WithStatus) =>
   workspace.subscriptionStatus === "active" || workspace.subscriptionStatus === "past_due";
