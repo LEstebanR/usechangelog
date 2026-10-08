@@ -57,7 +57,7 @@ export default async function AppLayout({ children }: LayoutProps<"/app">) {
           </form>
         </div>
       </SiteHeader>
-      <AppNav tabs={Boolean(workspace)} admin={admin} />
+      <AppNav hasWorkspace={Boolean(workspace)} admin={admin} />
       {(workspace?.subscriptionStatus === "past_due" || workspace?.subscriptionStatus === "canceled") && (
         <BillingBanner {...billingFix(workspace.subscriptionStatus)} />
       )}

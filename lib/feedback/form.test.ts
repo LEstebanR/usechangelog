@@ -18,6 +18,12 @@ describe("parseFeedback", () => {
     expect(parseFeedback(formData({ message: "a".repeat(10) })).error).toBeUndefined();
   });
 
+  test("line breaks count once, however the browser sends them", () => {
+    const message = `${"a".repeat(990)}\r\n${"b".repeat(1009)}`;
+    expect(parseFeedback(formData({ message })).error).toBeUndefined();
+    expect(parseFeedback(formData({ message })).values.message).not.toContain("\r");
+  });
+
   test("an unknown kind is other", () => {
     expect(parseFeedback(formData({ kind: "spam", message: "a".repeat(10) })).values.kind).toBe("other");
   });

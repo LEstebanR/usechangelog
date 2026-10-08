@@ -17,7 +17,8 @@ export type FeedbackState = { ok?: true; error?: string; values: { kind: Feedbac
 // dropped, so only our own paths get stored.
 export function parseFeedback(formData: FormData) {
   const kind = oneOf(FEEDBACK_KINDS, formData.get("kind"), "other");
-  const message = String(formData.get("message") ?? "").trim();
+  // Browsers send line breaks as \r\n; count them as one, like the textarea does.
+  const message = String(formData.get("message") ?? "").replace(/\r\n?/g, "\n").trim();
   const rawPage = String(formData.get("page") ?? "");
   const page = /^\/app(\/[\w\-/]*)?$/.test(rawPage) ? rawPage.slice(0, 200) : "/app";
   const error =

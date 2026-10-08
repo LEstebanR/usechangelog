@@ -19,13 +19,14 @@ const ADMIN_TAB = { href: "/app/admin", label: "Admin", match: ["/app/admin"] };
 // The app's sections, and Feedback on the right (#28). Client only to mark the current tab.
 // Before onboarding there are no tabs yet, but Feedback is still there. The Admin tab is
 // display only; /app/admin checks the role itself.
-export function AppNav({ tabs, admin }: { tabs: boolean; admin: boolean }) {
+export function AppNav({ hasWorkspace, admin }: { hasWorkspace: boolean; admin: boolean }) {
   const pathname = usePathname();
+  const tabs = [...(hasWorkspace ? TABS : []), ...(admin ? [ADMIN_TAB] : [])];
 
   return (
     <nav aria-label="App" className="border-b border-hairline bg-canvas">
       <ul className="mx-auto flex max-w-6xl items-center gap-6 overflow-x-auto px-6">
-        {[...(tabs ? TABS : []), ...(admin ? [ADMIN_TAB] : [])].map(({ href, label, match }) => (
+        {tabs.map(({ href, label, match }) => (
           <li key={href}>
             <Link
               href={href}

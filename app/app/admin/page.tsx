@@ -4,7 +4,6 @@ import { isAdmin, requireAdmin } from "@/lib/auth/roles";
 import { getUser } from "@/lib/auth/server";
 import { FEEDBACK_KINDS, FEEDBACK_LABELS } from "@/lib/feedback/form";
 import { listFeedback } from "@/lib/feedback/server";
-import { oneOf } from "@/lib/posts/form";
 
 // The title only names the page for admins; anyone else gets the 404's, so nothing hints it exists.
 export async function generateMetadata(): Promise<Metadata> {
@@ -19,11 +18,14 @@ const dateTime = (date: Date) =>
 export default async function AdminPage({ searchParams }: PageProps<"/app/admin">) {
   await requireAdmin();
   const raw = (await searchParams).kind;
-  const kind = raw ? oneOf(FEEDBACK_KINDS, raw, "other") : undefined;
+  // Unknown or missing: every kind.
+  const kind = FEEDBACK_KINDS.find((k) => k === raw);
   const items = await listFeedback({ kind });
-  const filters = [{ href: "/app/admin", label: "All", current: !kind }].concat(
-    FEEDBACK_KINDS.map((k) => ({ href: `/app/admin?kind=${k}`, label: FEEDBACK_LABELS[k], current: kind === k })),
-  );
+  const filters = [undefined, ...FEEDBACK_KINDS].map((k) => ({
+    href: k ? `/app/admin?kind=${k}` : "/app/admin",
+    label: k ? FEEDBACK_LABELS[k] : "All",
+    current: kind === k,
+  }));
 
   return (
     <div className="mx-auto flex max-w-3xl flex-col gap-6">
