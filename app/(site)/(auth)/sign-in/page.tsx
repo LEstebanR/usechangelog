@@ -4,10 +4,11 @@ import { redirect, unstable_rethrow } from "next/navigation";
 import { sendMagicLink } from "@/lib/auth/actions";
 import { getUser } from "@/lib/auth/server";
 import { signInErrorMessage } from "@/lib/auth/sign-in-errors";
+import { signInMetadata } from "../../metadata";
 import { inputClass, primaryButtonClass } from "../../form-styles";
 import { SubmitButton } from "../../submit-button";
 
-export const metadata: Metadata = { title: "Sign in — UseChangelog" };
+export const metadata: Metadata = signInMetadata;
 
 export default async function SignInPage({ searchParams }: PageProps<"/sign-in">) {
   // The proxy doesn't refresh the session on the login URL, and the SDK can

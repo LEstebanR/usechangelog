@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { brand, legal } from "../content";
 import { LegalMail, LegalPage } from "../legal-page";
+import { MarketingJsonLd } from "../../json-ld";
 import { pageMetadata } from "../metadata";
 
 export const metadata: Metadata = pageMetadata({
@@ -13,6 +14,7 @@ export const metadata: Metadata = pageMetadata({
 export default function PrivacyPage() {
   return (
     <LegalPage label="Privacy" title="What we keep, and why." updated="October 8, 2026">
+      <MarketingJsonLd />
       <p>
         UseChangelog is operated by {legal.operator}. This page explains what we store, what we use it for and who
         processes it for us. Questions go to <LegalMail />.

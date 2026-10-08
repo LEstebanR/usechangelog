@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { brand, legal } from "../content";
 import { LegalMail, LegalPage } from "../legal-page";
+import { MarketingJsonLd } from "../../json-ld";
 import { pageMetadata } from "../metadata";
 
 export const metadata: Metadata = pageMetadata({
@@ -14,6 +15,7 @@ export const metadata: Metadata = pageMetadata({
 export default function TermsPage() {
   return (
     <LegalPage label="Terms" title="The short version, in full." updated="October 7, 2026">
+      <MarketingJsonLd />
       <p>
         These terms cover your use of UseChangelog, operated by {legal.operator}. By creating an account you agree
         to them. Questions go to <LegalMail />.

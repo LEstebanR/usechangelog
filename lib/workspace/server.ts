@@ -27,7 +27,12 @@ export async function requireWorkspace() {
 // Cached per request: the page and its metadata both read it.
 export const getWorkspaceBySlug = cache(async (slug: string) => {
   const [workspace] = await getDb()
-    .select({ id: workspaces.id, name: workspaces.name, subscriptionStatus: workspaces.subscriptionStatus })
+    .select({
+      id: workspaces.id,
+      name: workspaces.name,
+      subscriptionStatus: workspaces.subscriptionStatus,
+      widgetLang: workspaces.widgetLang,
+    })
     .from(workspaces)
     .where(eq(workspaces.slug, slug))
     .limit(1);

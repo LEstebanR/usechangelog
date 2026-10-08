@@ -1,6 +1,6 @@
 import type { MetadataRoute } from "next";
 import { listPublicChangelogs } from "@/lib/posts/server";
-import { legal } from "./content";
+import { legal } from "./(site)/content";
 import { siteUrl } from "@/lib/site";
 
 // Refreshed every hour: a changelog's first post shows up here within the hour (#19).

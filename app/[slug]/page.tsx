@@ -4,20 +4,26 @@ import { cache } from "react";
 import { canPublish, isIndexable } from "@/lib/billing/status";
 import { formatDay, LABELS } from "@/lib/posts/form";
 import { listPublishedPosts } from "@/lib/posts/server";
+import { changelogJsonLd } from "@/lib/seo/json-ld";
+import { changelogLanguage } from "@/lib/seo/language";
+import { siteUrl } from "@/lib/site";
 import { getWorkspaceBySlug } from "@/lib/workspace/server";
-import { PostTags } from "../app/post-tags";
-import { Grid } from "../grid";
-import { container } from "../layout-styles";
-import { MarkdownBody } from "../markdown-body";
-import { pageMetadata } from "../metadata";
-import { SiteFooter } from "../site-footer";
-import { SectionLabel } from "../section-label";
+import { JsonLd } from "../json-ld";
+import { PostTags } from "../(site)/app/post-tags";
+import { Grid } from "../(site)/grid";
+import { container } from "../(site)/layout-styles";
+import { MarkdownBody } from "../(site)/markdown-body";
+import { pageMetadata } from "../(site)/metadata";
+import { SiteFooter } from "../(site)/site-footer";
+import { SectionLabel } from "../(site)/section-label";
 
 // Always fresh: publishing shows up on the next reload. Without this, Next would cache
 // the page after its first request.
 export const dynamic = "force-dynamic";
 
 type Post = Awaited<ReturnType<typeof listPublishedPosts>>[number];
+
+const changelogDescription = (name: string) => `What's new in ${name}: what shipped, and what's coming.`;
 
 
 // Each changelog shares as itself: its workspace's name, its own URL and canonical (#19).
@@ -31,7 +37,7 @@ export async function generateMetadata({ params }: PageProps<"/[slug]">): Promis
   return {
     ...pageMetadata({
       title: `${workspace.name} Changelog`,
-      description: `What's new in ${workspace.name}: what shipped, and what's coming.`,
+      description: changelogDescription(workspace.name),
       path: `/${slug}`,
     }),
     ...(indexable ? {} : { robots: { index: false, follow: true } }),
@@ -53,9 +59,21 @@ export default async function PublicChangelog({ params }: PageProps<"/[slug]">) 
   const posts = await getPublicPosts(workspace.id);
   const coming = posts.filter((p) => p.type === "coming");
   const shipped = posts.filter((p) => p.type !== "coming");
+  const description = changelogDescription(workspace.name);
 
   return (
     <div className="relative isolate flex min-h-dvh flex-col">
+      {posts.length > 0 && (
+        <JsonLd
+          data={changelogJsonLd({
+            name: `${workspace.name} Changelog`,
+            description,
+            url: `${siteUrl()}/${slug}`,
+            inLanguage: changelogLanguage(workspace.widgetLang),
+            posts,
+          })}
+        />
+      )}
       <Grid />
 
       <main className={`${container} flex-1 pb-20 pt-16 md:pb-28 md:pt-24`}>

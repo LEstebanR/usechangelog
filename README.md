@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="app/opengraph-image.png" alt="UseChangelog: Tell your users what shipped. Sample changelog entries tagged New, Improved and Fixed." width="720">
+  <img src="public/opengraph-image.png" alt="UseChangelog: Tell your users what shipped. Sample changelog entries tagged New, Improved and Fixed." width="720">
 </p>
 
 <h1 align="center">UseChangelog</h1>
@@ -77,27 +77,31 @@ The reasoning behind each choice is in its issue. For example, [#4](https://gith
 
 ```
 app/
-  page.tsx              Landing page
-  content.ts            All landing copy (edit text here, not in page.tsx)
-  layout.tsx            Fonts, metadata, Open Graph
-  not-found.tsx         404 page (unknown routes and notFound())
-  privacy/, terms/      Privacy policy and terms (shell in legal-page.tsx)
-  site-footer.tsx       Footer of the landing, the public page and the legal pages (brand, Privacy · Terms)
-  layout-styles.ts      Page width and gutters shared by those pages
-  app/admin/           Admin only: the feedback users send (#28)
+  document.tsx          Shared <html> shell (fonts, analytics)
+  global-not-found.tsx  Unmatched URLs: the 404 document, lang="en"
+  manifest.ts           Web app manifest
   sitemap.ts, robots.ts SEO: the public pages and changelogs with a post; /app, sign-in and /api blocked
   globals.css           Design tokens (@theme) and motion
-  latest.tsx            Rotating "Latest from Acme" feed in the hero
-  reveal.tsx            Scroll reveals (IntersectionObserver)
-  section-label.tsx     Section label with the brand square
-  tag.tsx               New / Improved / Fixed / Coming soon tags
-  markdown-body.tsx     A post body rendered from Markdown (styles in markdown-styles.ts)
-  [slug]/               The public changelog at /{slug}, rendered on every request
+  (site)/               Marketing site, sign-in and the app. Document language is English
+    page.tsx            Landing page
+    content.ts          All landing copy (edit text here, not in page.tsx)
+    layout.tsx          Metadata and Open Graph for that tree
+    not-found.tsx       404 page (unknown routes and notFound())
+    privacy/, terms/    Privacy policy and terms (shell in legal-page.tsx)
+    site-footer.tsx     Footer of the landing, the public page and the legal pages (brand, Privacy · Terms)
+    layout-styles.ts    Page width and gutters shared by those pages
+    latest.tsx          Rotating "Latest from Acme" feed in the hero
+    reveal.tsx          Scroll reveals (IntersectionObserver)
+    section-label.tsx   Section label with the brand square
+    tag.tsx             New / Improved / Fixed / Coming soon tags
+    markdown-body.tsx   A post body rendered from Markdown (styles in markdown-styles.ts)
+    (auth)/sign-in/     Magic link sign-in
+    app/                The signed-in app: /app (posts), /app/posts/new, /app/posts/[id], /app/onboarding, /app/settings, /app/billing
+    app/admin/          Admin only: the feedback users send (#28)
+  [slug]/               The public changelog at /{slug}. Its own root layout sets lang from the workspace
   api/widget/[key]/     Public widget data (CORS open, 60-second CDN cache)
   api/polar/            Polar checkout, customer portal and webhook (the only writer of subscription state)
-  icon.svg, apple-icon.png, opengraph-image.png
-  (auth)/sign-in/       Magic link sign-in
-  app/                  The signed-in app: /app (posts), /app/posts/new, /app/posts/[id], /app/onboarding, /app/settings, /app/billing
+  icon.svg, apple-icon.png
   api/auth/[...path]/   Auth handler, proxied to Neon
 lib/auth/               Server auth client and Server Actions (sign in, sign out)
 lib/workspace/          Slug rules, form parsing, getCurrentWorkspace(), getWorkspaceBySlug() and workspace Server Actions
@@ -106,6 +110,7 @@ lib/billing/            Polar config, mapPolarStatus(), canPublish() (the one pu
 lib/markdown.ts         renderMarkdown(): safe Markdown to HTML for the public page and the widget
 lib/widget/             The widget's words in 5 languages and the API payload
 public/widget.js        The embeddable "What's new" widget (vanilla JS, Shadow DOM)
+public/opengraph-image.png  Shared social image (1200×630)
 scripts/smoke-app.ts    Signed-in smoke test (`bun run smoke`)
 scripts/widget-test.ts  Host pages to try the widget from another origin (`bun run widget-test`)
 db/
@@ -321,9 +326,9 @@ The landing is the **Quiet grid** direction. It has five parts:
   - Instrument Sans for body text.
 - **Colors:**
   - ink-blue accent `#1D3A8F`;
-  - tag colors: blue for New, violet for Improved, green for Fixed (one palette in `app/tag.tsx`).
+  - tag colors: blue for New, violet for Improved, green for Fixed (one palette in `app/(site)/tag.tsx`).
 - **Motion:** sober, and it respects `prefers-reduced-motion`.
-- **Copy:** all of it lives in `app/content.ts`.
+- **Copy:** all of it lives in `app/(site)/content.ts`.
 
 Lighthouse on the production build: **98 / 100 / 100 / 100** on mobile and **100 / 100 / 100 / 100** on desktop (performance, accessibility, best practices, SEO).
 

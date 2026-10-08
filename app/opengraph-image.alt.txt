@@ -1,1 +1,0 @@
-UseChangelog: Tell your users what shipped. Sample changelog entries tagged New, Improved and Fixed.
