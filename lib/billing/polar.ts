@@ -1,19 +1,23 @@
 import { createPolarCore, type Environment, type models } from "@polar-sh/sdk/2026-10";
 import { getProducts } from "@polar-sh/sdk/2026-10/services/products";
 import { listSubscriptions } from "@polar-sh/sdk/2026-10/services/subscriptions";
-import { connection } from "next/server";
 
 // Read on first use, not at import, so `next build` runs without env vars.
 // Previews point to Polar's sandbox and production to production (`POLAR_SERVER`).
-export function polarConfig() {
+// Null when Polar isn't set up (CI builds, a fresh clone); polarConfig() requires it.
+export function readPolarConfig() {
   const accessToken = process.env.POLAR_ACCESS_TOKEN;
   const productId = process.env.POLAR_PRODUCT_ID;
   const server = process.env.POLAR_SERVER;
-  if (!accessToken || !productId || (server !== "sandbox" && server !== "production")) {
-    throw new Error("POLAR_ACCESS_TOKEN, POLAR_PRODUCT_ID and POLAR_SERVER (sandbox or production) must be set");
-  }
+  if (!accessToken || !productId || (server !== "sandbox" && server !== "production")) return null;
   const environment: Environment = server;
   return { accessToken, productId, environment };
+}
+
+export function polarConfig() {
+  const config = readPolarConfig();
+  if (!config) throw new Error("POLAR_ACCESS_TOKEN, POLAR_PRODUCT_ID and POLAR_SERVER (sandbox or production) must be set");
+  return config;
 }
 
 // Whether Polar already has a live subscription for this workspace. Our row can lag behind
@@ -39,21 +43,17 @@ export function webhookSecret() {
   return secret;
 }
 
+const NO_PLAN = { price: null, trial: null };
+
 // The plan as Polar has it: its price ("$9.99 / month") and free trial ("15-day free trial"),
 // each null when there is none or it can't be read. Pages then say only "Monthly plan".
-// Neither is ever written in our code.
-// For the billing page: per request, never at build.
-export async function getPlan() {
-  await connection();
-  return readPlan();
-}
-
-// For the landing, which caches it for an hour (#9). Without Polar's env vars (CI builds,
-// a fresh clone) it quietly gives nothing.
+// Neither is ever written in our code. The landing caches it for an hour (#9); the billing
+// page reads it per request. Without Polar set up, it quietly gives nothing.
 export async function readPlan() {
-  if (!process.env.POLAR_ACCESS_TOKEN || !process.env.POLAR_PRODUCT_ID) return { price: null, trial: null };
+  const config = readPolarConfig();
+  if (!config) return NO_PLAN;
   try {
-    const { accessToken, productId, environment } = polarConfig();
+    const { accessToken, productId, environment } = config;
     const product = await getProducts(createPolarCore({ accessToken, environment }))(productId);
     const price = product.prices.find((p): p is models.ProductPriceFixed => p.amount_type === "fixed" && !p.is_archived);
     return {
@@ -62,7 +62,7 @@ export async function readPlan() {
     };
   } catch (error) {
     console.error("Couldn't read the plan from Polar", error);
-    return { price: null, trial: null };
+    return NO_PLAN;
   }
 }
 

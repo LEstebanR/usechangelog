@@ -1,11 +1,7 @@
 import { describe, expect, test } from "bun:test";
+import { formData as form } from "@/lib/test/form-data";
 import { parsePostForm, toDay } from "./form";
 
-const form = (fields: Record<string, string>) => {
-  const data = new FormData();
-  for (const [key, value] of Object.entries(fields)) data.set(key, value);
-  return data;
-};
 const dayFromToday = (days: number) => toDay(new Date(Date.now() + days * 86_400_000));
 
 describe("parsePostForm", () => {

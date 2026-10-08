@@ -1,7 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Funnel_Display, Instrument_Sans } from "next/font/google";
 import { siteUrl } from "@/lib/site";
-import { brand, hero } from "./content";
+import { siteDescription, siteOpenGraph, siteTitle } from "./metadata";
 import "./globals.css";
 
 const funnelDisplay = Funnel_Display({
@@ -14,23 +14,12 @@ const instrumentSans = Instrument_Sans({
   subsets: ["latin"],
 });
 
-const title = `${brand} — ${hero.headline.replace(/\.$/, "")}`;
-const description =
-  "A public changelog and an in-app widget for indie hackers and small product teams.";
-
 export const metadata: Metadata = {
   // Production's domain (NEXT_PUBLIC_SITE_URL), or a preview's own URL (#13).
   metadataBase: new URL(siteUrl()),
-  title,
-  description,
-  openGraph: {
-    type: "website",
-    // Resolved against metadataBase: production's URL, or the preview's own. Per-page URLs are #19.
-    url: "/",
-    siteName: brand,
-    title,
-    description,
-  },
+  title: siteTitle,
+  description: siteDescription,
+  openGraph: siteOpenGraph,
   twitter: {
     card: "summary_large_image",
   },

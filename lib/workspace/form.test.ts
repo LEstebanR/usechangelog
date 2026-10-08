@@ -1,11 +1,6 @@
 import { describe, expect, test } from "bun:test";
+import { formData as form } from "@/lib/test/form-data";
 import { parseForm } from "./form";
-
-const form = (fields: Record<string, string>) => {
-  const data = new FormData();
-  for (const [key, value] of Object.entries(fields)) data.set(key, value);
-  return data;
-};
 
 describe("parseForm (workspace)", () => {
   test("trims the name and keeps a valid slug in lowercase", () => {

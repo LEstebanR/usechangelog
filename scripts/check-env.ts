@@ -17,9 +17,9 @@ const checks: [name: string, pattern: RegExp, hint: string][] = [
   isProduction
     ? ["POLAR_SERVER", /^production$/, "production"]
     : ["POLAR_SERVER", /^sandbox$/, "sandbox (only Production uses production)"],
-  // Previews and local use their own URL; only Production needs the canonical one (#13).
-  ...(isProduction ? [["NEXT_PUBLIC_SITE_URL", /^https:\/\/[^/\s]+\/?$/, "the https:// origin of the production site"] satisfies [string, RegExp, string]] : []),
 ];
+// Previews and local use their own URL; only Production needs the canonical one (#13).
+if (isProduction) checks.push(["NEXT_PUBLIC_SITE_URL", /^https:\/\/[^/\s]+\/?$/, "the https:// origin of the production site"]);
 
 const problems = checks.flatMap(([name, pattern, hint]) => {
   const value = process.env[name];

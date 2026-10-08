@@ -1,6 +1,8 @@
+import type { Metadata } from "next";
 import { readPlan } from "@/lib/billing/polar";
 import { audience, brand, closing, example, footer, hero, how, posts, problem, publicPath, shippedPosts, signIn, widget } from "./content";
 import { Latest } from "./latest";
+import { siteOpenGraph } from "./metadata";
 import { Reveal } from "./reveal";
 import { SiteFooter } from "./site-footer";
 import { SectionLabel } from "./section-label";
@@ -86,6 +88,10 @@ function Section({
   );
 }
 
+
+// The landing's own og:url, resolved against metadataBase: production's URL or the preview's
+// (#13). Other pages get theirs with #19.
+export const metadata: Metadata = { openGraph: { ...siteOpenGraph, url: "/" } };
 
 // The landing is static, refreshed every hour so the plan's price follows Polar (#9).
 export const revalidate = 3600;

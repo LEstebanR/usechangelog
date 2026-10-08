@@ -9,7 +9,7 @@
     "start": "next start",
     "lint": "eslint",
     "typecheck": "next typegen && tsc --noEmit",
-    "check": "bun run lint && bun run typecheck && bun run build && bun run test",
+    "check": "bun run lint && bun run test && bun run typecheck && bun run build",
     "test": "bun test",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
