@@ -23,7 +23,7 @@
 
 ## Status
 
-> **Early access.** [usechangelog.com](https://www.usechangelog.com) is live and the product works end to end, billing included. Sign-up is open; the public launch is [#9](https://github.com/LEstebanR/usechangelog/issues/9). The MVP is built issue by issue, in the order listed in [Roadmap](#roadmap).
+> **Live at [usechangelog.com](https://www.usechangelog.com).** Sign up is free; publishing, the public page and the widget need the monthly plan, billed by Polar. The MVP was built issue by issue, in the order listed in [Roadmap](#roadmap); see [End-to-end check](#end-to-end-check) for how it's verified.
 
 ## What it is
 
@@ -138,31 +138,53 @@ Open http://localhost:3000.
 | `bun run start` | Serve the production build |
 | `bun run lint` | ESLint |
 | `bun run typecheck` | `next typegen` + `tsc --noEmit` (typegen creates route types like `LayoutProps` on a clean checkout) |
-| `bun run check` | Lint, typecheck and build |
+| `bun run check` | Lint, typecheck, build and tests |
 | `bun run test` | Unit tests with `bun test` (`*.test.ts`) |
 | `bun run db:generate` | Generate a migration from `db/schema.ts` |
 | `bun run db:migrate` | Apply pending migrations (uses `DATABASE_URL_UNPOOLED`) |
 | `bun run check-env` | Check the required env vars and their format, without printing them. Locally it also checks the database and auth answer. Vercel runs it before migrating |
-| `bun run polar:state <slug>` | Read only: a workspace's subscription in our database next to what Polar has, and what differs |
+| `bun run polar:state <slug>` | Read only: a workspace's subscription in our database next to what Polar has, and what differs. Uses `.env.local` (develop + sandbox); for production, see below |
 | `bun run widget-test <widget-key> [base-url] [port]` | Host pages on another origin (`localhost:5050`) that load the widget: floating button, trigger + Spanish, hostile CSS, invalid key. For a protected preview, set `VERCEL_AUTOMATION_BYPASS_SECRET` |
 | `bun run smoke <email> [base-url]` | Signed-in smoke test of `/app`. Reuses the last session (`.smoke-session-*.json`, git-ignored), so it only sends a magic link when that expires; `SMOKE_LINK=<link>` skips the request. Never writes data, and refuses production URLs unless `SMOKE_ALLOW_PRODUCTION=1` |
 
 ### Environment variables
 
-The landing needs none. The variables arrive with the product issues, each documented in `.env.example` (names only, never values):
+Every variable the code reads is in `.env.example`, by name only. `bun run check-env` checks the required ones and their format without printing them. Vercel runs it before every deploy, and locally it also checks that the database and auth answer.
 
-| Variable | Used for | Set by | Issue |
-| --- | --- | --- | --- |
-| `DATABASE_URL`, `DATABASE_URL_UNPOOLED` | Postgres connection | Neon ↔ Vercel integration | [#4](https://github.com/LEstebanR/usechangelog/issues/4) |
-| `NEON_AUTH_BASE_URL` | Auth endpoint | Neon ↔ Vercel integration | [#4](https://github.com/LEstebanR/usechangelog/issues/4) |
-| `NEON_AUTH_COOKIE_SECRET` | Session cookie signing | Manually | [#4](https://github.com/LEstebanR/usechangelog/issues/4) |
-| `POLAR_ACCESS_TOKEN`, `POLAR_PRODUCT_ID`, `POLAR_SERVER` | Checkout and portal (`sandbox` on previews) | Manually | [#14](https://github.com/LEstebanR/usechangelog/issues/14) |
-| `POLAR_ALLOW_DISCOUNT_CODES` | Optional and temporary: `true` shows the discount code field in the checkout while Polar reviews the account; delete it once approved | Manually, Production only | — |
-| `POLAR_WEBHOOK_SECRET` | Webhook signature check | Manually | [#15](https://github.com/LEstebanR/usechangelog/issues/15) |
-| `NEXT_PUBLIC_SITE_URL` | Canonical URL and metadata | Manually | [#13](https://github.com/LEstebanR/usechangelog/issues/13) |
-| `VERCEL_AUTOMATION_BYPASS_SECRET` | Optional, local only: `bun run widget-test` against a protected preview | Manually, in `.env.local` | [#8](https://github.com/LEstebanR/usechangelog/issues/8) |
+| Variable | Used for | Preview | Production | Where the value comes from |
+| --- | --- | --- | --- | --- |
+| `DATABASE_URL`, `DATABASE_URL_UNPOOLED` | Postgres (pooled for the app, direct for migrations) | `develop` branch | `production` branch | Neon → the branch → Connect |
+| `NEON_AUTH_BASE_URL` | Managed Better Auth endpoint | `develop` branch | `production` branch | Neon → the branch → Auth |
+| `NEON_AUTH_COOKIE_SECRET` | Session cookie signing | Random, 32+ chars | Random, 32+ chars | `openssl rand -base64 32` |
+| `POLAR_ACCESS_TOKEN` | Checkout, portal, plan price | Sandbox token | Production token | Polar → Settings → Developers (scopes: `checkouts:write`, `customer_sessions:write`, `products:read`, `subscriptions:read`) |
+| `POLAR_PRODUCT_ID` | The monthly plan | Sandbox product | Production product | Polar → Products |
+| `POLAR_SERVER` | Which Polar to call | `sandbox` | `production` | Fixed; `check-env` enforces it |
+| `POLAR_WEBHOOK_SECRET` | Webhook signature check | Sandbox endpoint secret | Production endpoint secret | Polar → Settings → Webhooks. Locally, the secret `polar listen` prints |
+| `POLAR_ALLOW_DISCOUNT_CODES` | Optional and temporary: discount field in the checkout during Polar's account review | — | Only during the review | Set by hand, delete after |
+| `NEXT_PUBLIC_SITE_URL` | Canonical URL for metadata (`metadataBase`, `og:url`) | Unset: the preview's own URL (`VERCEL_URL`) | `https://www.usechangelog.com` | Fixed |
+| `VERCEL_AUTOMATION_BYPASS_SECRET` | Optional, local only: `widget-test` and `smoke` against a protected preview | — | — | Vercel → Deployment Protection → Protection Bypass for Automation |
+| `SMOKE_LINK`, `SMOKE_ALLOW_PRODUCTION` | Optional, local only: `bun run smoke` | — | — | You |
+| `VERCEL`, `VERCEL_ENV`, `VERCEL_URL` | Which environment this is | Set by Vercel | Set by Vercel | Never set them yourself |
 
-For local work, copy `.env.example` to `.env.local`. Real `.env*` files are git-ignored.
+**Running locally, step by step:**
+1. `cp .env.example .env.local`.
+2. Fill in the Neon values from the `develop` branch (Connect for the URLs, Auth for the auth URL). If `develop` is missing, see [Local database](#local-database).
+3. `NEON_AUTH_COOKIE_SECRET`: any random 32+ characters.
+4. Polar: the sandbox organization's token and product. For the webhook secret, see [Billing webhooks locally](#billing-webhooks-locally).
+5. Leave `NEXT_PUBLIC_SITE_URL` and the optional ones empty.
+6. `bun run check-env`, then `bun run dev`.
+
+### Checking a production subscription
+
+`bun run polar:state <slug>` reads whatever env it runs with. To point it at production without keeping production secrets around:
+
+```bash
+vercel env pull /tmp/usechangelog.prod.env --environment=production
+set -a && . /tmp/usechangelog.prod.env && set +a && bun run polar:state <slug>
+rm /tmp/usechangelog.prod.env
+```
+
+It never writes. Delete the file right after: it holds production's database and Polar credentials.
 
 ### Local database
 
@@ -187,6 +209,35 @@ polar listen http://localhost:3000/api/polar/webhook
 - **Migrations:** Vercel runs `vercel-build`: it checks the env vars (`check-env`), applies pending migrations to the deployment's database, then runs `next build`.
 - **Billing:** Production uses Polar's production organization; previews and local use its sandbox (`POLAR_SERVER`, enforced by `check-env`). Polar sends webhooks to `/api/polar/webhook`; for a protected preview, the sandbox endpoint uses the branch URL with `?x-vercel-protection-bypass=<secret>`. Locally, `polar listen` forwards them.
 - **CI:** [GitHub Actions](.github/workflows/ci.yml) runs `lint`, `typecheck`, `build` and `test` as separate checks on every PR and on each push to `main`.
+
+## End-to-end check
+
+The manual run-through of the whole product (#10). Run it on a preview with Polar sandbox before a release, and on production with your own account. There is no demo button and no test data in production. The automated part is `bun run test` (the rules in `lib/`); everything below is what a person checks.
+
+| # | Step | Expected |
+| --- | --- | --- |
+| 1 | Open the landing and click **Get started** | `/signup` lands on `/sign-in`. The closing section shows the plan's price and trial, read from Polar |
+| 2 | Ask for the magic link, open it from the email | You land in `/app` (onboarding the first time) |
+| 3 | Onboarding: name the workspace and pick its slug | `/app` with the public URL `/{slug}` |
+| 4 | Write 4 posts: New, Improved and Fixed as Shipped, and one Coming soon. Try **Publish** | "You don't have an active subscription. Subscribe to publish…", nothing is saved as published |
+| 5 | **Billing → Subscribe**, pay in Polar's checkout (sandbox: `4242 4242 4242 4242`) | Back on `/app/billing`: "Free trial" or "Active" within a few seconds (the webhook) |
+| 6 | Publish the 4 posts, open `/{slug}` | The posts are there, "Coming soon" first |
+| 7 | Install the widget using only **Settings → Widget**: a static HTML page and a Next.js app with a CSP (`bun run widget-test <key> [url]` serves host pages). Also with `lang="es"` | The panel shows the posts, in English and in Spanish, with no errors or warnings in the console |
+| 8 | **Manage subscription → Cancel** in Polar's portal. Then revoke it (Polar → Sales → Subscriptions) | "Ends on <date>" after cancelling. After revoking: `/{slug}` is a 404, the widget shows nothing, and `/app` shows the banner. The posts stay in the app |
+| 9 | Send feedback from the app | After [#28](https://github.com/LEstebanR/usechangelog/issues/28), which isn't built yet |
+| 10 | **Sign out** | `/app` redirects to `/sign-in` |
+
+**Runs so far:**
+- **Local, Polar sandbox, 2026-10-07:**
+  - steps 1–5 and 8 passed, plus the trial, ending the trial with a $9.99 charge, uncancelling and a simulated `past_due` (banner and a link to the portal);
+  - the checkout opened from a tampered URL still used the session's workspace and email.
+  - Step 6 (publishing with a plan) wasn't run, by the owner's choice. Step 7 was verified when the widget shipped (#8, `bun run widget-test`).
+- **Production, 2026-10-08:**
+  - Polar's account review went through the production checkout;
+  - every webhook delivery to `https://www.usechangelog.com/api/polar/webhook` returned 200;
+  - an unsigned request returned 403;
+  - `/`, `/sign-in`, `/privacy` and `/terms` answer.
+  - A full production pass with a real subscription is the owner's to run.
 
 ## Roadmap
 

@@ -116,13 +116,14 @@ export const widget = {
   label: "Widget",
   title: "One line in your app.",
   text: "Paste the snippet before the closing body tag. A “What’s new” panel then shows your latest posts inside your app.",
+  // The same shape as the snippet in /app/settings (lib/widget/snippets.ts), plus the optional trigger.
   snippet: `<script
-  src="https://usechangelog.com/widget.js"
-  data-project="acme"
+  src="https://www.usechangelog.com/widget.js"
+  data-key="your-widget-key"
   data-trigger="#whats-new"
   defer
 ></script>`,
-  note: "Preview only. The widget isn’t live yet.",
+  note: "Your key, and the snippet for HTML, Next.js and Vite, are in Settings once you sign up.",
 };
 
 export const audience = {
@@ -143,9 +144,11 @@ export const audience = {
 export const closing = {
   label: "Next",
   title: "Start your changelog.",
-  plan: "Publishing is part of a monthly plan. Pricing will be shared at launch.",
-  // Early access until the launch (#9): sign-up is open, the product is still settling in.
-  status: "We’re in early access while we launch. Sign up free; publishing needs the monthly plan.",
+  // The price and trial come from Polar (#9); without them, the plan line says only this.
+  plan: "Publishing is part of a monthly plan.",
+  planWithPrice: (price: string, trial: string | null) =>
+    `One monthly plan, ${price}${trial ? `, starting with a ${trial}` : ""}. Cancel any time.`,
+  status: "Sign up free. Publishing, your public page and the widget need the monthly plan.",
 };
 
 export const signIn = { label: "Sign in", href: "/sign-in" };

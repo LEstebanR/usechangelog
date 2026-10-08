@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { getPlan } from "@/lib/billing/polar";
+import { readPlan } from "@/lib/billing/polar";
 import { hasSubscription, type SubscriptionStatus } from "@/lib/billing/status";
 import { formatDay, toDay } from "@/lib/posts/form";
 import { requireWorkspace } from "@/lib/workspace/server";
@@ -11,7 +11,7 @@ export const metadata: Metadata = { title: "Billing — UseChangelog" };
 // The plan (#14), its real state from the webhook (#15) and the way to Polar's portal (#17).
 export default async function BillingPage({ searchParams }: PageProps<"/app/billing">) {
   // The price doesn't depend on the workspace: read both at once.
-  const [workspace, { price, trial }, { checkout }] = await Promise.all([requireWorkspace(), getPlan(), searchParams]);
+  const [workspace, { price, trial }, { checkout }] = await Promise.all([requireWorkspace(), readPlan(), searchParams]);
   const status = workspace.subscriptionStatus;
   const pastDue = status === "past_due";
   const backFromCheckout = checkout === "success";
