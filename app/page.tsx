@@ -1,9 +1,10 @@
 import { audience, brand, closing, example, footer, hero, how, posts, problem, publicPath, shippedPosts, signIn, widget } from "./content";
 import { Latest } from "./latest";
 import { Reveal } from "./reveal";
+import { SiteFooter } from "./site-footer";
 import { SectionLabel } from "./section-label";
 import { Grid } from "./grid";
-import { LegalLinks } from "./legal-page";
+import { container } from "./layout-styles";
 import { TAG_PALETTE, Tag } from "./tag";
 import { Wordmark } from "./wordmark";
 import type { CSSProperties } from "react";
@@ -12,7 +13,6 @@ const delay = (ms: number) => ({ "--delay": `${ms}ms` }) as CSSProperties;
 // One rhythm for every list that reveals item by item.
 const stagger = (i: number) => delay(i * 120);
 
-const container = "mx-auto w-full max-w-6xl px-5 sm:px-8";
 const h2 =
   "text-balance font-display font-medium tracking-[-0.025em] text-3xl leading-[1.1] md:text-[2.6rem]";
 const h2Small =
@@ -416,27 +416,17 @@ export default function Home() {
         </Section>
       </main>
 
-      <footer className="border-t border-hairline bg-canvas">
-        <div
-          className={`${container} flex flex-col gap-2 py-8 text-sm text-graphite sm:flex-row sm:items-center sm:justify-between`}
-        >
-          <span translate="no" className="font-display font-medium text-ink">
-            {brand}
-          </span>
-          <span className="flex flex-wrap items-center gap-x-3 gap-y-1">
-            <LegalLinks />
-            <span aria-hidden="true">·</span>
-            <span className="tabular-nums">
-              © {footer.year} {brand}
-            </span>
-            <span aria-hidden="true">·</span>
-            <a href={footer.credit.href} className="hover:text-ink">
-              Made with <span aria-hidden="true" className="text-clay">♥</span>
-              <span className="sr-only">love</span> by <span className="font-medium text-ink">{footer.credit.name}</span>
-            </a>
-          </span>
-        </div>
-      </footer>
+      <SiteFooter>
+        <span aria-hidden="true">·</span>
+        <span className="tabular-nums">
+          © {footer.year} {brand}
+        </span>
+        <span aria-hidden="true">·</span>
+        <a href={footer.credit.href} className="hover:text-ink">
+          Made with <span aria-hidden="true" className="text-clay">♥</span>
+          <span className="sr-only">love</span> by <span className="font-medium text-ink">{footer.credit.name}</span>
+        </a>
+      </SiteFooter>
     </div>
   );
 }

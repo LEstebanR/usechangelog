@@ -27,6 +27,7 @@ Goal: a PR, ready for review and not merged, that meets every "Hecho cuando" ite
 ## 3. Plan → checkpoint
 
 - Branch from an up-to-date `main`. The name is `<type>/<issue>-<short-slug>`, for example `feat/4-auth`.
+- **Overlapping open PRs:** check `gh pr list` for open PRs that touch the same files (shared copy like `app/content.ts`, the landing, a layout). If one does, say it in the plan and either wait for it to merge or branch from it and base the PR on it, so the conflict isn't left for merge time.
 - Write a short plan: one line per step, each with how it will be verified.
 
   ```

@@ -8,7 +8,7 @@ export const metadata: Metadata = { title: "Terms — UseChangelog" };
 // Billing matches the product: one monthly plan through Polar, access until the period ends (#15).
 export default function TermsPage() {
   return (
-    <LegalPage label="Terms" title="The short version, in full.">
+    <LegalPage label="Terms" title="The short version, in full." updated="October 7, 2026">
       <p>
         These terms cover your use of UseChangelog, operated by {legal.operator}. By creating an account you agree
         to them. Questions go to <LegalMail />.
