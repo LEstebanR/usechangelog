@@ -104,9 +104,10 @@ app/
   icon.svg, apple-icon.png
   api/auth/[...path]/   Auth handler, proxied to Neon
 lib/auth/               Server auth client and Server Actions (sign in, sign out)
+lib/account/            Deleting an account: deleteAccount() and the Neon API call (#31)
 lib/workspace/          Slug rules, form parsing, getCurrentWorkspace(), getWorkspaceBySlug() and workspace Server Actions
 lib/posts/              Post form parsing, workspace-scoped queries and post Server Actions
-lib/billing/            Polar config, mapPolarStatus(), canPublish() (the one publish gate) and the webhook handler
+lib/billing/            Polar config, revokeSubscriptionsInPolar(), mapPolarStatus(), canPublish() (the one publish gate) and the webhook handler
 lib/markdown.ts         renderMarkdown(): safe Markdown to HTML for the public page and the widget
 lib/widget/             The widget's words in 5 languages and the API payload
 public/widget.js        The embeddable "What's new" widget (vanilla JS, Shadow DOM)
@@ -147,7 +148,7 @@ Open http://localhost:3000.
 | `bun run lint` | ESLint |
 | `bun run typecheck` | `next typegen` + `tsc --noEmit` (typegen creates route types like `LayoutProps` on a clean checkout) |
 | `bun run check` | Lint, typecheck, build and tests |
-| `bun run test` | Unit tests with `bun test` (`*.test.ts`) |
+| `bun run test` | Unit tests with `bun test --isolate` (`*.test.ts`; each file gets its own module mocks) |
 | `bun run db:generate` | Generate a migration from `db/schema.ts` |
 | `bun run db:migrate` | Apply pending migrations (uses `DATABASE_URL_UNPOOLED`) |
 | `bun run check-env` | Check the required env vars and their format, without printing them. Locally it also checks the database and auth answer. Vercel runs it before migrating |
@@ -165,7 +166,8 @@ Every variable the code reads is in `.env.example`, by name only. `bun run check
 | `DATABASE_URL`, `DATABASE_URL_UNPOOLED` | Postgres (pooled for the app, direct for migrations) | `develop` branch | `production` branch | Neon → the branch → Connect |
 | `NEON_AUTH_BASE_URL` | Managed Better Auth endpoint | `develop` branch | `production` branch | Neon → the branch → Auth |
 | `NEON_AUTH_COOKIE_SECRET` | Session cookie signing | Random, 32+ chars | Random, 32+ chars | `openssl rand -base64 32` |
-| `POLAR_ACCESS_TOKEN` | Checkout, portal, plan price | Sandbox token | Production token | Polar → Settings → Developers (scopes: `checkouts:write`, `customer_sessions:write`, `products:read`, `subscriptions:read`) |
+| `NEON_API_KEY`, `NEON_PROJECT_ID`, `NEON_BRANCH_ID` | Deleting an account: the user is deleted through the Neon API (#31) | `develop` branch id | `production` branch id | Neon → Organization settings → API keys (project-scoped); ids from `neonctl projects list` and `neonctl branches list` |
+| `POLAR_ACCESS_TOKEN` | Checkout, portal, plan price, cancelling on account deletion | Sandbox token | Production token | Polar → Settings → Developers (scopes: `checkouts:write`, `customer_sessions:write`, `products:read`, `subscriptions:read`, `subscriptions:write`) |
 | `POLAR_PRODUCT_ID` | The monthly plan | Sandbox product | Production product | Polar → Products |
 | `POLAR_SERVER` | Which Polar to call | `sandbox` | `production` | Fixed; `check-env` enforces it |
 | `POLAR_WEBHOOK_SECRET` | Webhook signature check | Sandbox endpoint secret | Production endpoint secret | Polar → Settings → Webhooks. Locally, the secret `polar listen` prints |
@@ -178,7 +180,7 @@ Every variable the code reads is in `.env.example`, by name only. `bun run check
 **Running locally, step by step:**
 1. `cp .env.example .env.local`.
 2. Fill in the Neon values from the `develop` branch (Connect for the URLs, Auth for the auth URL). If `develop` is missing, see [Local database](#local-database).
-3. `NEON_AUTH_COOKIE_SECRET`: any random 32+ characters.
+3. `NEON_AUTH_COOKIE_SECRET`: any random 32+ characters. For `NEON_API_KEY`, `NEON_PROJECT_ID` and `NEON_BRANCH_ID`, use a Neon API key and the `develop` branch's id.
 4. Polar: the sandbox organization's token and product. For the webhook secret, see [Billing webhooks locally](#billing-webhooks-locally).
 5. Leave `NEXT_PUBLIC_SITE_URL` and the optional ones empty.
 6. `bun run check-env`, then `bun run dev`.

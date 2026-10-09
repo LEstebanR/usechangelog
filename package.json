@@ -10,7 +10,7 @@
     "lint": "eslint",
     "typecheck": "next typegen && tsc --noEmit",
     "check": "bun run lint && bun run test && bun run typecheck && bun run build",
-    "test": "bun test",
+    "test": "bun test --isolate",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
     "vercel-build": "bun run check-env && bun run db:migrate && next build",
