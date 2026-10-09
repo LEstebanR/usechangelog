@@ -31,11 +31,12 @@ export async function sendMagicLink(formData: FormData) {
 // magic link. The SDK stores the OAuth challenge cookie the callback needs.
 export async function signInWithGoogle() {
   const origin = await getOrigin();
+  const callbackURL = `${origin}/auth/callback`;
   const { data, error } = await getAuth().signIn.social({
     provider: "google",
-    callbackURL: `${origin}/auth/callback`,
+    callbackURL,
     // Neon sends new users to its own default ("/") without this.
-    newUserCallbackURL: `${origin}/auth/callback`,
+    newUserCallbackURL: callbackURL,
     errorCallbackURL: `${origin}/sign-in`,
   });
   if (error || !data?.url) {
