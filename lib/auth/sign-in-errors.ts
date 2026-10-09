@@ -6,7 +6,7 @@ const messages: Record<string, string> = {
   MISSING_EMAIL: "Enter your email address.",
   INVALID_EMAIL: "That doesn't look like an email address. Check it and try again.",
   SEND_FAILED: "We couldn't send the link. Check the address and try again.",
-  GOOGLE_FAILED: "We couldn't reach Google. Try again, or use your email instead.",
+  GOOGLE_FAILED: "Google sign-in didn't go through. Try again, or use your email instead.",
   access_denied: "Google sign-in was cancelled. Try again, or use your email instead.",
 };
 

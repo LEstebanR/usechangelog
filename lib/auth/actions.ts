@@ -31,7 +31,7 @@ export async function sendMagicLink(formData: FormData) {
 // magic link. The SDK stores the OAuth challenge cookie the callback needs.
 export async function signInWithGoogle() {
   const origin = await getOrigin();
-  const callbackURL = `${origin}/auth/callback`;
+  const callbackURL = `${origin}/auth/callback?via=google`;
   const { data, error } = await getAuth().signIn.social({
     provider: "google",
     callbackURL,
