@@ -32,6 +32,13 @@ The auth rules (magic link and Google only, one account and one workspace, no te
 - **Google** only. `production` uses our own OAuth client (Google Cloud project "UseChangelog", brand-verified consent screen, scopes `openid`, `email`, `profile`, redirect URI `{NEON_AUTH_BASE_URL}/callback/google`): check it with `neonctl neon-auth oauth-provider list --branch production`. `develop` and previews keep Neon's shared credentials, so Google's screen shows Neon there.
 - Previews get their own auth per branch through the Vercel integration.
 
+## Google (OAuth) checklist
+
+- `signInWithGoogle` passes `callbackURL` **and** `newUserCallbackURL`, both `/auth/callback?via=google`. Without `newUserCallbackURL`, Neon sends new users to `/` with the verifier unexchanged. `via=google` lets the callback show `GOOGLE_FAILED` instead of the magic link's `INVALID_TOKEN`.
+- Errors: `GOOGLE_FAILED` (ours), `access_denied` (cancelled at Google); anything else gets the generic message.
+- Check production's client without signing in: `POST https://www.usechangelog.com/api/auth/sign-in/social` with `{"provider":"google","callbackURL":"https://www.usechangelog.com/auth/callback","disableRedirect":true}` returns a Neon `/sign-in/social/init` URL; its redirect goes to Google with our `client_id`, the production redirect URI and `scope=email profile openid`.
+- Linking: try it locally on `develop` (the owner signs in): magic link first, then Google with the same email, same workspace and no onboarding.
+
 ## Env vars
 
 `NEON_AUTH_BASE_URL` (from the integration) and `NEON_AUTH_COOKIE_SECRET` (set by hand, at least 32 characters).

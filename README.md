@@ -147,7 +147,7 @@ Open http://localhost:3000.
 | `bun run lint` | ESLint |
 | `bun run typecheck` | `next typegen` + `tsc --noEmit` (typegen creates route types like `LayoutProps` on a clean checkout) |
 | `bun run check` | Lint, typecheck, build and tests |
-| `bun run test` | Unit tests with `bun test` (`*.test.ts`) |
+| `bun run test` | Unit tests with `bun test --isolate` (`*.test.ts`; each file gets its own module mocks) |
 | `bun run db:generate` | Generate a migration from `db/schema.ts` |
 | `bun run db:migrate` | Apply pending migrations (uses `DATABASE_URL_UNPOOLED`) |
 | `bun run check-env` | Check the required env vars and their format, without printing them. Locally it also checks the database and auth answer. Vercel runs it before migrating |

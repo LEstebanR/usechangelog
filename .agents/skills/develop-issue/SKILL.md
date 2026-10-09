@@ -10,6 +10,7 @@ Goal: a PR, ready for review and not merged, that meets every "Hecho cuando" ite
 ## 1. Check it can start
 
 - **The issue is approved.** The owner said so in this conversation, or the issue says so. If not, stop and ask.
+- **It doesn't contradict the product rules.** Compare the issue with `AGENTS.md` → Product rules and the out-of-scope list. If it needs something they rule out (a provider, a feature, a tool), stop and ask the owner to approve the change explicitly. If they approve, update `AGENTS.md` and the skills that restate the rule in the same PR.
 - **Its dependencies are done.** For every `#n` under "Depende de", the issue is closed, or its PR is merged into `main`. If one is missing, stop and say which.
 - **Its infrastructure is ready.** If the issue needs external services or env vars (look for a "Lo hace el owner" section), check them before planning: `vercel env ls` for env var names, and the vendor's dashboard or CLI for services. List what's missing in the plan as owner steps, with exact commands, so the owner can do them while you code.
 - **Vendor configuration matches the issue.** Before planning, read what the vendor already has, by API or CLI, and compare it with the issue's decisions: for billing, the product in Polar (price, interval, free trial), the token's scopes and the webhook's events. A mismatch (a trial the issue rules out, a missing scope) goes in the plan as a question for the owner, not as a surprise at checkout.
@@ -51,6 +52,7 @@ Goal: a PR, ready for review and not merged, that meets every "Hecho cuando" ite
 - Run the `verifier` agent, or the same commands it runs: lint, typecheck, build, and tests if they exist. Everything must pass.
 - For runtime behavior, use the `next-dev-loop` skill against `next dev`.
 - In the browser, fill forms with JS (the native `value` setter plus an `input` event, then `form.requestSubmit(button)`) instead of typing and clicking by coordinates: pages hydrate after load and layouts shift with the window size, so typed text gets lost and clicks land on the wrong button.
+  - Find the button by its text and check `location.pathname` in the same script before submitting. A page can redirect first (a signed-in visitor on `/sign-in` lands in `/app`), and "the first form" is then a different one, such as Sign out.
 - To try the widget from another origin, `bun run widget-test <widget-key> [base-url]` serves host pages on `localhost:5050`. For a protected preview, export `VERCEL_AUTOMATION_BYPASS_SECRET` first.
 - For anything behind sign-in, `bun run smoke <email> [base-url]` signs in with a real magic link (you paste it from the email) and checks `/app` and onboarding. It reuses the saved session, so it only spends a Neon email when the session has expired; don't sign in by hand for each check. It never writes to the database.
 
@@ -60,6 +62,7 @@ Goal: a PR, ready for review and not merged, that meets every "Hecho cuando" ite
 - **Several issues in one PR:** from the start, give the description a "Hecho cuando" section with one block per issue, each item as a checkbox, and keep it updated as you verify. Don't leave it for the end.
 - **Wait for checks:** wait for CI (lint, typecheck, build, test) and for the Vercel preview to be Ready.
 - **Check every item:** go through each "Hecho cuando" item **on the preview** and record the result in the PR description. Explain any item that isn't met.
+  - The owner can skip the preview check when it adds nothing over local, for example when the preview uses the same Neon branch (`develop`) that local already tested. Say so in the PR's "How it was tested" and in the checklist, and don't push for it.
 
 ## 7. Simplify and review
 
