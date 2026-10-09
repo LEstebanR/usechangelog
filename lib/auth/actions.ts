@@ -34,6 +34,8 @@ export async function signInWithGoogle() {
   const { data, error } = await getAuth().signIn.social({
     provider: "google",
     callbackURL: `${origin}/auth/callback`,
+    // Neon sends new users to its own default ("/") without this.
+    newUserCallbackURL: `${origin}/auth/callback`,
     errorCallbackURL: `${origin}/sign-in`,
   });
   if (error || !data?.url) {
