@@ -26,6 +26,7 @@ The auth rules (magic link only, one account and one workspace, no teams, SSO or
 ## Neon settings (Console → Auth)
 
 - **Magic Link** on, 15-minute expiry, new user registration on.
+- **Email on `production`:** custom SMTP through Resend, sender `UseChangelog <hello@usechangelog.com>`; check it with `neonctl neon-auth config email-provider get --branch production` and test it with `… email-provider test --recipient-email <you>`. The name inside the email is the branch's auth application name (`neonctl api /projects/{id}/branches/{branch}/auth/config -X PATCH -F name=UseChangelog`), not the project name. `allow_localhost` is off on `production`, on on `develop`.
 - No OAuth providers.
 - Previews get their own auth per branch through the Vercel integration.
 
@@ -35,7 +36,7 @@ The auth rules (magic link only, one account and one workspace, no teams, SSO or
 
 ## Not in the MVP
 
-Passwords, social login, SSO, MFA, passkeys, organizations, an account page. Custom SMTP and domain are #24.
+Passwords, social login, SSO, MFA, passkeys, organizations, an account page. A fully branded email template (Neon's `send.magic_link` webhook) can come later; today Neon's template goes out through our SMTP.
 
 ## Final step: improvements
 
