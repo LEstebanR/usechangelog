@@ -268,6 +268,7 @@ The manual run-through of the whole product (#10). Run it on a preview with Pola
 | 8 | **Manage subscription → Cancel** in Polar's portal. Then revoke it (Polar → Sales → Subscriptions) | "Ends on <date>" after cancelling. After revoking: `/{slug}` is a 404, the widget shows nothing, and `/app` shows the banner. The posts stay in the app |
 | 9 | Send feedback from the app | After [#28](https://github.com/LEstebanR/usechangelog/issues/28), which isn't built yet |
 | 10 | **Sign out** | `/app` redirects to `/sign-in` |
+| 11 | Sign in again, **Settings → Delete account**, type the slug | Lands on `/` with "Your account was deleted." The subscription is cancelled in Polar, `/{slug}` is a 404, and the slug is free for a new workspace (#31) |
 
 **Runs so far:**
 - **Local, Polar sandbox, 2026-10-07:**
