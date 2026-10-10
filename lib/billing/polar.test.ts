@@ -36,14 +36,14 @@ describe("revokeSubscriptionsInPolar", () => {
       { id: "done", status: "canceled" },
       { id: "never", status: "incomplete_expired" },
     ];
-    expect(await revokeSubscriptionsInPolar("ws-1")).toBe(3);
+    await revokeSubscriptionsInPolar("ws-1");
     expect(listedFor).toMatchObject({ external_customer_id: "ws-1" });
     expect(revoked.sort()).toEqual(["late", "live", "trial"]);
   });
 
   test("with nothing live, it revokes nothing", async () => {
     subscriptions = [{ id: "done", status: "canceled" }];
-    expect(await revokeSubscriptionsInPolar("ws-1")).toBe(0);
+    await revokeSubscriptionsInPolar("ws-1");
     expect(revoked).toEqual([]);
   });
 });

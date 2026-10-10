@@ -1,16 +1,12 @@
 "use server";
 
-import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { requireUser } from "@/lib/auth/server";
+import { clearAuthCookies, requireUser } from "@/lib/auth/server";
 import { revokeSubscriptionsInPolar } from "@/lib/billing/polar";
 import { getCurrentWorkspace } from "@/lib/workspace/server";
 import { deleteAuthUser } from "./neon";
 
 export type DeleteAccountState = { error?: string };
-
-// Every cookie Neon Auth sets starts with this (the SDK doesn't export it from the Next entry).
-const AUTH_COOKIE_PREFIX = "__Secure-neon-auth";
 
 // Deletes the signed-in user's account (#31): cancel in Polar, then delete the user, whose
 // workspace and posts go by cascade. The typed slug is checked here too, not only in the form.
@@ -43,11 +39,7 @@ export async function deleteAccount(_prev: DeleteAccountState, formData: FormDat
     };
   }
 
-  // The user and its sessions are gone; drop the cookies so this browser is signed out too.
-  const jar = await cookies();
-  for (const { name } of jar.getAll()) {
-    // Browsers only clear a __Secure- cookie from a Secure Set-Cookie.
-    if (name.startsWith(AUTH_COOKIE_PREFIX)) jar.delete({ name, path: "/", secure: true });
-  }
+  // The user and its sessions are gone; this browser is signed out too.
+  await clearAuthCookies();
   redirect("/?deleted=1");
 }

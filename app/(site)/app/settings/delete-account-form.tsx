@@ -2,7 +2,7 @@
 
 import { useActionState, useState } from "react";
 import { deleteAccount } from "@/lib/account/actions";
-import { inputClass } from "../../form-styles";
+import { dangerButtonClass, inputClass } from "../../form-styles";
 
 // The button stays off until the slug is typed exactly; the action checks it again.
 export function DeleteAccountForm({ slug }: { slug: string }) {
@@ -34,7 +34,7 @@ export function DeleteAccountForm({ slug }: { slug: string }) {
       <button
         type="submit"
         disabled={!matches || pending}
-        className="motion-press mt-2 inline-flex items-center justify-center whitespace-nowrap bg-clay px-4 py-2.5 font-medium text-canvas transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
+        className={`mt-2 ${dangerButtonClass}`}
       >
         {pending ? "Deleting…" : "Delete account"}
       </button>

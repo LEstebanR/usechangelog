@@ -5,20 +5,19 @@ let workspace: { id: string; slug: string } | null;
 let calls: string[];
 let polarFails: boolean;
 let neonFails: boolean;
-let deletedCookies: string[];
+let signedOut: boolean;
 
 mock.module("next/navigation", () => ({
   redirect: (url: string) => {
     throw new Error(`redirect:${url}`);
   },
 }));
-mock.module("next/headers", () => ({
-  cookies: async () => ({
-    getAll: () => [{ name: "__Secure-neon-auth.session_token" }, { name: "__Secure-neon-auth.session_data" }, { name: "other" }],
-    delete: ({ name }: { name: string }) => deletedCookies.push(name),
-  }),
+mock.module("@/lib/auth/server", () => ({
+  requireUser: async () => ({ id: "user-1" }),
+  clearAuthCookies: async () => {
+    signedOut = true;
+  },
 }));
-mock.module("@/lib/auth/server", () => ({ requireUser: async () => ({ id: "user-1" }) }));
 mock.module("@/lib/workspace/server", () => ({ getCurrentWorkspace: async () => workspace }));
 mock.module("@/lib/billing/polar", () => ({
   revokeSubscriptionsInPolar: async (id: string) => {
@@ -46,14 +45,14 @@ describe("deleteAccount", () => {
     calls = [];
     polarFails = false;
     neonFails = false;
-    deletedCookies = [];
+    signedOut = false;
     console.error = () => {};
   });
 
   test("cancels in Polar, deletes the user, signs out and lands on /?deleted=1", async () => {
     await expect(deleteAccount({}, form(" acme "))).rejects.toThrow("redirect:/?deleted=1");
     expect(calls).toEqual(["polar:ws-1", "neon:user-1"]);
-    expect(deletedCookies).toEqual(["__Secure-neon-auth.session_token", "__Secure-neon-auth.session_data"]);
+    expect(signedOut).toBe(true);
   });
 
   test("a different slug is refused, even when the action is called directly", async () => {
@@ -65,13 +64,13 @@ describe("deleteAccount", () => {
     polarFails = true;
     expect(await deleteAccount({}, form("acme"))).toEqual({ error: expect.stringContaining("nothing was deleted") });
     expect(calls).toEqual(["polar:ws-1"]);
-    expect(deletedCookies).toEqual([]);
+    expect(signedOut).toBe(false);
   });
 
   test("when Neon fails, the user stays signed in and sees the error", async () => {
     neonFails = true;
     expect(await deleteAccount({}, form("acme"))).toEqual({ error: expect.stringContaining("couldn't delete") });
-    expect(deletedCookies).toEqual([]);
+    expect(signedOut).toBe(false);
   });
 
   test("without a workspace, there is nothing to cancel: the user is deleted", async () => {

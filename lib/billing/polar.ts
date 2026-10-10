@@ -43,7 +43,6 @@ export async function revokeSubscriptionsInPolar(workspaceId: string) {
   const { items } = await listSubscriptions(polar)({ external_customer_id: workspaceId, limit: 100 });
   const live = items.filter((subscription) => mapPolarStatus(subscription.status) !== "canceled");
   await Promise.all(live.map((subscription) => revokeSubscriptions(polar)(subscription.id)));
-  return live.length;
 }
 
 // Off: no coupons in the MVP. Only while Polar reviews the account, POLAR_ALLOW_DISCOUNT_CODES=true
