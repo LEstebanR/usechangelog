@@ -28,21 +28,27 @@ describe("revokeSubscriptionsInPolar", () => {
     listedFor = undefined;
   });
 
-  test("revokes the workspace's trialing, active and past_due subscriptions, and only those", async () => {
+  test("revokes every subscription of the workspace that could still bill", async () => {
     subscriptions = [
       { id: "trial", status: "trialing" },
       { id: "live", status: "active" },
       { id: "late", status: "past_due" },
+      { id: "checkout", status: "incomplete" },
+      { id: "owed", status: "unpaid" },
+      { id: "paused", status: "paused" },
       { id: "done", status: "canceled" },
       { id: "never", status: "incomplete_expired" },
     ];
     await revokeSubscriptionsInPolar("ws-1");
     expect(listedFor).toMatchObject({ external_customer_id: "ws-1" });
-    expect(revoked.sort()).toEqual(["late", "live", "trial"]);
+    expect(revoked.sort()).toEqual(["checkout", "late", "live", "owed", "paused", "trial"]);
   });
 
-  test("with nothing live, it revokes nothing", async () => {
-    subscriptions = [{ id: "done", status: "canceled" }];
+  test("with only ended subscriptions, it revokes nothing", async () => {
+    subscriptions = [
+      { id: "done", status: "canceled" },
+      { id: "never", status: "incomplete_expired" },
+    ];
     await revokeSubscriptionsInPolar("ws-1");
     expect(revoked).toEqual([]);
   });

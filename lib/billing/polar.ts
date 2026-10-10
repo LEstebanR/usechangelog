@@ -1,7 +1,6 @@
 import { createPolarCore, type Environment, type models } from "@polar-sh/sdk/2026-10";
 import { getProducts } from "@polar-sh/sdk/2026-10/services/products";
 import { listSubscriptions, revokeSubscriptions } from "@polar-sh/sdk/2026-10/services/subscriptions";
-import { mapPolarStatus } from "./status";
 
 // Read on first use, not at import, so `next build` runs without env vars.
 // Previews point to Polar's sandbox and production to production (`POLAR_SERVER`).
@@ -34,14 +33,18 @@ export async function hasActiveSubscriptionInPolar(workspaceId: string) {
   return items.length > 0;
 }
 
-// Ends every subscription of the workspace that still bills or publishes (trialing, active,
-// past_due) right away, without a refund. Deleting the account (#31) calls it first: if it
-// throws, nothing is deleted. The webhook that follows finds no workspace and skips it.
+// Polar statuses that can never bill again. Anything else (trialing, active, past_due, but also
+// incomplete, unpaid or paused, which can resume) gets revoked.
+const ENDED = new Set(["canceled", "incomplete_expired"]);
+
+// Ends every subscription of the workspace that could still bill, right away and without a
+// refund. Deleting the account (#31) calls it first: if it throws, nothing is deleted. The
+// webhook that follows finds no workspace and skips it.
 export async function revokeSubscriptionsInPolar(workspaceId: string) {
   const { accessToken, environment } = polarConfig();
   const polar = createPolarCore({ accessToken, environment });
   const { items } = await listSubscriptions(polar)({ external_customer_id: workspaceId, limit: 100 });
-  const live = items.filter((subscription) => mapPolarStatus(subscription.status) !== "canceled");
+  const live = items.filter((subscription) => !ENDED.has(subscription.status));
   await Promise.all(live.map((subscription) => revokeSubscriptions(polar)(subscription.id)));
 }
 
