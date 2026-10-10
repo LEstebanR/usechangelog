@@ -12,6 +12,7 @@ import { TAG_PALETTE, Tag } from "./tag";
 import { MarketingJsonLd } from "../json-ld";
 import { Wordmark } from "./wordmark";
 import type { CSSProperties } from "react";
+import { DeletedNotice } from "./deleted-notice";
 
 const delay = (ms: number) => ({ "--delay": `${ms}ms` }) as CSSProperties;
 // One rhythm for every list that reveals item by item.
@@ -140,6 +141,8 @@ export default async function Home() {
           </nav>
         </div>
       </header>
+
+      <DeletedNotice />
 
       <main id="main">
         {/* Hero */}

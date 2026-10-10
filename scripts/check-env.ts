@@ -10,6 +10,10 @@ const checks: [name: string, pattern: RegExp, hint: string][] = [
   ["DATABASE_URL_UNPOOLED", /^postgres(ql)?:\/\/[^/\s]+\/\S+/, "a postgresql:// connection string (Neon → Connect, direct)"],
   ["NEON_AUTH_BASE_URL", /^https:\/\/\S+\/auth$/, "the https://…/auth URL from Neon → Better Auth"],
   ["NEON_AUTH_COOKIE_SECRET", /^\S{32,}$/, "a random value of at least 32 characters"],
+  // Deleting an account (#31) deletes the user through the Neon API, on this deployment's branch.
+  ["NEON_API_KEY", /^\S{20,}$/, "a Neon API key (Neon → Organization settings → API keys)"],
+  ["NEON_PROJECT_ID", /^[a-z]+-[a-z]+-\d+$/, "the Neon project id (neonctl projects list)"],
+  ["NEON_BRANCH_ID", /^br-[a-z0-9-]+$/, "the id of this deployment's Neon branch, br-… (neonctl branches list)"],
   ["POLAR_ACCESS_TOKEN", /^polar_\S+$/, "an organization access token from Polar (polar_…)"],
   ["POLAR_PRODUCT_ID", /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i, "the monthly plan's product id (a UUID) from Polar"],
   ["POLAR_WEBHOOK_SECRET", /^\S{16,}$/, "the webhook endpoint's secret from Polar"],

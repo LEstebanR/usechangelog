@@ -35,6 +35,8 @@ export async function createWorkspace(
       return slugTakenOrThrow(error, state);
     }
   }
+  // The /app layout was rendered without a workspace (no Settings or Billing in the nav).
+  revalidatePath("/app", "layout");
   redirect("/app");
 }
 

@@ -77,9 +77,10 @@ export default function PrivacyPage() {
 
       <h2>Deleting your account</h2>
       <p>
-        Email <LegalMail /> from your account&apos;s address and we&apos;ll delete your account, your workspace and its
-        posts. To stop paying, cancel your subscription first in Billing → Manage subscription. Polar keeps its own
-        records of your payments, as the law requires.
+        Delete it yourself in Settings → Delete account. That deletes your account, your workspace and its posts
+        right away, and cancels your subscription without a refund. If you can&apos;t sign in, email <LegalMail /> from
+        your account&apos;s address and we&apos;ll do it. Polar keeps its own records of your payments, as the law
+        requires.
       </p>
 
       <h2>Changes</h2>

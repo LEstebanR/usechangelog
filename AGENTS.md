@@ -43,7 +43,7 @@ This list is the source of truth. The skills in `.agents/skills/` add implementa
 
 ## Verifying changes
 
-- **Checks:** `bun run check` runs lint, typecheck, build and the tests. `bun run test` runs only the tests (`bun test`, files named `*.test.ts`, next to the code they cover; no database, see `lib/posts/server.test.ts`). CI runs all four as separate jobs on every PR.
+- **Checks:** `bun run check` runs lint, typecheck, build and the tests. `bun run test` runs only the tests (`bun test --isolate`, so a `mock.module` stays in its file; files named `*.test.ts`, next to the code they cover; no database, see `lib/posts/server.test.ts`). CI runs all four as separate jobs on every PR.
 - **Verifier:** the `verifier` agent (`.cursor/agents/verifier.md`, linked for Claude Code at `.claude/agents/verifier.md`) runs these checks and reports the result without changing code.
 - **Runtime:** for runtime behavior in `next dev`, use the `next-dev-loop` skill.
 
