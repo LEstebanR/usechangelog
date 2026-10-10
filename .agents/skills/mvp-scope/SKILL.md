@@ -9,7 +9,7 @@ The product rules and the out-of-scope list live in `AGENTS.md` → **Product ru
 
 ## In
 
-- **Account:** Magic link sign-in (see `auth`), then onboarding creates one workspace with a unique slug. The user can delete their account, which deletes the workspace and its posts (#31).
+- **Account:** Magic link or Google sign-in (see `auth`), then onboarding creates one workspace with a unique slug. The user can delete their account, which deletes the workspace and its posts (#31).
 - **Posts:**
   - Title and a Markdown body.
   - A category (New, Improved or Fixed) and a type (Shipped, or Coming for what's on the way).

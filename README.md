@@ -67,7 +67,7 @@ The public page and the widget only serve posts while the workspace has an **act
 | CI | GitHub Actions: lint, typecheck, build and test as separate jobs | ✅ In use |
 | Package manager | [Bun](https://bun.sh) | ✅ In use |
 | Database | [Neon](https://neon.com) Postgres, with Drizzle ORM and migrations in the repo | ✅ In use |
-| Auth | Neon Managed Better Auth, magic link only | ✅ In use |
+| Auth | Neon Managed Better Auth: magic link and Google | ✅ In use |
 | Payments | [Polar](https://polar.sh) as merchant of record: one monthly plan, sandbox on previews | ✅ In use |
 | Analytics | [Vercel Web Analytics](https://vercel.com/docs/analytics): cookieless page views on the site and public changelogs (`@vercel/analytics`) | ✅ In use |
 
@@ -95,7 +95,7 @@ app/
     section-label.tsx   Section label with the brand square
     tag.tsx             New / Improved / Fixed / Coming soon tags
     markdown-body.tsx   A post body rendered from Markdown (styles in markdown-styles.ts)
-    (auth)/sign-in/     Magic link sign-in
+    (auth)/sign-in/     Sign-in: Google or a magic link
     app/                The signed-in app: /app (posts), /app/posts/new, /app/posts/[id], /app/onboarding, /app/settings, /app/billing
     app/admin/          Admin only: the feedback users send (#28)
   [slug]/               The public changelog at /{slug}. Its own root layout sets lang from the workspace
@@ -247,6 +247,7 @@ polar listen http://localhost:3000/api/polar/webhook
 
 - **Production:** https://www.usechangelog.com (`usechangelog.com` redirects there), deployed from `main`. Neon Auth on the `production` branch trusts `https://www.usechangelog.com`, and the Polar production webhook points to `https://www.usechangelog.com/api/polar/webhook`; a webhook doesn't follow the redirect.
 - **Sign-in email:** production sends magic links from `UseChangelog <hello@usechangelog.com>` through [Resend](https://resend.com)'s SMTP, set on the `production` branch with `neonctl neon-auth config email-provider update` (#24). DNS on Vercel: Resend's DKIM (`resend._domainkey`), SPF and bounce MX (`send`), and DMARC `p=none` (`_dmarc`). The app name in the email is set with the auth config API, and `allow_localhost` is off on production. Previews and local use `develop`, which keeps Neon's shared sender. `usechangelog.com` has no mailbox: support is `support@lesteban.dev`.
+- **Google sign-in:** production uses UseChangelog's own Google OAuth client (brand-verified consent screen, scopes `openid`, `email`, `profile`), set on the `production` branch with `neonctl neon-auth oauth-provider` (#25). Its redirect URI is `{NEON_AUTH_BASE_URL}/callback/google`. Previews and local use `develop`, which keeps Neon's shared Google credentials, so Google's screen shows Neon there.
 - **Previews:** every pull request gets its own Vercel preview, with its own Neon branch and auth. Its URL goes in the PR description.
 - **Migrations:** Vercel runs `vercel-build`: it checks the env vars (`check-env`), applies pending migrations to the deployment's database, then runs `next build`.
 - **Billing:** Production uses Polar's production organization; previews and local use its sandbox (`POLAR_SERVER`, enforced by `check-env`). Polar sends webhooks to `/api/polar/webhook`; for a protected preview, the sandbox endpoint uses the branch URL with `?x-vercel-protection-bypass=<secret>`. Locally, `polar listen` forwards them.
@@ -304,7 +305,7 @@ The issue tracker is the backlog. Issues are numbered in build order; each one l
 | 14 | Landing: open sign-up | [#9](https://github.com/LEstebanR/usechangelog/issues/9) |
 | 15 | End-to-end check of the MVP | [#10](https://github.com/LEstebanR/usechangelog/issues/10) |
 | 16 | Custom domain and branded auth email *(post-MVP)* | [#24](https://github.com/LEstebanR/usechangelog/issues/24) |
-| 17 | Sign in with Google *(post-MVP)* | [#25](https://github.com/LEstebanR/usechangelog/issues/25) |
+| 17 | Sign in with Google | [#25](https://github.com/LEstebanR/usechangelog/issues/25) |
 | 19 | Delete your account | [#31](https://github.com/LEstebanR/usechangelog/issues/31) |
 | 20 | Custom 404 page | [#33](https://github.com/LEstebanR/usechangelog/issues/33) |
 
@@ -314,7 +315,7 @@ Kept out on purpose:
 - waitlist, voting, comments, reactions;
 - RSS, email digests, scheduled posts;
 - custom domains per workspace, an unread badge in the widget;
-- teams and roles, SSO;
+- teams and roles, SSO, social login other than Google;
 - Stripe, a free tier that publishes without a subscription;
 - translations, apart from the widget's Spanish chrome.
 
