@@ -1,0 +1,55 @@
+import { beforeEach, describe, expect, mock, test } from "bun:test";
+
+// revokeSubscriptionsInPolar with Polar's SDK mocked (`bun test --isolate`).
+let subscriptions: { id: string; status: string }[];
+let listedFor: unknown;
+let revoked: string[];
+
+mock.module("@polar-sh/sdk/2026-10", () => ({ createPolarCore: () => ({}) }));
+mock.module("@polar-sh/sdk/2026-10/services/products", () => ({ getProducts: () => async () => ({}) }));
+mock.module("@polar-sh/sdk/2026-10/services/subscriptions", () => ({
+  listSubscriptions: () => async (query: unknown) => {
+    listedFor = query;
+    return { items: subscriptions };
+  },
+  revokeSubscriptions: () => async (id: string) => {
+    revoked.push(id);
+  },
+}));
+
+process.env.POLAR_ACCESS_TOKEN = "polar_test";
+process.env.POLAR_PRODUCT_ID = "00000000-0000-0000-0000-000000000000";
+process.env.POLAR_SERVER = "sandbox";
+const { revokeSubscriptionsInPolar } = await import("./polar");
+
+describe("revokeSubscriptionsInPolar", () => {
+  beforeEach(() => {
+    revoked = [];
+    listedFor = undefined;
+  });
+
+  test("revokes every subscription of the workspace that could still bill", async () => {
+    subscriptions = [
+      { id: "trial", status: "trialing" },
+      { id: "live", status: "active" },
+      { id: "late", status: "past_due" },
+      { id: "checkout", status: "incomplete" },
+      { id: "owed", status: "unpaid" },
+      { id: "paused", status: "paused" },
+      { id: "done", status: "canceled" },
+      { id: "never", status: "incomplete_expired" },
+    ];
+    await revokeSubscriptionsInPolar("ws-1");
+    expect(listedFor).toMatchObject({ external_customer_id: "ws-1" });
+    expect(revoked.sort()).toEqual(["checkout", "late", "live", "owed", "paused", "trial"]);
+  });
+
+  test("with only ended subscriptions, it revokes nothing", async () => {
+    subscriptions = [
+      { id: "done", status: "canceled" },
+      { id: "never", status: "incomplete_expired" },
+    ];
+    await revokeSubscriptionsInPolar("ws-1");
+    expect(revoked).toEqual([]);
+  });
+});

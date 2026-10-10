@@ -11,8 +11,10 @@ function lazy<T>(create: () => T) {
   return () => (value ??= create());
 }
 
-// Set by Neon Auth after sign-in (the SDK doesn't export the name).
-const SESSION_COOKIE = "__Secure-neon-auth.session_token";
+// Set by Neon Auth after sign-in (the SDK doesn't export the names). Every one of its
+// cookies starts with the prefix.
+const AUTH_COOKIE_PREFIX = "__Secure-neon-auth";
+const SESSION_COOKIE = `${AUTH_COOKIE_PREFIX}.session_token`;
 
 export const getAuth = lazy(() => {
   const baseUrl = process.env.NEON_AUTH_BASE_URL;
@@ -35,6 +37,15 @@ export const getUser = cache(async () => {
   const { data } = await getAuth().getSession();
   return data?.user ?? null;
 });
+
+// Signs this browser out without calling Neon, for when the user is already gone (#31).
+// Browsers only clear a __Secure- cookie from a Secure Set-Cookie.
+export async function clearAuthCookies() {
+  const jar = await cookies();
+  for (const { name } of jar.getAll()) {
+    if (name.startsWith(AUTH_COOKIE_PREFIX)) jar.delete({ name, path: "/", secure: true });
+  }
+}
 
 // For every page and Server Action under /app: the proxy skips Server Actions,
 // so this is the check that counts.

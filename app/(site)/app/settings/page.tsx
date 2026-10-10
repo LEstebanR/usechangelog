@@ -5,6 +5,7 @@ import { getOrigin, publicUrl } from "@/lib/site";
 import { secondaryButtonClass } from "../../form-styles";
 import { SubmitButton } from "../../submit-button";
 import { WorkspaceForm } from "../workspace-form";
+import { DeleteAccountForm } from "./delete-account-form";
 import { WidgetInstall } from "./widget-install";
 
 export const metadata: Metadata = { title: "Settings — UseChangelog" };
@@ -58,6 +59,18 @@ export default async function SettingsPage() {
           </SubmitButton>
         </form>
         <WidgetInstall origin={origin} widgetKey={workspace.widgetKey} />
+      </section>
+
+      <section aria-labelledby="delete-account" className="mt-8 border border-clay/40 bg-canvas p-8">
+        <h2 id="delete-account" className="font-display text-xl font-medium text-clay">
+          Delete account
+        </h2>
+        <p className="mt-2 text-sm text-graphite">
+          This deletes your account, your workspace and all its posts. Your public page{" "}
+          <span className="font-mono break-all">{url}</span> and your widget stop working. If you have a subscription, it&apos;s
+          cancelled right away, without a refund. This can&apos;t be undone.
+        </p>
+        <DeleteAccountForm slug={workspace.slug} />
       </section>
     </div>
   );

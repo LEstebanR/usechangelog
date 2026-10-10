@@ -35,6 +35,7 @@ The billing rules (Polar only, one monthly plan, sign-up free, only `active` pub
 - **Gate:** check the stored state in one place, server-side. For `past_due`, show a banner that links to the portal. Drafts stay editable in every state.
 - **Customer portal:** the only place to change the payment method or cancel. Link to it from the app; don't build our own billing UI.
 - **Env vars:** access token, webhook secret and product id.
+- **Identity:** the workspace id is the Polar customer's `external_id`. The webhook (`lib/billing/webhook.ts`), the checkout's duplicate check (`hasActiveSubscriptionInPolar`) and account deletion (`revokeSubscriptionsInPolar`) all find the workspace by it. Polar has one customer per email per organization, so an organization shared with another app breaks this: a customer of the other app can't subscribe here, and their `external_id` isn't a workspace (#60).
 
 ## Not in the MVP
 
