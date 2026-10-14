@@ -156,7 +156,7 @@ export const signIn = { label: "Sign in", href: "/sign-in" };
 // Who runs UseChangelog, and the legal pages (#18). Each page keeps its own "Last updated" date.
 export const legal = {
   operator: "LEsteban (Luis Esteban Ramírez)",
-  contact: "support@lesteban.dev",
+  contact: "support@usechangelog.com",
   links: [
     { href: "/privacy", label: "Privacy" },
     { href: "/terms", label: "Terms" },

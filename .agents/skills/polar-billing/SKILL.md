@@ -24,6 +24,7 @@ The billing rules (Polar only, one monthly plan, sign-up free, only `active` pub
 
 ## Our rules
 
+- **Organization:** UseChangelog has its own, in sandbox and in production, never shared with another app (see **Identity**). Its support email must use the domain of its website, `usechangelog.com`.
 - **Product:** reference it by an env var. If the price or the free trial has to be shown, read it from Polar.
 - **Free trial:** optional, set on the product in Polar. Polar's `trialing` maps to `active` (it publishes); the webhook stores the trial's end so the billing page can show it.
 - **Checkout:** start it from the signed-in app with the workspace owner's identity. Pass our account or workspace id so the webhook can map back to it.
@@ -35,7 +36,7 @@ The billing rules (Polar only, one monthly plan, sign-up free, only `active` pub
 - **Gate:** check the stored state in one place, server-side. For `past_due`, show a banner that links to the portal. Drafts stay editable in every state.
 - **Customer portal:** the only place to change the payment method or cancel. Link to it from the app; don't build our own billing UI.
 - **Env vars:** access token, webhook secret and product id.
-- **Identity:** the workspace id is the Polar customer's `external_id`. The webhook (`lib/billing/webhook.ts`), the checkout's duplicate check (`hasActiveSubscriptionInPolar`) and account deletion (`revokeSubscriptionsInPolar`) all find the workspace by it. Polar has one customer per email per organization, so an organization shared with another app breaks this: a customer of the other app can't subscribe here, and their `external_id` isn't a workspace (#60).
+- **Identity:** the workspace id is the Polar customer's `external_id`. The webhook (`lib/billing/webhook.ts`), the checkout's duplicate check (`hasActiveSubscriptionInPolar`) and account deletion (`revokeSubscriptionsInPolar`) all find the workspace by it. Polar has one customer per email per organization, so an organization shared with another app breaks this: a customer of the other app can't subscribe here, and their `external_id` isn't a workspace. That's why we moved off the shared one (#60).
 
 ## Not in the MVP
 
