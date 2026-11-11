@@ -22,7 +22,10 @@ export default function PrivacyPage() {
 
       <h2>What we store</h2>
       <ul>
-        <li>Your account: your email address and your sign-in sessions.</li>
+        <li>
+          Your account: your email address and your sign-in sessions. If you sign in with Google, also the name and
+          profile picture Google shares with us.
+        </li>
         <li>
           Your workspace: its name, its public URL (slug), its widget settings and the posts you write, drafts
           included.
@@ -48,6 +51,10 @@ export default function PrivacyPage() {
       <ul>
         <li>
           <strong>Neon</strong>: our database, sign-in, and the emails with your sign-in link.
+        </li>
+        <li>
+          <strong>Google</strong>: sign-in, if you choose &ldquo;Continue with Google&rdquo;. We ask Google only for
+          your email address, name and profile picture.
         </li>
         <li>
           <strong>Vercel</strong>: hosting. Like any web host, it logs the requests made to the app, to your public

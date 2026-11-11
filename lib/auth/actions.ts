@@ -27,6 +27,29 @@ export async function sendMagicLink(formData: FormData) {
   redirect("/sign-in?sent=1");
 }
 
+// Google sends the browser back to Neon, which lands it on /auth/callback like a
+// magic link. The SDK stores the OAuth challenge cookie the callback needs.
+export async function signInWithGoogle() {
+  const origin = await getOrigin();
+  const callbackURL = `${origin}/auth/callback?via=google`;
+  const { data, error } = await getAuth().signIn.social({
+    provider: "google",
+    callbackURL,
+    // Neon sends new users to its own default ("/") without this.
+    newUserCallbackURL: callbackURL,
+    errorCallbackURL: `${origin}/sign-in`,
+  });
+  if (error || !data?.url) {
+    console.error("[sign-in] google failed", {
+      status: error?.status,
+      code: error?.code,
+      message: error?.message,
+    });
+    redirect("/sign-in?error=GOOGLE_FAILED");
+  }
+  redirect(data.url);
+}
+
 export async function signOut() {
   await getAuth().signOut();
   redirect("/");

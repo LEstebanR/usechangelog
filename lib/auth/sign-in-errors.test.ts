@@ -7,8 +7,14 @@ describe("signInErrorMessage", () => {
     expect(signInErrorMessage("INVALID_TOKEN")).toContain("already used");
   });
 
-  test("an unknown code gets the generic message", () => {
-    expect(signInErrorMessage("SOMETHING_ELSE")).toBe("Something went wrong with that link. Enter your email to get a new one.");
+  test("a cancelled Google sign-in says so", () => {
+    expect(signInErrorMessage("access_denied")).toContain("cancelled");
+  });
+
+  test("an unknown code, from a link or from Google, gets the generic message", () => {
+    expect(signInErrorMessage("SOMETHING_ELSE")).toBe(
+      "Something went wrong signing you in. Try again, or use your email to get a new link.",
+    );
   });
 
   test("no code, no message", () => {
