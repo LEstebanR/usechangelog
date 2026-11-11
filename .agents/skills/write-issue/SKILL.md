@@ -13,6 +13,8 @@ An issue is ready when someone can develop it without asking questions, and the 
 2. **Read the neighbors.** `gh issue list --state open`, then `gh issue view <n>` for the issues before and after this one. Check:
    - **Order:** does this issue need something a later issue builds, like a table, an env var or a route? If so, move that piece here or reorder, and say why.
    - **Overlap:** is part of this already in another issue? Remove it from one of them.
+   - **Open PRs:** `gh pr list` before editing an issue that depends on one, and again right before publishing. A PR can merge, and close its issue, while you write, which changes what "Depende de" and "Hecho cuando" should say.
+   - **Manual state:** when reviewing the backlog, compare the database with the vendor (for billing, `bun run polar:state <slug>` with production's env; it reads only). A workspace `active` without a Polar subscription, or a subscription without a workspace, is a decision made by hand that the issues should name.
 3. **Verify external facts.** For any vendor, library or service (pricing, limits, domain requirements, APIs, Next.js version behavior):
    - Read the current docs (`WebFetch`/`WebSearch`, or `node_modules/next/dist/docs/` for Next.js).
    - Cite them in **References**.
@@ -29,7 +31,7 @@ Use `.github/ISSUE_TEMPLATE/feature.md` for product work and `.github/ISSUE_TEMP
   - `P1`: needed before opening sign-up.
   - `P2`: after launch.
 
-  Within a priority, dependencies set the order.
+  Within a priority, dependencies set the order. A tracking issue with no code (outreach, a run-through in production) also gets a number and a label, so the order shows when it comes.
 - **Language:** the body is in Spanish; code, paths and identifiers stay in English.
 - **References:** point to other issues by their GitHub number (`#12`), never by the number in their title.
 - **Sections:** "Depende de", "Decisiones", "Impacto" and "Riesgos" go in only when they apply.
