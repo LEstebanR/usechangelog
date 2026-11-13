@@ -40,6 +40,7 @@ This list is the source of truth. The skills in `.agents/skills/` add implementa
 - **The `develop` Neon branch is permanent:** local dev and previews share it. Create or recreate it with `neonctl branches create --name develop --parent production` (no expiration), never from the Neon console, whose "Automatically delete branch after" is on by default and deleted the previous one after a day. Protect it in Neon if the plan allows.
 - **Env vars are checked before deploying:** `vercel-build` runs `bun run check-env` (`scripts/check-env.ts`) first. Add every new required var there with its expected format.
 - **No env vars at import time:** create clients (auth, database, SDKs) on first use, so `bun run build` passes without secrets.
+- **Worktrees in `.claude/worktrees/<issue>`:** one per issue, inside the repo, never as sibling folders. The folder is in `.gitignore` and in ESLint's ignores. Copy `.env.local` into each one and run `bun install` there.
 
 ## Verifying changes
 

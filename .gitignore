@@ -43,3 +43,6 @@ next-env.d.ts
 
 # Saved sessions from `bun run smoke`
 .smoke-session-*.json
+
+# Git worktrees (one per issue)
+/.claude/worktrees/
