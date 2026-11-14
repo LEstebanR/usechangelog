@@ -6,7 +6,7 @@ import { PAGE_COPY } from "@/lib/changelog/copy";
 import { formatDay } from "@/lib/posts/form";
 import { listPublishedPosts } from "@/lib/posts/server";
 import { changelogJsonLd } from "@/lib/seo/json-ld";
-import { changelogLanguage } from "@/lib/seo/language";
+import { changelogLanguage, ogLocale } from "@/lib/seo/language";
 import { siteUrl } from "@/lib/site";
 import type { WidgetLang } from "@/lib/widget/copy";
 import { getWorkspaceBySlug } from "@/lib/workspace/server";
@@ -33,12 +33,14 @@ export async function generateMetadata({ params }: PageProps<"/[slug]">): Promis
   const workspace = await getWorkspaceBySlug(slug);
   if (!workspace || !canPublish(workspace)) return {};
   const indexable = isIndexable(workspace, (await getPublicPosts(workspace.id)).length);
-  const copy = PAGE_COPY[changelogLanguage(workspace.widgetLang)];
+  const lang = changelogLanguage(workspace.widgetLang);
+  const copy = PAGE_COPY[lang];
   return {
     ...pageMetadata({
       title: copy.title(workspace.name),
       description: copy.description(workspace.name),
       path: `/${slug}`,
+      locale: ogLocale(lang),
     }),
     ...(indexable ? {} : { robots: { index: false, follow: true } }),
   };
@@ -101,7 +103,7 @@ export default async function PublicChangelog({ params }: PageProps<"/[slug]">) 
         )}
       </main>
 
-      <SiteFooter prefix={copy.poweredBy} />
+      <SiteFooter prefix={copy.poweredBy} legalLinks={false} />
     </div>
   );
 }

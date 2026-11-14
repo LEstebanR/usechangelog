@@ -23,15 +23,21 @@ export const siteOpenGraph = {
 } as const;
 
 // A page's own title, description, canonical, Open Graph and Twitter card (#19). `path` is
-// resolved against metadataBase, so it points to production or to the preview.
-export const pageMetadata = ({ title, description, path }: { title: string; description: string; path: string }) => ({
+// resolved against metadataBase, so it points to production or to the preview. `locale` is
+// og:locale (e.g. "es_ES") for a public changelog in another language; crawlers assume en_US.
+export const pageMetadata = ({ title, description, path, locale }: {
+  title: string;
+  description: string;
+  path: string;
+  locale?: string;
+}) => ({
   // On the same object as the relative image, so the image resolves against the site URL
   // even when this page replaces the layout's Open Graph.
   metadataBase: new URL(siteUrl()),
   title,
   description,
   alternates: { canonical: path },
-  openGraph: { ...siteOpenGraph, title, description, url: path, images: [ogImage] },
+  openGraph: { ...siteOpenGraph, title, description, url: path, images: [ogImage], ...(locale ? { locale } : {}) },
   twitter: { card: "summary_large_image" as const, title, description, images: [ogImage.url] },
 });
 

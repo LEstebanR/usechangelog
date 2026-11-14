@@ -88,7 +88,7 @@ app/
     layout.tsx          Metadata and Open Graph for that tree
     not-found.tsx       404 page (unknown routes and notFound())
     privacy/, terms/    Privacy policy and terms (shell in legal-page.tsx)
-    site-footer.tsx     Footer of the landing, the public page and the legal pages (brand, Privacy · Terms)
+    site-footer.tsx     Footer of the landing, the public page and the legal pages (brand; Privacy · Terms except on the public page)
     layout-styles.ts    Page width and gutters shared by those pages
     latest.tsx          Rotating "Latest from Acme" feed in the hero
     reveal.tsx          Scroll reveals (IntersectionObserver)
