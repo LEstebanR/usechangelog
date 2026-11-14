@@ -56,7 +56,7 @@ export function WhatsNewPreview({ slug, name, lang, enabled, total, allUpdatesUr
   }, [open]);
 
   return (
-    <div className="relative">
+    <div className="relative min-w-0">
       <button
         ref={trigger}
         type="button"
@@ -64,13 +64,13 @@ export function WhatsNewPreview({ slug, name, lang, enabled, total, allUpdatesUr
         aria-expanded={open}
         aria-haspopup="dialog"
         title={enabled ? "Preview what your users see" : "The widget is off: your users don't see it"}
-        className="flex items-center gap-2 border border-hairline px-3 py-2 text-sm font-medium transition-colors hover:border-ink"
+        className="flex max-w-full items-center gap-2 border border-hairline px-3 py-2 text-sm font-medium transition-colors hover:border-ink"
       >
-        <span aria-hidden="true" className="size-2 bg-blue" />
+        <span aria-hidden="true" className="size-2 shrink-0 bg-blue" />
         <span className="max-w-40 truncate">/{slug}</span>
-        <span className="tabular-nums text-graphite">{total}</span>
+        <span className="shrink-0 tabular-nums text-graphite">{total}</span>
         {!enabled && (
-          <span className="border border-hairline px-1.5 py-0.5 text-xs uppercase tracking-wider text-graphite">Off</span>
+          <span className="shrink-0 border border-hairline px-1.5 py-0.5 text-xs uppercase tracking-wider text-graphite">Off</span>
         )}
       </button>
 

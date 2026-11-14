@@ -36,6 +36,7 @@ export function WorkspaceForm({ action, initial, origin, submitLabel, showWidget
   const slug = slugInput ?? slugify(name);
   // Settings only: warn before a stored slug changes.
   const slugChanged = Boolean(initial.slug) && slug.trim().toLowerCase() !== initial.slug;
+  const host = origin.replace(/^https?:\/\//, "");
 
   return (
     <form action={formAction} noValidate className="flex flex-col gap-5">
@@ -66,9 +67,13 @@ export function WorkspaceForm({ action, initial, origin, submitLabel, showWidget
         <label htmlFor="slug" className="text-sm font-medium">
           Public URL
         </label>
+        {/* A long host (a Vercel preview) is cut short so the slug always has room. */}
         <div className="flex items-stretch">
-          <span className="flex items-center border border-r-0 border-hairline bg-wash px-3 text-sm text-graphite">
-            {origin.replace(/^https?:\/\//, "")}/
+          <span
+            title={`${host}/`}
+            className="flex min-w-0 items-center border border-r-0 border-hairline bg-wash px-3 text-sm text-graphite"
+          >
+            <span className="truncate">{host}/</span>
           </span>
           <input
             id="slug"
@@ -82,7 +87,8 @@ export function WorkspaceForm({ action, initial, origin, submitLabel, showWidget
             placeholder="acme"
             aria-invalid={Boolean(state.errors?.slug)}
             aria-describedby="slug-help"
-            className={`${inputClass} min-w-0 flex-1`}
+            // At least 14 characters plus padding and border, so ~12 wide ones still show.
+            className={`${inputClass} min-w-[calc(14ch+1.5rem+2px)] flex-1`}
           />
         </div>
         <p id="slug-help" className={`text-sm ${state.errors?.slug ? "text-clay" : "text-graphite"}`}>
