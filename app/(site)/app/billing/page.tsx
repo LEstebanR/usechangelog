@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { readPlan } from "@/lib/billing/polar";
 import { PLANS, planOf, projectLimit } from "@/lib/billing/plans";
-import { hasSubscription, type SubscriptionStatus } from "@/lib/billing/status";
+import { canPublish, hasSubscription, type SubscriptionStatus } from "@/lib/billing/status";
 import { formatDay, toDay } from "@/lib/posts/form";
-import { getCurrentAccount, listWorkspaces, requireWorkspace } from "@/lib/workspace/server";
+import { getCurrentAccount, listWorkspaces } from "@/lib/workspace/server";
 import { primaryButtonClass, secondaryButtonClass } from "../../form-styles";
 
 export const metadata: Metadata = { title: "Billing — UseChangelog" };
@@ -12,22 +13,24 @@ export const metadata: Metadata = { title: "Billing — UseChangelog" };
 // The account's plan (#14, #65), its real state from the webhook (#15), how many projects it
 // uses, and the way to Pro or to Polar's portal (#17).
 export default async function BillingPage({ searchParams }: PageProps<"/app/billing">) {
-  // The workspace carries the account's status (`none` before the first checkout); the
-  // account row, when there is one, has the dates and the Polar customer.
-  const [workspace, account, projects, { price, trial }, { checkout }] = await Promise.all([
-    requireWorkspace(),
+  // An account page: it reads the account and all its projects, never the open project.
+  const [account, projects, { price, trial }, { checkout }] = await Promise.all([
     getCurrentAccount(),
     listWorkspaces(),
     readPlan(),
     searchParams,
   ]);
-  const status = workspace.subscriptionStatus;
-  const plan = PLANS[planOf(workspace)];
-  const limit = projectLimit(workspace);
+  // Billing is for after onboarding, like every tab.
+  if (!projects.length) redirect("/app/onboarding");
+  // No account row before onboarding created it, or before accounts existed: Free.
+  const billing = { subscriptionStatus: account?.subscriptionStatus ?? ("none" as const) };
+  const status = billing.subscriptionStatus;
+  const plan = PLANS[planOf(billing)];
+  const limit = projectLimit(billing);
   const pastDue = status === "past_due";
   const backFromCheckout = checkout === "success";
   // Back from the checkout before the webhook has landed, or a free trial.
-  const shown = backFromCheckout && !hasSubscription(workspace) ? "activating" : status === "active" && account?.trialEndsAt ? "trial" : status;
+  const shown = backFromCheckout && !hasSubscription(billing) ? "activating" : status === "active" && account?.trialEndsAt ? "trial" : status;
   const { dot, title, detail } = STATUS[shown];
   const day = (date: Date | null | undefined) => (date ? formatDay(toDay(date)) : "");
   const dates = { periodEnd: day(account?.currentPeriodEnd), trialEnd: day(account?.trialEndsAt), canceling: Boolean(account?.cancelAtPeriodEnd), price };
@@ -36,15 +39,31 @@ export default async function BillingPage({ searchParams }: PageProps<"/app/bill
     <div className="mx-auto flex max-w-lg flex-col gap-8">
       <h1 className="font-display text-3xl font-medium tracking-tight">Billing</h1>
 
+      {/* The account's plan and which of its projects it publishes: the oldest ones (#65). */}
       <section className="border border-hairline bg-canvas p-8">
-        <p className="text-sm text-graphite">
-          You&apos;re on <span className="font-medium text-ink">{plan.name}</span>, using{" "}
-          <span className="tabular-nums">
-            {Math.min(projects.length, limit)} of {limit}
-          </span>{" "}
-          {limit === 1 ? "project" : "projects"}.
-          {projects.length > limit && ` ${projects.length - limit} more ${projects.length - limit === 1 ? "isn't" : "aren't"} public.`}
-        </p>
+        <div className="flex flex-wrap items-baseline justify-between gap-2">
+          <h2 className="font-display text-xl font-medium">Your plan: {plan.name}</h2>
+          <p className="text-sm text-graphite tabular-nums">
+            Publishes {limit} {limit === 1 ? "project" : "projects"}
+          </p>
+        </div>
+        <ul className="mt-4 divide-y divide-hairline border border-hairline text-sm">
+          {projects.map((project) => (
+            <li key={project.id} className="flex items-center justify-between gap-3 px-3 py-2">
+              <span className="truncate font-medium">{project.name}</span>
+              {canPublish(project) ? (
+                <span className="shrink-0 text-xs text-green">Public</span>
+              ) : (
+                <span className="shrink-0 text-xs text-clay">Not public</span>
+              )}
+            </li>
+          ))}
+        </ul>
+        {projects.length > limit && (
+          <p className="mt-3 text-sm text-graphite">
+            Your oldest {limit === 1 ? "project is" : `${limit} projects are`} public. The others keep their posts and drafts.
+          </p>
+        )}
       </section>
 
       <section className="border border-hairline bg-canvas p-8">
@@ -52,7 +71,7 @@ export default async function BillingPage({ searchParams }: PageProps<"/app/bill
           <h2 className="font-display text-xl font-medium">Pro</h2>
           {price && <p className="font-display text-lg tabular-nums">{price}</p>}
         </div>
-        {trial && !hasSubscription(workspace) && <p className="mt-1 text-sm font-medium text-green">Starts with a {trial}.</p>}
+        {trial && !hasSubscription(billing) && <p className="mt-1 text-sm font-medium text-green">Starts with a {trial}.</p>}
         <p className="mt-2 text-sm text-graphite">
           Up to {PLANS.pro.projects} projects, each with its own public changelog page and widget. Free publishes{" "}
           {PLANS.free.projects}.
@@ -72,7 +91,7 @@ export default async function BillingPage({ searchParams }: PageProps<"/app/bill
             or a portal session. They take everything from the session, never from the form. */}
         {/* Stacked and full width on a phone, side by side from sm. */}
         <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:flex-wrap [&>*]:w-full sm:[&>*]:w-auto [&_button]:w-full">
-          {!hasSubscription(workspace) && !backFromCheckout && (
+          {!hasSubscription(billing) && !backFromCheckout && (
             <form action="/api/polar/checkout">
               <button type="submit" className={primaryButtonClass}>
                 Upgrade to Pro
