@@ -1,18 +1,11 @@
-import type { Metadata } from "next";
 import Link from "next/link";
-import { isAdmin, requireAdmin } from "@/lib/auth/roles";
-import { getUser } from "@/lib/auth/server";
+import { dateTime } from "@/lib/admin/format";
+import { adminMetadata, requireAdmin } from "@/lib/auth/roles";
 import { FEEDBACK_KINDS, FEEDBACK_LABELS } from "@/lib/feedback/form";
 import { listFeedback } from "@/lib/feedback/server";
+import { AdminNav } from "./admin-nav";
 
-// The title only names the page for admins; anyone else gets the 404's, so nothing hints it exists.
-export async function generateMetadata(): Promise<Metadata> {
-  const user = await getUser();
-  return user && (await isAdmin(user.id)) ? { title: "Admin — UseChangelog" } : { title: "Page not found — UseChangelog" };
-}
-
-const dateTime = (date: Date) =>
-  date.toLocaleString("en-US", { month: "short", day: "numeric", year: "numeric", hour: "2-digit", minute: "2-digit", timeZone: "UTC" });
+export const generateMetadata = () => adminMetadata("Admin");
 
 // What users send us from the app (#28), newest first. Admins only: anyone else gets a 404.
 export default async function AdminPage({ searchParams }: PageProps<"/app/admin">) {
@@ -29,6 +22,7 @@ export default async function AdminPage({ searchParams }: PageProps<"/app/admin"
 
   return (
     <div className="mx-auto flex max-w-3xl flex-col gap-6">
+      <AdminNav current="/app/admin" />
       <div>
         <h1 className="font-display text-3xl font-medium tracking-tight">Feedback</h1>
         <p className="mt-2 text-sm text-graphite">What users send from the app, newest first. Answer them by email.</p>

@@ -13,3 +13,11 @@ export const user = neonAuth.table("user", {
   createdAt: timestamp({ withTimezone: true }).notNull(),
   updatedAt: timestamp({ withTimezone: true }).notNull(),
 });
+
+// Better Auth deletes a session on sign-out or expiry, so the newest one left is the
+// latest sign-in we can still see, not a history. Read only, for the admin users view (#57).
+export const session = neonAuth.table("session", {
+  id: uuid().primaryKey(),
+  userId: uuid().notNull(),
+  createdAt: timestamp({ withTimezone: true }).notNull(),
+});

@@ -97,7 +97,7 @@ app/
     markdown-body.tsx   A post body rendered from Markdown (styles in markdown-styles.ts)
     (auth)/sign-in/     Sign-in: Google or a magic link
     app/                The signed-in app: /app (posts), /app/posts/new, /app/posts/[id], /app/onboarding, /app/settings, /app/billing
-    app/admin/          Admin only: the feedback users send (#28)
+    app/admin/          Admin only: the feedback users send (#28) and, at /app/admin/users, who signed up (#57)
   [slug]/               The public changelog at /{slug}. Its own root layout sets lang from the workspace
   api/widget/[key]/     Public widget data (CORS open, 60-second CDN cache)
   api/polar/            Polar checkout, customer portal and webhook (the only writer of subscription state)
@@ -202,7 +202,7 @@ Answer by email, by hand.
 
 ### Admin
 
-`admin` is our own staff role, in the `user_roles` table (customers never have one). An admin sees an **Admin** tab in the app, and `/app/admin` lists the feedback, newest first, filterable by kind; anyone else gets a 404 there.
+`admin` is our own staff role, in the `user_roles` table (customers never have one). An admin sees an **Admin** tab in the app, and `/app/admin` lists the feedback, newest first, filterable by kind. `/app/admin/users` lists everyone who signed up (newest 200), with their workspace, subscription (as the webhook stored it), posts and latest sign-in, plus totals. Anyone else gets a 404 on both.
 
 Grant it to someone who has signed in at least once on that environment:
 
