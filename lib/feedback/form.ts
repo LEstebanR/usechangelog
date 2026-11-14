@@ -11,16 +11,14 @@ export const FEEDBACK_STATUSES = ["open", "done", "dismissed"] as const;
 export type FeedbackStatus = (typeof FEEDBACK_STATUSES)[number];
 // The status filter spans every kind, so it uses the generic names.
 export const STATUS_FILTER_LABELS: Record<FeedbackStatus, string> = { open: "Open", done: "Done", dismissed: "Dismissed" };
-export const STATUS_LABELS: Record<FeedbackKind, Record<FeedbackStatus, string>> = {
-  bug: { open: "Open", done: "Fixed", dismissed: "Won't fix" },
-  idea: { open: "Open", done: "Shipped", dismissed: "Declined" },
-  other: { open: "Open", done: "Answered", dismissed: "Archived" },
-};
-// The buttons that move a message to each status.
-export const STATUS_ACTIONS: Record<FeedbackKind, Record<FeedbackStatus, string>> = {
-  bug: { open: "Reopen", done: "Mark fixed", dismissed: "Won't fix" },
-  idea: { open: "Reopen", done: "Mark shipped", dismissed: "Decline" },
-  other: { open: "Reopen", done: "Mark answered", dismissed: "Archive" },
+// Each status's name for a kind (`label`) and the button that moves a message to it
+// (`action`), in one table so a rename changes both.
+type StatusName = { label: string; action: string };
+const OPEN: StatusName = { label: "Open", action: "Reopen" };
+export const STATUS_NAMES: Record<FeedbackKind, Record<FeedbackStatus, StatusName>> = {
+  bug: { open: OPEN, done: { label: "Fixed", action: "Mark fixed" }, dismissed: { label: "Won't fix", action: "Won't fix" } },
+  idea: { open: OPEN, done: { label: "Shipped", action: "Mark shipped" }, dismissed: { label: "Declined", action: "Decline" } },
+  other: { open: OPEN, done: { label: "Answered", action: "Mark answered" }, dismissed: { label: "Archived", action: "Archive" } },
 };
 
 // The admin's status form: which message and its new status. Null when either is invalid.

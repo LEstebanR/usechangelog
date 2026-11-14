@@ -16,6 +16,7 @@ Goal: a PR, ready for review and not merged, that meets every "Hecho cuando" ite
 - **Options the issue leaves to try:** if the issue says "try option 1, else option 2" for a vendor capability, try it now with a cheap probe (a request, a CLI call), before the plan. The plan then names the option that works and asks for its env vars from the start.
 - **Vendor configuration matches the issue.** Before planning, read what the vendor already has, by API or CLI, and compare it with the issue's decisions: for billing, the product in Polar (price, interval, free trial), the token's scopes and the webhook's events. A mismatch (a trial the issue rules out, a missing scope) goes in the plan as a question for the owner, not as a surprise at checkout.
 - **Auth on the preview.** If the PR touches sign-in or `/app` and will be checked on its preview, add an owner step to the plan: in Neon, on the branch previews use, Better Auth → Domains → `https://usechangelog-git-<branch>-lestebanrs-projects.vercel.app`. Neon has no wildcard that covers preview URLs. Then, before checking anything behind sign-in on the preview, ask the owner to sign in there in the browser you'll use; never sign in for them.
+- **Ask whether the preview check is needed.** In the plan, ask the owner whether to verify on the preview or skip it (see step 6). If they skip it, drop the Neon domain and sign-in steps from the plan, and verify against `develop` and locally instead.
 - **Resuming:** if a branch or PR for this issue already exists, continue there; don't start over.
 
 ## 2. Read before writing code
@@ -51,7 +52,32 @@ Goal: a PR, ready for review and not merged, that meets every "Hecho cuando" ite
 ## 5. Verify locally
 
 - Run the `verifier` agent, or the same commands it runs: lint, typecheck, build, and tests if they exist. Everything must pass.
-- **Hand-written SQL runs once against `develop`:** CI builds without a database, so a type error in raw `sql` (a `CASE` whose params Postgres types as `text`, an enum without a cast) only shows up on the preview build. Run each new query once with a throwaway `bun scripts/_check.ts` that only reads, and delete the script afterwards. To check a write, run it as a `select` with the same `where`, or inside a `db.batch` that fails and rolls back.
+- **Hand-written SQL runs once against `develop`:** CI builds without a database, so a type error in raw `sql` (a `CASE` whose params Postgres types as `text`, an enum without a cast) only shows up on the preview build. Run each new query once with a throwaway `bun scripts/_check.ts` that only reads, and delete the script afterwards. To check a write, run it as a `select` with the same `where`, or inside a `db.batch` that fails and rolls back. The batch below inserts a temporary row, runs the write and asserts the result with a division by zero, so a passing check rolls everything back:
+
+  ```ts
+  // scripts/_check.ts — run with `bun scripts/_check.ts`, then delete it.
+  import { sql } from "drizzle-orm";
+  import { getDb } from "@/db";
+  import { feedback } from "@/db/schema";
+  import { setFeedbackStatus } from "@/lib/feedback/server"; // the write under test
+
+  const db = getDb();
+  const id = crypto.randomUUID();
+  const userId = ((await db.execute(sql`select id from neon_auth."user" limit 1`)).rows[0] as { id: string }).id;
+  try {
+    await db.batch([
+      db.execute(sql`insert into ${feedback} (id, user_id, message, page) values (${id}, ${userId}, 'temp check', '/app')`),
+      setFeedbackStatus(id, "done"),
+      // 1/0 when the expectation holds: the error is the pass, and it rolls the batch back.
+      db.execute(sql`select 1/(case when (select resolved_at from ${feedback} where id = ${id}) is not null then 0 else 1 end)`),
+    ]);
+    console.log("FAIL: the expectation didn't hold");
+  } catch (e) {
+    console.log(String(e).includes("division by zero") ? "pass" : `error: ${e}`);
+  }
+  console.log("left behind:", (await db.execute(sql`select count(*) from ${feedback} where id = ${id}`)).rows); // 0
+  process.exit(0);
+  ```
 - For runtime behavior, use the `next-dev-loop` skill against `next dev`.
 - In the browser, fill forms with JS (the native `value` setter plus an `input` event, then `form.requestSubmit(button)`) instead of typing and clicking by coordinates: pages hydrate after load and layouts shift with the window size, so typed text gets lost and clicks land on the wrong button.
   - Find the button by its text and check `location.pathname` in the same script before submitting. A page can redirect first (a signed-in visitor on `/sign-in` lands in `/app`), and "the first form" is then a different one, such as Sign out.
@@ -71,15 +97,15 @@ Goal: a PR, ready for review and not merged, that meets every "Hecho cuando" ite
 - **Check every item:** go through each "Hecho cuando" item **on the preview** and record the result in the PR description. Explain any item that isn't met.
   - The owner can skip the preview check when it adds nothing over local, for example when the preview uses the same Neon branch (`develop`) that local already tested. Say so in the PR's "How it was tested" and in the checklist, and don't push for it.
 
-## 7. Simplify and review
+## 7. Review (and simplify when it pays)
 
-Batch first: if the owner keeps asking for UX or design changes on the PR, finish that round of requests, then run simplify and code-review once over everything, instead of one pass per request.
+Batch first: if the owner keeps asking for UX or design changes on the PR, finish that round of requests, then run the review (and simplify, if it applies) once over everything, instead of one pass per request.
 
-1. **Simplify:** run the `simplify` skill on the branch diff and apply its fixes.
-2. **Code review:** run the `code-review` skill on the PR. Fix confirmed bugs. If a finding would change the issue's scope or a decision, ask the owner instead.
+1. **Simplify (optional):** not on every PR. Run the `simplify` skill only when the diff is large or adds a new module or pattern, or when the owner asks. For a small diff, the review's reuse check is enough.
+2. **Code review:** run the project's `review-pr` skill on the PR, not the generic `code-review` plugin: it checks this repo's rules (access checks, paywall, migrations, scope). Fix confirmed bugs. If a finding would change the issue's scope or a decision, ask the owner instead.
 3. **Re-check:** run step 5 again, push, and confirm CI is still green.
 
-In Cursor, where these skills don't exist, or when a skill fails (quota, API error), do the same review by hand: reuse, simplification, efficiency, then a correctness pass. Say in the report that it was done by hand and why.
+In Cursor, where these skills don't exist, or when a skill fails (quota, API error), follow `.agents/skills/review-pr/SKILL.md` by hand. Say in the report that it was done by hand and why.
 
 ## 8. Update the README
 
@@ -100,7 +126,7 @@ Before reporting, run `git fetch` and `gh pr view <n> --json mergeable` again. I
 Tell the owner:
 - the PR link;
 - the status of each "Hecho cuando" item;
-- what simplify and code-review changed;
+- what the review (and simplify, if it ran) changed;
 - any deviation from the issue, and why.
 
 **Never merge:** the owner merges.

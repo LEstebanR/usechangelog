@@ -333,14 +333,17 @@ The issue tracker is the backlog. Each issue carries a number in its title, in b
 | 19 | Delete your account | [#31](https://github.com/LEstebanR/usechangelog/issues/31) | ✅ Done |
 | 20 | Custom 404 page | [#33](https://github.com/LEstebanR/usechangelog/issues/33) | ✅ Done |
 | 22 | Polar: an organization of our own | [#60](https://github.com/LEstebanR/usechangelog/issues/60) | ✅ Done |
-| 23 | Security: rotate the database password exposed in Vercel logs | [#61](https://github.com/LEstebanR/usechangelog/issues/61) | Open |
+| 23 | Security: rotate the database password exposed in Vercel logs | [#61](https://github.com/LEstebanR/usechangelog/issues/61) | ✅ Done |
 | 24 | Docs: courtesy accounts, roadmap and previews in the README | [#64](https://github.com/LEstebanR/usechangelog/issues/64) | ✅ Done |
-| 25 | Plans: Free and Pro, with several projects per account | [#65](https://github.com/LEstebanR/usechangelog/issues/65) | Open |
-| 26 | Admin: see the registered users | [#57](https://github.com/LEstebanR/usechangelog/issues/57) | Open |
+| 25 | Plans: Free and Pro, with several projects per account | [#65](https://github.com/LEstebanR/usechangelog/issues/65) | ✅ Done |
+| 26 | Admin: see the registered users | [#57](https://github.com/LEstebanR/usechangelog/issues/57) | ✅ Done |
 | 27 | Launch: full test sign-up in production before outreach | [#62](https://github.com/LEstebanR/usechangelog/issues/62) | ✅ Done |
-| 27 | Own changelog: UseChangelog publishes its updates at `/usechangelog` | [#67](https://github.com/LEstebanR/usechangelog/issues/67) | Open |
+| 27 | Own changelog: UseChangelog publishes its updates at `/usechangelog` | [#67](https://github.com/LEstebanR/usechangelog/issues/67) | ✅ Done |
 | 28 | Launch: get the first 5 to 10 real users | [#58](https://github.com/LEstebanR/usechangelog/issues/58) | ✅ Done |
+| 28 | Share image for each changelog, in its language | [#73](https://github.com/LEstebanR/usechangelog/issues/73) | ✅ Done |
 | 29 | Admin: mark feedback as resolved | [#75](https://github.com/LEstebanR/usechangelog/issues/75) | ✅ Done |
+| 29 | Email: welcome when the first project is created | [#76](https://github.com/LEstebanR/usechangelog/issues/76) | Open |
+| 30 | Admin: no project limit for staff | [#77](https://github.com/LEstebanR/usechangelog/issues/77) | ✅ Done |
 
 ### Out of scope
 

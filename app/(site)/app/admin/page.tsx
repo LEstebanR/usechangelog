@@ -8,9 +8,8 @@ import {
   FEEDBACK_LABELS,
   FEEDBACK_STATUSES,
   parseAdminFilters,
-  STATUS_ACTIONS,
   STATUS_FILTER_LABELS,
-  STATUS_LABELS,
+  STATUS_NAMES,
 } from "@/lib/feedback/form";
 import { listFeedback, openCounts } from "@/lib/feedback/server";
 import { AdminNav } from "./admin-nav";
@@ -94,7 +93,7 @@ export default async function AdminPage({ searchParams }: PageProps<"/app/admin"
               <p className="whitespace-pre-wrap [overflow-wrap:anywhere]">{item.message}</p>
               <div className="flex flex-wrap items-center gap-x-3 gap-y-2 text-sm">
                 <span className={item.status === "open" ? "font-medium text-ink" : "text-graphite"}>
-                  {STATUS_LABELS[item.kind][item.status]}
+                  {STATUS_NAMES[item.kind][item.status].label}
                   {item.resolvedAt && (
                     <>
                       {" · "}
@@ -114,7 +113,7 @@ export default async function AdminPage({ searchParams }: PageProps<"/app/admin"
                       value={s}
                       className="border border-hairline px-3 py-1 text-graphite hover:border-ink hover:text-ink"
                     >
-                      {STATUS_ACTIONS[item.kind][s]}
+                      {STATUS_NAMES[item.kind][s].action}
                     </button>
                   ))}
                 </form>

@@ -7,7 +7,7 @@ import {
   parseAdminFilters,
   parseFeedback,
   parseStatusChange,
-  STATUS_LABELS,
+  STATUS_NAMES,
 } from "./form";
 
 describe("parseFeedback", () => {
@@ -46,11 +46,20 @@ describe("parseFeedback", () => {
   });
 });
 
-describe("STATUS_LABELS", () => {
+describe("STATUS_NAMES", () => {
+  const labels = (k: keyof typeof STATUS_NAMES) => Object.values(STATUS_NAMES[k]).map((n) => n.label);
+  const actions = (k: keyof typeof STATUS_NAMES) => Object.values(STATUS_NAMES[k]).map((n) => n.action);
+
   test("each kind names done and dismissed its own way", () => {
-    expect(STATUS_LABELS.bug).toEqual({ open: "Open", done: "Fixed", dismissed: "Won't fix" });
-    expect(STATUS_LABELS.idea).toEqual({ open: "Open", done: "Shipped", dismissed: "Declined" });
-    expect(STATUS_LABELS.other).toEqual({ open: "Open", done: "Answered", dismissed: "Archived" });
+    expect(labels("bug")).toEqual(["Open", "Fixed", "Won't fix"]);
+    expect(labels("idea")).toEqual(["Open", "Shipped", "Declined"]);
+    expect(labels("other")).toEqual(["Open", "Answered", "Archived"]);
+  });
+
+  test("the buttons: reopen, then the kind's own actions", () => {
+    expect(actions("bug")).toEqual(["Reopen", "Mark fixed", "Won't fix"]);
+    expect(actions("idea")).toEqual(["Reopen", "Mark shipped", "Decline"]);
+    expect(actions("other")).toEqual(["Reopen", "Mark answered", "Archive"]);
   });
 });
 
