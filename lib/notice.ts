@@ -6,6 +6,7 @@ export const NOTICES = {
   drafted: "Draft saved.",
   deleted: "Post deleted.",
   settings: "Settings saved.",
+  projectDeleted: "Project deleted.",
 } as const;
 
 export type Notice = keyof typeof NOTICES;

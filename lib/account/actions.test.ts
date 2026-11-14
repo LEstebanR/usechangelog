@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, mock, test } from "bun:test";
 
 // deleteAccount with the session, Polar, Neon, cookies and redirect mocked (`bun test --isolate`).
-let workspace: { id: string; slug: string } | null;
+let account: { id: string } | null;
 let calls: string[];
 let polarFails: boolean;
 let neonFails: boolean;
@@ -13,12 +13,12 @@ mock.module("next/navigation", () => ({
   },
 }));
 mock.module("@/lib/auth/server", () => ({
-  requireUser: async () => ({ id: "user-1" }),
+  requireUser: async () => ({ id: "user-1", email: "Ana@example.com" }),
   clearAuthCookies: async () => {
     signedOut = true;
   },
 }));
-mock.module("@/lib/workspace/server", () => ({ getCurrentWorkspace: async () => workspace }));
+mock.module("@/lib/workspace/server", () => ({ getCurrentAccount: async () => account }));
 mock.module("@/lib/billing/polar", () => ({
   revokeSubscriptionsInPolar: async (id: string) => {
     calls.push(`polar:${id}`);
@@ -33,15 +33,15 @@ mock.module("./neon", () => ({
 }));
 
 const { deleteAccount } = await import("./actions");
-const form = (slug: string) => {
+const form = (email: string) => {
   const data = new FormData();
-  data.set("slug", slug);
+  data.set("email", email);
   return data;
 };
 
 describe("deleteAccount", () => {
   beforeEach(() => {
-    workspace = { id: "ws-1", slug: "acme" };
+    account = { id: "acct-1" };
     calls = [];
     polarFails = false;
     neonFails = false;
@@ -50,32 +50,32 @@ describe("deleteAccount", () => {
   });
 
   test("cancels in Polar, deletes the user, signs out and lands on /?deleted=1", async () => {
-    await expect(deleteAccount({}, form(" acme "))).rejects.toThrow("redirect:/?deleted=1");
-    expect(calls).toEqual(["polar:ws-1", "neon:user-1"]);
+    await expect(deleteAccount({}, form(" ana@example.com "))).rejects.toThrow("redirect:/?deleted=1");
+    expect(calls).toEqual(["polar:acct-1", "neon:user-1"]);
     expect(signedOut).toBe(true);
   });
 
-  test("a different slug is refused, even when the action is called directly", async () => {
-    expect(await deleteAccount({}, form("acme-2"))).toEqual({ error: expect.stringContaining("slug") });
+  test("a different email is refused, even when the action is called directly", async () => {
+    expect(await deleteAccount({}, form("other@example.com"))).toEqual({ error: expect.stringContaining("email") });
     expect(calls).toEqual([]);
   });
 
   test("when Polar fails, nothing is deleted", async () => {
     polarFails = true;
-    expect(await deleteAccount({}, form("acme"))).toEqual({ error: expect.stringContaining("nothing was deleted") });
-    expect(calls).toEqual(["polar:ws-1"]);
+    expect(await deleteAccount({}, form("ana@example.com"))).toEqual({ error: expect.stringContaining("nothing was deleted") });
+    expect(calls).toEqual(["polar:acct-1"]);
     expect(signedOut).toBe(false);
   });
 
   test("when Neon fails, the user stays signed in and sees the error", async () => {
     neonFails = true;
-    expect(await deleteAccount({}, form("acme"))).toEqual({ error: expect.stringContaining("couldn't delete") });
+    expect(await deleteAccount({}, form("ana@example.com"))).toEqual({ error: expect.stringContaining("couldn't delete") });
     expect(signedOut).toBe(false);
   });
 
-  test("without a workspace, there is nothing to cancel: the user is deleted", async () => {
-    workspace = null;
-    await expect(deleteAccount({}, form(""))).rejects.toThrow("redirect:/?deleted=1");
+  test("without an account row (no checkout ever), there is nothing to cancel: the user is deleted", async () => {
+    account = null;
+    await expect(deleteAccount({}, form("ana@example.com"))).rejects.toThrow("redirect:/?deleted=1");
     expect(calls).toEqual(["neon:user-1"]);
   });
 });

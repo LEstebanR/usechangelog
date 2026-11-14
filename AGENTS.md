@@ -16,18 +16,18 @@ Changelog and product announcements for small teams: a public changelog page and
 
 This list is the source of truth. The skills in `.agents/skills/` add implementation detail and don't restate these rules.
 
-- **Account model:** one account, one workspace. No teams, no organizations.
+- **Account model:** one account, several projects (`workspaces` in code), as many as the plan allows. No teams, no organizations.
 - **Staff role:** `admin` (table `user_roles`) is for us, not for customers. Admins read the feedback at `/app/admin`; anyone else gets a 404 there. Grant it with `bun run admin:grant <email>`.
 - **Public page:** the slug lives in the path (`usechangelog.com/{slug}`), never in a subdomain.
 - **Auth:** Neon Managed Better Auth with magic link and Google, nothing else. No passwords, SSO or other social providers. The same email by either method is the same user. See `.agents/skills/auth`.
-- **Billing:** Polar, never Stripe. One monthly plan. The price is never hardcoded in code or copy; it comes from Polar. See `.agents/skills/polar-billing`.
-- **Paywall:** sign-up is free. Publishing, the public page and the widget require a subscription in state `active`. A free trial counts as `active`; whether there is one, and how long, is set on the product in Polar, never in code. `past_due`, `canceled` and `none` can't publish. Exception: courtesy accounts that staff activate by hand; there is no UI or code to grant them (README → Courtesy accounts).
+- **Billing:** Polar, never Stripe. Two plans: Free, which never goes through Polar, and Pro, the only product in Polar, monthly. The subscription is the account's, not a project's. Pro's price is never hardcoded in code or copy; it comes from Polar. The project limits live in `lib/billing/plans.ts`. See `.agents/skills/polar-billing`.
+- **Paywall:** sign-up is free. Free publishes 1 project and Pro up to 3: the account's oldest projects publish (public page, widget, sitemap), as many as the plan allows; the rest keep their posts but aren't public. Pro is a subscription in state `active`; a free trial counts as `active`, and whether there is one, and how long, is set on the product in Polar, never in code. `past_due`, `canceled` and `none` are Free. No quotas on posts or widget traffic. Exception: courtesy accounts are Pro without paying, set by staff by hand in `accounts`; there is no UI or code to grant them (README → Courtesy accounts).
 - **Out of scope:**
   - waitlist, voting, comments, reactions
   - RSS or feeds, email digests, scheduled posts
   - custom domains, unread badge
   - teams or roles, SSO or social login other than Google
-  - Stripe, or a free tier that publishes without a subscription
+  - Stripe, an Agency/Business plan, per-project, per-seat or annual pricing
   - Check `.agents/skills/mvp-scope` for what *is* in before adding a feature.
 - **Language:** the app, landing, legal pages and public page are English only. Posts are never translated. The one exception is the widget chrome (its button, title, tags and dates): English by default, or Spanish, Portuguese, French or German, chosen per workspace in settings (`lib/widget/copy.ts`).
 
@@ -36,7 +36,8 @@ This list is the source of truth. The skills in `.agents/skills/` add implementa
 - **Bun, never npm:** `bun install`, `bun add`, `bun run <script>`, `bunx`. `bun.lock` is the only lockfile.
 - **SSR first:** read data in Server Components and write it with Server Actions posted from plain forms. Use a client component only for a small interactive island (a pending button, a toggle), and prefer a server form over a client UI library.
 - **Access checks in pages, not layouts:** every page and Server Action under `/app` calls `requireUser()` or `requireWorkspace()` itself. Layouts don't re-run on client navigation and don't stop nested routes from rendering, so a layout check protects nothing.
-- **Migrations in an open PR:** if a migration hasn't reached `main`, change it by regenerating it (delete the file, its snapshot and its journal entry, then `bun run db:generate`) instead of stacking a fix-up migration. Re-apply it on `develop` only after telling the owner, since local dev and previews share that database; never drop or alter tables there while the owner is using the app.
+- **Migrations in an open PR:** if a migration hasn't reached `main`, change it by regenerating it (delete the file, its snapshot and its journal entry, then `bun run db:generate`) instead of stacking a fix-up migration. Re-apply it on `develop` only after telling the owner, since local dev and previews share that database; never drop or alter tables there while the owner is using the app. Pushing the branch counts: the preview's `vercel-build` runs `db:migrate` on `develop`.
+- **Destructive migrations and deploy order:** `vercel-build` migrates before the new deployment replaces the old one, so for the length of the build the old code runs against the new schema. Dropping or renaming something the current code reads breaks production for that time. Do it in two PRs: first add the new structure and stop reading the old one, then drop it in a later PR. Ship it in one PR only if the owner accepts that window.
 - **The `develop` Neon branch is permanent:** local dev and previews share it. Create or recreate it with `neonctl branches create --name develop --parent production` (no expiration), never from the Neon console, whose "Automatically delete branch after" is on by default and deleted the previous one after a day. Protect it in Neon if the plan allows.
 - **Env vars are checked before deploying:** `vercel-build` runs `bun run check-env` (`scripts/check-env.ts`) first. Add every new required var there with its expected format.
 - **No env vars at import time:** create clients (auth, database, SDKs) on first use, so `bun run build` passes without secrets.

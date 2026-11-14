@@ -1,11 +1,9 @@
 import { and, count, desc, eq, inArray, max, sql } from "drizzle-orm";
 import { notFound } from "next/navigation";
 import { getDb } from "@/db";
-import { posts, workspaces } from "@/db/schema";
-import { PUBLIC_STATUSES } from "@/lib/billing/status";
-import { requireWorkspace } from "@/lib/workspace/server";
-
-export const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+import { accounts, posts, workspaces } from "@/db/schema";
+import { UUID } from "@/lib/uuid";
+import { listWorkspaces, publishesSql, requireWorkspace } from "@/lib/workspace/server";
 
 // The workspace's posts, newest first: by publish date, or by last edit for never-published drafts.
 export async function listPosts() {
@@ -56,27 +54,38 @@ export async function countPublishedPosts(workspaceId: string) {
 }
 
 // Every changelog that is public and has something on it, for the sitemap (#19): the
-// workspace can publish (PUBLIC_STATUSES, the same rule as canPublish) and has at least one
-// published post. `lastPost` is its newest publish date. Returns the query, like above.
+// project publishes (publishesSql, the same rule as canPublish: among its account's oldest,
+// as many as the plan allows) and has at least one published post. `lastPost` is its newest
+// publish date. Returns the query, like above.
 export function listPublicChangelogs() {
-  return getDb()
+  const db = getDb();
+  // Ranked once per project, in a subquery, not once per joined post.
+  const publishing = db
+    .select({ id: workspaces.id })
+    .from(workspaces)
+    .leftJoin(accounts, eq(accounts.userId, workspaces.ownerId))
+    .where(publishesSql);
+  return db
     .select({ slug: workspaces.slug, lastPost: max(posts.publishedOn) })
     .from(workspaces)
     .innerJoin(posts, and(eq(posts.workspaceId, workspaces.id), eq(posts.status, "published")))
-    .where(inArray(workspaces.subscriptionStatus, PUBLIC_STATUSES))
+    .where(inArray(workspaces.id, publishing))
     .groupBy(workspaces.slug);
 }
 
-// A post of the signed-in user's workspace. Anything else, including another
-// workspace's id or a malformed one, is a 404.
+// A post of any of the signed-in user's projects, not only the open one (#65): another tab
+// may have switched projects. Returns the post and its project. Anything else, including
+// another user's post or a malformed id, is a 404.
 export async function requirePost(id: string) {
-  const workspace = await requireWorkspace();
   if (!UUID.test(id)) notFound();
+  const projects = await listWorkspaces();
+  if (!projects.length) notFound();
   const [post] = await getDb()
     .select()
     .from(posts)
-    .where(and(eq(posts.id, id), eq(posts.workspaceId, workspace.id)))
+    .where(and(eq(posts.id, id), inArray(posts.workspaceId, projects.map((p) => p.id))))
     .limit(1);
-  if (!post) notFound();
-  return post;
+  const workspace = post && projects.find((p) => p.id === post.workspaceId);
+  if (!post || !workspace) notFound();
+  return { post, workspace };
 }

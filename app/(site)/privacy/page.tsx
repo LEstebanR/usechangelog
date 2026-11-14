@@ -84,7 +84,7 @@ export default function PrivacyPage() {
 
       <h2>Deleting your account</h2>
       <p>
-        Delete it yourself in Settings → Delete account. That deletes your account, your workspace and its posts
+        Delete it yourself in Settings → Delete account. That deletes your account, your projects and their posts
         right away, and cancels your subscription without a refund. If you can&apos;t sign in, email <LegalMail /> from
         your account&apos;s address and we&apos;ll do it. Polar keeps its own records of your payments, as the law
         requires.

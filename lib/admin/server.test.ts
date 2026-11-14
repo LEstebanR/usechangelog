@@ -7,10 +7,16 @@ const { listUsers, userCounts } = await import("./server");
 describe("listUsers", () => {
   const { sql, params } = listUsers().toSQL();
 
-  test("every user, with their workspace if they have one", () => {
+  test("every user, with their account and projects if they have them", () => {
     expect(sql).toContain('from "neon_auth"."user"');
+    expect(sql).toContain('left join "accounts" on "accounts"."user_id" = "neon_auth"."user"."id"');
     expect(sql).toContain('left join "workspaces" on "workspaces"."owner_id" = "neon_auth"."user"."id"');
     expect(sql).toContain('left join "posts" on "posts"."workspace_id" = "workspaces"."id"');
+  });
+
+  test("one row per user, whatever their number of projects, with the slugs oldest first", () => {
+    expect(sql).toContain('group by "neon_auth"."user"."id", "accounts"."id"');
+    expect(sql).toContain('array(select "workspaces"."slug" from "workspaces" where "workspaces"."owner_id" = "neon_auth"."user"."id" order by "workspaces"."created_at", "workspaces"."id")');
   });
 
   test("counts all posts, and only published ones as published", () => {
@@ -33,14 +39,14 @@ describe("listUsers", () => {
 describe("userCounts", () => {
   const { sql, params } = userCounts().toSQL();
 
-  test("every user, and the ones with a workspace", () => {
-    expect(sql).toContain('from "neon_auth"."user" left join "workspaces"');
-    expect(sql).toContain('count("workspaces"."id")');
+  test("every user, and the ones with a project (each counted once)", () => {
+    expect(sql).toContain('from "neon_auth"."user" left join "accounts"');
+    expect(sql).toContain('exists (select 1 from "workspaces" where "workspaces"."owner_id" = "neon_auth"."user"."id")');
   });
 
   test("active (trials included) and past_due counted separately", () => {
-    expect(sql.match(/count\(\*\) filter/g)).toHaveLength(3);
-    expect(sql).toContain('"workspaces"."trial_ends_at" is not null');
+    expect(sql.match(/count\(\*\) filter/g)).toHaveLength(4);
+    expect(sql).toContain('"accounts"."trial_ends_at" is not null');
     expect(params).toEqual(["active", "active", "past_due"]);
   });
 });

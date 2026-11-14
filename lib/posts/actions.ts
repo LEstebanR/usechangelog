@@ -2,14 +2,13 @@
 
 import { and, eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
-import { notFound } from "next/navigation";
 import { getDb } from "@/db";
 import { posts } from "@/db/schema";
 import { canPublish } from "@/lib/billing/status";
 import { redirectWithNotice } from "@/lib/notice";
-import { requireWorkspace } from "@/lib/workspace/server";
+import { openProject, requireOwnWorkspace } from "@/lib/workspace/server";
 import { parsePostForm, type PostFormState } from "./form";
-import { requirePost, UUID } from "./server";
+import { requirePost } from "./server";
 
 // The only place a post becomes public; savePost checks the subscription first (#16).
 // A published post always has a date: the one given, or today.
@@ -17,15 +16,19 @@ function publish(publishedOn: string | null, today: string) {
   return { status: "published" as const, publishedOn: publishedOn ?? today };
 }
 
-// Creates the post when `id` is null (then back to the list), updates it otherwise.
+// Creates a post in the given project (then back to the list), or updates the given post.
+// Both come bound from the page, never from the cookie: another tab may have switched
+// projects meanwhile (#65), and a post is always saved in its own project.
 // The buttons send `intent`: save keeps the status, publish and unpublish change it.
 export async function savePost(
-  id: string | null,
+  target: { postId: string } | { workspaceId: string },
   _prev: PostFormState,
   formData: FormData,
 ): Promise<PostFormState> {
-  const workspace = await requireWorkspace();
-  const existing = id ? await requirePost(id) : null;
+  const { post: existing, workspace } =
+    "postId" in target
+      ? await requirePost(target.postId)
+      : { post: null, workspace: await requireOwnWorkspace(target.workspaceId) };
   const { intent, today, ...state } = parsePostForm(formData);
   if (state.errors) return state;
 
@@ -38,12 +41,14 @@ export async function savePost(
       ? publish(publishedOn ?? existing?.publishedOn ?? null, today)
       : { status, publishedOn };
 
-  // Going public needs an active subscription (#16). Nothing is saved, the form keeps what
-  // was typed. Drafts, edits to a published post and unpublishing work in every state.
+  // Going public needs a project that publishes under the account's plan (#16, #65). Nothing
+  // is saved, the form keeps what was typed. Drafts, edits to a published post and unpublishing work in every state.
   if (next.status === "published" && existing?.status !== "published" && !canPublish(workspace)) {
     return { values: state.values, blocked: workspace.subscriptionStatus };
   }
 
+  // Back on /app, show the post's own project, even if another tab switched away from it.
+  await openProject(workspace.id);
   // The header preview (in the layout) only shows published posts.
   const touchesPublic = next.status === "published" || existing?.status === "published";
   const revalidate = () => revalidatePath("/app", touchesPublic ? "layout" : "page");
@@ -66,15 +71,11 @@ export async function savePost(
   return { values: { ...state.values, publishedOn: next.publishedOn ?? "" }, notice };
 }
 
-// One query, scoped to the session's workspace: nothing deleted means not yours, so 404.
+// Scoped to the post's own project, which requirePost checks is the user's: else 404.
 export async function deletePost(id: string) {
-  const workspace = await requireWorkspace();
-  if (!UUID.test(id)) notFound();
-  const deleted = await getDb()
-    .delete(posts)
-    .where(and(eq(posts.id, id), eq(posts.workspaceId, workspace.id)))
-    .returning({ status: posts.status });
-  if (!deleted.length) notFound();
-  revalidatePath("/app", deleted[0].status === "published" ? "layout" : "page");
+  const { post, workspace } = await requirePost(id);
+  await getDb().delete(posts).where(and(eq(posts.id, post.id), eq(posts.workspaceId, workspace.id)));
+  await openProject(workspace.id);
+  revalidatePath("/app", post.status === "published" ? "layout" : "page");
   redirectWithNotice("deleted");
 }

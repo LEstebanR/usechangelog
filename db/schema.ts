@@ -11,25 +11,20 @@ import { user } from "./neon-auth";
 export const widgetLang = pgEnum("widget_lang", WIDGET_LANGS);
 export const subscriptionStatus = pgEnum("subscription_status", SUBSCRIPTION_STATUSES);
 
-// One per user (unique owner_id). Deleting the user deletes the workspace (#31).
-export const workspaces = pgTable("workspaces", {
+// A new project's widget key: public, random, and never changed afterwards.
+export const newWidgetKey = () => randomBytes(16).toString("base64url");
+
+// One per user, created on onboarding or the first time billing needs it (#65). The plan is
+// the account's, not the project's: one Pro covers several projects. Its id is the Polar
+// customer's external_id; accounts migrated from a single workspace kept that workspace's id,
+// so Polar customers created before the migration still find theirs.
+export const accounts = pgTable("accounts", {
   id: uuid().primaryKey().defaultRandom(),
-  ownerId: uuid("owner_id")
+  userId: uuid("user_id")
     .notNull()
-    .unique("workspaces_owner_id_unique")
+    .unique("accounts_user_id_unique")
     .references(() => user.id, { onDelete: "cascade" }),
-  name: text().notNull(),
-  slug: text().notNull().unique("workspaces_slug_unique"),
-  // Public and permanent: the widget (#8) uses it, so changing the slug never breaks an embed.
-  widgetKey: text("widget_key")
-    .notNull()
-    .unique("workspaces_widget_key_unique")
-    .$defaultFn(() => randomBytes(16).toString("base64url")),
-  // Language of the widget's chrome (#8), set in settings.
-  widgetLang: widgetLang("widget_lang").notNull().default("en"),
-  // Off hides the widget on the customer's site without touching their snippet (#8).
-  widgetEnabled: boolean("widget_enabled").notNull().default(true),
-  // Billing (#15). Only the Polar webhook writes these; the workspace id is Polar's external_id.
+  // Billing (#15). Only the Polar webhook writes these (and a courtesy account, by hand).
   polarCustomerId: text("polar_customer_id"),
   polarSubscriptionId: text("polar_subscription_id"),
   subscriptionStatus: subscriptionStatus("subscription_status").notNull().default("none"),
@@ -40,11 +35,37 @@ export const workspaces = pgTable("workspaces", {
   // Polar's modified_at of the last event applied: older or retried events never overwrite it.
   subscriptionUpdatedAt: timestamp("subscription_updated_at", { withTimezone: true }),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
-  updatedAt: timestamp("updated_at", { withTimezone: true })
-    .notNull()
-    .defaultNow()
-    .$onUpdate(() => new Date()),
 });
+
+// A project in the UI ("workspace" in code). A user has several, as many as their plan
+// publishes (#65). Deleting the user deletes them (#31).
+export const workspaces = pgTable(
+  "workspaces",
+  {
+    id: uuid().primaryKey().defaultRandom(),
+    ownerId: uuid("owner_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    name: text().notNull(),
+    slug: text().notNull().unique("workspaces_slug_unique"),
+    // Public and permanent: the widget (#8) uses it, so changing the slug never breaks an embed.
+    widgetKey: text("widget_key")
+      .notNull()
+      .unique("workspaces_widget_key_unique")
+      .$defaultFn(newWidgetKey),
+    // Language of the widget's chrome (#8), set in settings.
+    widgetLang: widgetLang("widget_lang").notNull().default("en"),
+    // Off hides the widget on the customer's site without touching their snippet (#8).
+    widgetEnabled: boolean("widget_enabled").notNull().default(true),
+    // Which projects publish depends on it: the oldest ones of the account (#65).
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .notNull()
+      .defaultNow()
+      .$onUpdate(() => new Date()),
+  },
+  (t) => [index("workspaces_owner_id_idx").on(t.ownerId)],
+);
 
 export const postCategory = pgEnum("post_category", CATEGORIES);
 export const postType = pgEnum("post_type", TYPES);

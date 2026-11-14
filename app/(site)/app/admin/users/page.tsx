@@ -20,7 +20,7 @@ export default async function AdminUsersPage() {
   const [users, [counts]] = await Promise.all([listUsers(), userCounts()]);
   const totals = [
     { label: "Users", value: counts.total },
-    { label: "With a workspace", value: counts.withWorkspace },
+    { label: "With a project", value: counts.withProject },
     { label: "Active", value: counts.active, note: `${counts.trialing} on trial` },
     { label: "Past due", value: counts.pastDue },
   ];
@@ -63,25 +63,25 @@ export default async function AdminUsersPage() {
                 <a href={`mailto:${u.email}`} className="text-blue underline underline-offset-4 [overflow-wrap:anywhere]">
                   {u.email}
                 </a>
-                {u.workspace ? (
-                  <>
-                    <a href={`/${u.workspace.slug}`} target="_blank" rel="noopener" className="text-sm underline underline-offset-4">
-                      /{u.workspace.slug}
+                {u.projects.length ? (
+                  u.projects.map((slug) => (
+                    <a key={slug} href={`/${slug}`} target="_blank" rel="noopener" className="text-sm underline underline-offset-4">
+                      /{slug}
                     </a>
-                    <span className="border border-hairline px-1.5 py-0.5 text-xs font-medium text-ink sm:ml-auto">
-                      {subscriptionLabel(u.workspace)}
-                    </span>
-                  </>
+                  ))
                 ) : (
-                  <span className="text-sm text-graphite">No workspace yet</span>
+                  <span className="text-sm text-graphite">No project yet</span>
                 )}
+                <span className="border border-hairline px-1.5 py-0.5 text-xs font-medium text-ink sm:ml-auto">
+                  {u.account ? subscriptionLabel(u.account) : "none"}
+                </span>
               </div>
               <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-graphite">
                 <span>
                   Signed up <When date={u.createdAt} />
                 </span>
                 <span>Last sign-in {u.lastSignInAt ? <When date={u.lastSignInAt} /> : "no session on record"}</span>
-                {u.workspace && <span>{postsLabel(u.posts, u.published)}</span>}
+                {u.projects.length > 0 && <span>{postsLabel(u.posts, u.published)}</span>}
               </div>
             </li>
           ))}

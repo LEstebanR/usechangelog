@@ -1,17 +1,18 @@
 import type { Metadata } from "next";
 import { signOut } from "@/lib/auth/actions";
-import { billingFix } from "@/lib/billing/status";
+import { billingFix, canPublish } from "@/lib/billing/status";
 import { isAdmin } from "@/lib/auth/roles";
 import { requireUser } from "@/lib/auth/server";
 import { renderMarkdown } from "@/lib/markdown";
 import { countPublishedPosts, listPublishedPosts } from "@/lib/posts/server";
 import { publicUrl } from "@/lib/site";
-import { getCurrentWorkspace } from "@/lib/workspace/server";
+import { getCurrentWorkspace, listWorkspaces } from "@/lib/workspace/server";
 import { EnterSubmits } from "../enter-submits";
 import { secondaryButtonClass } from "../form-styles";
 import { SubmitButton } from "../submit-button";
 import { SiteHeader } from "../wordmark";
 import { AppNav } from "./app-nav";
+import { ProjectPicker } from "./project-picker";
 import { WhatsNewPreview } from "./whats-new-preview";
 
 export const metadata: Metadata = { title: "UseChangelog" };
@@ -21,7 +22,7 @@ export const metadata: Metadata = { title: "UseChangelog" };
 export default async function AppLayout({ children }: LayoutProps<"/app">) {
   const user = await requireUser();
   // Display only (not an access check): what the workspace's users will see.
-  const [workspace, admin] = await Promise.all([getCurrentWorkspace(), isAdmin(user.id)]);
+  const [projects, workspace, admin] = await Promise.all([listWorkspaces(), getCurrentWorkspace(), isAdmin(user.id)]);
   const [posts, total, url] = workspace
     ? await Promise.all([
         listPublishedPosts(workspace.id, { limit: 10 }),
@@ -35,6 +36,7 @@ export default async function AppLayout({ children }: LayoutProps<"/app">) {
       <EnterSubmits />
       <SiteHeader home="/app" compact>
         <div className="flex items-center gap-2 sm:gap-3">
+          {workspace && <ProjectPicker projects={projects} current={workspace} />}
           {workspace && (
             <WhatsNewPreview
               slug={workspace.slug}
@@ -58,22 +60,23 @@ export default async function AppLayout({ children }: LayoutProps<"/app">) {
         </div>
       </SiteHeader>
       <AppNav hasWorkspace={Boolean(workspace)} admin={admin} />
-      {(workspace?.subscriptionStatus === "past_due" || workspace?.subscriptionStatus === "canceled") && (
-        <BillingBanner {...billingFix(workspace.subscriptionStatus)} />
+      {workspace && (!canPublish(workspace) || workspace.subscriptionStatus === "past_due") && (
+        <BillingBanner {...billingFix(workspace.subscriptionStatus)} publishes={canPublish(workspace)} />
       )}
       <main className="mx-auto max-w-6xl px-6 py-16">{children}</main>
     </div>
   );
 }
 
-// A paid workspace that stopped paying (#16): its page and widget are off until it's fixed.
-// A workspace that never subscribed (`none`) gets no banner; it learns on its first publish.
-function BillingBanner({ problem, href, cta }: ReturnType<typeof billingFix>) {
+// A project the plan doesn't publish (#16, #65): its page and widget are off until the account
+// moves to Pro. A failed payment shows too, also on a project that still publishes as Free.
+function BillingBanner({ problem, href, cta, publishes }: ReturnType<typeof billingFix> & { publishes: boolean }) {
   return (
     <div role="status" className="border-b border-clay/40 bg-clay-wash">
       <p className="mx-auto max-w-6xl px-6 py-3 text-sm text-clay">
-        {problem}, so your changelog page and widget aren&apos;t showing anything in public. Your posts are
-        safe.{" "}
+        {publishes
+          ? `${problem}. Until it's fixed, only your oldest project is public.`
+          : `${problem}, so this project's page and widget aren't showing anything in public. Its posts are safe.`}{" "}
         <a href={href} className="font-medium underline underline-offset-4">
           {cta}
         </a>

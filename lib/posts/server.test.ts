@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { PUBLIC_STATUSES } from "@/lib/billing/status";
+import { PLANS, PRO_STATUSES } from "@/lib/billing/plans";
 
 // The query is only built, never run: no database in CI. The client needs a URL to exist.
 process.env.DATABASE_URL ??= "postgresql://test:test@localhost/test";
@@ -35,10 +35,13 @@ describe("listPublishedPosts", () => {
 describe("listPublicChangelogs (sitemap)", () => {
   const { sql, params } = listPublicChangelogs().toSQL();
 
-  // The same rule as isIndexable (the page's noindex): exactly the statuses that publish...
-  test("only workspaces whose status publishes (PUBLIC_STATUSES)", () => {
-    expect(sql).toContain('"workspaces"."subscription_status" in (');
-    expect(params.filter((p) => p !== "published")).toEqual([...PUBLIC_STATUSES]);
+  // The same rule as canPublish (and so isIndexable, the page's noindex): the project's rank
+  // among its account's projects, against a limit built from PRO_STATUSES and PLANS...
+  // The limits are cast: Postgres would infer the CASE's params as text and refuse `int <= text`.
+  test("only projects the account's plan publishes, by age", () => {
+    expect(sql).toContain('"workspaces"."id" in (select "workspaces"."id" from "workspaces" left join "accounts" on "accounts"."user_id" = "workspaces"."owner_id"');
+    expect(sql).toMatch(/\(select count\(\*\)::int \+ 1 from "workspaces" as older\s+where older\.owner_id = "workspaces"\."owner_id"\s+and \(older\.created_at, older\.id\) < \("workspaces"\."created_at", "workspaces"\."id"\)\) <= case when coalesce\("accounts"\."subscription_status", 'none'\) in \(\$\d+\) then \$\d+::int else \$\d+::int end/);
+    expect(params).toEqual(["published", ...PRO_STATUSES, PLANS.pro.projects, PLANS.free.projects]);
   });
 
   // ...and at least one published post.

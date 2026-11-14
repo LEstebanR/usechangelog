@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { PLANS } from "@/lib/billing/plans";
 import { readPlan } from "@/lib/billing/polar";
 import { audience, brand, closing, example, footer, hero, how, posts, problem, publicPath, shippedPosts, signIn, widget } from "./content";
 import { Latest } from "./latest";
@@ -410,13 +411,33 @@ export default async function Home() {
           id="get-started"
           label={closing.label}
           title={closing.title}
-          aside={price ? closing.planWithPrice(price, trial) : closing.plan}
           marker="dashed"
           small
           className="border-t border-ink"
           padding="py-16 md:py-20"
         >
           <Indented className="mt-8">
+            <div className="mb-10 grid border-t border-ink sm:grid-cols-2">
+              {[
+                { name: PLANS.free.name, price: closing.plans.free.price, text: closing.plans.free.text(PLANS.free.projects) },
+                {
+                  name: PLANS.pro.name,
+                  price: price ?? closing.plans.pro.price,
+                  text: closing.plans.pro.text(PLANS.pro.projects, trial),
+                },
+              ].map((plan, i) => (
+                <div
+                  key={plan.name}
+                  className={`py-6 ${i === 0 ? "border-b border-hairline sm:border-b-0 sm:pr-8" : "sm:pl-8"}`}
+                >
+                  <h3 className="flex items-baseline justify-between gap-4 font-display text-2xl font-medium tracking-tight">
+                    {plan.name}
+                    <span className="text-lg tabular-nums text-graphite">{plan.price}</span>
+                  </h3>
+                  <p className="mt-3 leading-relaxed text-graphite">{plan.text}</p>
+                </div>
+              ))}
+            </div>
             <div className="flex flex-wrap items-center gap-x-6 gap-y-4">
               <a
                 href={hero.primaryCta.href}

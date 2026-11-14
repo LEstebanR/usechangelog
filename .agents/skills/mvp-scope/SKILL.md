@@ -9,14 +9,14 @@ The product rules and the out-of-scope list live in `AGENTS.md` → **Product ru
 
 ## In
 
-- **Account:** Magic link or Google sign-in (see `auth`), then onboarding creates one workspace with a unique slug. The user can delete their account, which deletes the workspace and its posts (#31).
+- **Account:** Magic link or Google sign-in (see `auth`), then onboarding creates the first project (`workspaces` in code) with a unique slug. More projects up to the plan's limit, picked in `/app`'s header (#65). A project can be deleted, but not the last one; deleting the account deletes all of them and their posts (#31).
 - **Posts:**
   - Title and a Markdown body.
   - A category (New, Improved or Fixed) and a type (Shipped, or Coming for what's on the way).
   - States `draft` and `published`. Drafts are never public. The publish date is set on the first publish and can be edited.
-- **Public page:** `usechangelog.com/{slug}` lists the workspace's published posts, newest first.
+- **Public page:** `usechangelog.com/{slug}` lists the project's published posts, newest first.
 - **Widget:** one script tag that shows the latest published posts in a "What's new" panel.
-- **Billing:** one monthly plan through Polar, with an optional free trial set in Polar, gating publishing, the page and the widget (see `polar-billing`).
+- **Billing:** Free publishes 1 project, Pro (monthly, through Polar, with an optional free trial set in Polar) up to 3. The plan is the account's and decides which projects publish, the page and the widget (see `polar-billing`).
 - **Landing and legal:** a marketing page with a sign-up CTA, plus privacy and terms pages.
 
 ## When a change isn't on this list

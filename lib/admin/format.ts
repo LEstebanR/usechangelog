@@ -7,7 +7,7 @@ const day = (date: Date) => formatDay(toDay(date));
 export const dateTime = (date: Date) =>
   date.toLocaleString("en-US", { month: "short", day: "numeric", year: "numeric", hour: "2-digit", minute: "2-digit", timeZone: "UTC" });
 
-// A workspace's subscription for the admin users view (#57), as the webhook stored it. A
+// An account's subscription for the admin users view (#57, #65), as the webhook stored it. A
 // trial is `active` with trial_ends_at; a cancellation is `active` until the period ends.
 export function subscriptionLabel(w: {
   subscriptionStatus: SubscriptionStatus;

@@ -3,14 +3,13 @@ import { redirect } from "next/navigation";
 import type { NextRequest } from "next/server";
 import { polarConfig } from "@/lib/billing/polar";
 import { getOrigin } from "@/lib/site";
-import { requireWorkspace } from "@/lib/workspace/server";
+import { getCurrentAccount } from "@/lib/workspace/server";
 
 // Polar's customer portal (#17): change the card, cancel, see invoices. Always the session
-// workspace's customer. Without one there is nothing to manage, so back to billing.
+// account's customer (#65). Without one there is nothing to manage, so back to billing.
 // What changes there reaches us through the webhook (#15), not on the way back.
 export async function GET(request: NextRequest) {
-  const workspace = await requireWorkspace();
-  const customerId = workspace.polarCustomerId;
+  const customerId = (await getCurrentAccount())?.polarCustomerId;
   if (!customerId) redirect("/app/billing");
 
   const { accessToken, environment } = polarConfig();
