@@ -6,7 +6,7 @@ import { getDb } from "@/db";
 import { posts } from "@/db/schema";
 import { canPublish } from "@/lib/billing/status";
 import { redirectWithNotice } from "@/lib/notice";
-import { requireOwnWorkspace } from "@/lib/workspace/server";
+import { openProject, requireOwnWorkspace } from "@/lib/workspace/server";
 import { parsePostForm, type PostFormState } from "./form";
 import { requirePost } from "./server";
 
@@ -47,6 +47,8 @@ export async function savePost(
     return { values: state.values, blocked: workspace.subscriptionStatus };
   }
 
+  // Back on /app, show the post's own project, even if another tab switched away from it.
+  await openProject(workspace.id);
   // The header preview (in the layout) only shows published posts.
   const touchesPublic = next.status === "published" || existing?.status === "published";
   const revalidate = () => revalidatePath("/app", touchesPublic ? "layout" : "page");
@@ -73,6 +75,7 @@ export async function savePost(
 export async function deletePost(id: string) {
   const { post, workspace } = await requirePost(id);
   await getDb().delete(posts).where(and(eq(posts.id, post.id), eq(posts.workspaceId, workspace.id)));
+  await openProject(workspace.id);
   revalidatePath("/app", post.status === "published" ? "layout" : "page");
   redirectWithNotice("deleted");
 }

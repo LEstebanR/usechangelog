@@ -58,10 +58,14 @@ describe("hasSubscription", () => {
 });
 
 describe("billingFix", () => {
-  test("a failed payment goes to the portal, anything else to Pro in billing", () => {
+  test("a failed payment goes to the portal, Free to Pro in billing", () => {
     expect(billingFix("past_due").href).toBe("/api/polar/portal");
     expect(billingFix("canceled")).toMatchObject({ href: "/app/billing", cta: "Upgrade to Pro" });
     expect(billingFix("none").href).toBe("/app/billing");
+  });
+
+  test("Pro past its limit never says to upgrade: it deletes a project", () => {
+    expect(billingFix("active")).toMatchObject({ href: "/app/settings", cta: "Delete a project" });
   });
 });
 

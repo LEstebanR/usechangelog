@@ -16,7 +16,8 @@ type Props = {
 export function ConfirmDeleteForm({ action, confirm, name, label }: Props) {
   const [state, formAction, pending] = useActionState(action, {});
   const [typed, setTyped] = useState("");
-  const matches = typed.trim().toLowerCase() === confirm.toLowerCase();
+  // Emails match in any case, like the server's check; slugs exactly.
+  const matches = name === "email" ? typed.trim().toLowerCase() === confirm.toLowerCase() : typed.trim() === confirm;
   const id = `confirm-${name}`;
 
   return (

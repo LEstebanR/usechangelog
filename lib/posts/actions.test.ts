@@ -27,6 +27,7 @@ mock.module("@/db", () => ({
 mock.module("@/lib/workspace/server", () => ({
   listWorkspaces: async () => [oldest, second],
   requireOwnWorkspace: async (id: string) => [oldest, second].find((p) => p.id === id),
+  openProject: async (id: string) => calls.push({ op: `open:${id}` }),
 }));
 mock.module("./server", () => ({
   requirePost: async (id: string) => ({
@@ -46,7 +47,11 @@ describe("savePost across projects", () => {
 
   test("a new post goes to the project bound by the page", async () => {
     await expect(savePost({ workspaceId: "ws-2" }, { values: {} as never }, form("save"))).rejects.toThrow("redirect:/app?done=drafted");
-    expect(calls).toEqual([{ op: "insert", row: expect.objectContaining({ workspaceId: "ws-2", title: "Dark mode" }) }]);
+    // ...and /app then shows that project, whatever the cookie said.
+    expect(calls).toEqual([
+      { op: "open:ws-2" },
+      { op: "insert", row: expect.objectContaining({ workspaceId: "ws-2", title: "Dark mode" }) },
+    ]);
   });
 
   test("editing a post checks its own project: on Free, the second project can't publish", async () => {
@@ -58,6 +63,9 @@ describe("savePost across projects", () => {
   test("saving a draft of a post in a project that doesn't publish still works", async () => {
     const state = await savePost({ postId: "post-1" }, { values: {} as never }, form("save"));
     expect(state).toMatchObject({ notice: "Draft saved." });
-    expect(calls).toEqual([{ op: "update", row: expect.objectContaining({ title: "Dark mode", status: "draft" }) }]);
+    expect(calls).toEqual([
+      { op: "open:ws-2" },
+      { op: "update", row: expect.objectContaining({ title: "Dark mode", status: "draft" }) },
+    ]);
   });
 });

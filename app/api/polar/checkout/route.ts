@@ -5,15 +5,18 @@ import { requireUser } from "@/lib/auth/server";
 import { discountCodesAllowed, hasActiveSubscriptionInPolar, polarConfig } from "@/lib/billing/polar";
 import { hasSubscription } from "@/lib/billing/status";
 import { getOrigin } from "@/lib/site";
-import { ensureAccount } from "@/lib/workspace/server";
+import { ensureAccount, getCurrentAccount, requireWorkspace } from "@/lib/workspace/server";
 
 // Subscribe (#14). The helper reads the checkout from the query string, so we never pass
 // it the incoming one: the product (Pro), the account and the email come from the session and
 // the env, and an edited URL changes nothing. Discount codes stay off (see discountCodesAllowed).
 export async function GET(request: NextRequest) {
-  const user = await requireUser();
-  // The subscription is the account's, not a project's (#65).
-  const account = await ensureAccount(user.id);
+  // Only after onboarding: Pro with nothing to publish makes no sense, and /app/billing
+  // (where the checkout returns) needs a project too.
+  const [user] = await Promise.all([requireUser(), requireWorkspace()]);
+  // The subscription is the account's, not a project's (#65). Onboarding created the row;
+  // ensureAccount covers a project made before accounts existed.
+  const account = (await getCurrentAccount()) ?? (await ensureAccount(user.id));
   // One subscription per account: an active or failing one is managed in the portal,
   // so billing shows its real state. Polar is asked too, for a payment whose webhook
   // hasn't landed yet: that one is still activating.

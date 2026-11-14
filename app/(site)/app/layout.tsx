@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { signOut } from "@/lib/auth/actions";
-import { projectLimit } from "@/lib/billing/plans";
 import { billingFix, canPublish } from "@/lib/billing/status";
 import { isAdmin } from "@/lib/auth/roles";
 import { requireUser } from "@/lib/auth/server";
@@ -37,7 +36,7 @@ export default async function AppLayout({ children }: LayoutProps<"/app">) {
       <EnterSubmits />
       <SiteHeader home="/app" compact>
         <div className="flex items-center gap-2 sm:gap-3">
-          {workspace && <ProjectPicker projects={projects} current={workspace} limit={projectLimit(workspace)} />}
+          {workspace && <ProjectPicker projects={projects} current={workspace} />}
           {workspace && (
             <WhatsNewPreview
               slug={workspace.slug}

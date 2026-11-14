@@ -11,6 +11,9 @@ import { user } from "./neon-auth";
 export const widgetLang = pgEnum("widget_lang", WIDGET_LANGS);
 export const subscriptionStatus = pgEnum("subscription_status", SUBSCRIPTION_STATUSES);
 
+// A new project's widget key: public, random, and never changed afterwards.
+export const newWidgetKey = () => randomBytes(16).toString("base64url");
+
 // One per user, created on onboarding or the first time billing needs it (#65). The plan is
 // the account's, not the project's: one Pro covers several projects. Its id is the Polar
 // customer's external_id; accounts migrated from a single workspace kept that workspace's id,
@@ -49,7 +52,7 @@ export const workspaces = pgTable(
     widgetKey: text("widget_key")
       .notNull()
       .unique("workspaces_widget_key_unique")
-      .$defaultFn(() => randomBytes(16).toString("base64url")),
+      .$defaultFn(newWidgetKey),
     // Language of the widget's chrome (#8), set in settings.
     widgetLang: widgetLang("widget_lang").notNull().default("en"),
     // Off hides the widget on the customer's site without touching their snippet (#8).

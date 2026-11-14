@@ -1,7 +1,7 @@
 // An account's subscription, as the Polar webhook (#15) stores it, and what publishes.
 // Pure: no SDK, no database.
 
-import { projectLimit, type WithStatus } from "./plans";
+import { PLANS, planOf, projectLimit, type WithStatus } from "./plans";
 
 export const SUBSCRIPTION_STATUSES = ["active", "past_due", "canceled", "none"] as const;
 export type SubscriptionStatus = (typeof SUBSCRIPTION_STATUSES)[number];
@@ -39,9 +39,12 @@ export const isIndexable = (workspace: Ranked, publishedPosts: number) =>
 export const hasSubscription = (account: WithStatus) =>
   account.subscriptionStatus === "active" || account.subscriptionStatus === "past_due";
 
-// What to do about a project that doesn't publish: a failed payment is fixed in Polar's portal
-// (#17), anything else by moving to Pro. The banner and the publish refusal both use it.
+// What to do about a project that doesn't publish (#16, #65): a failed payment is fixed in
+// Polar's portal (#17); on Free, by moving to Pro; on Pro past its limit, by deleting a project.
+// The banner and the publish refusal both use it.
 export const billingFix = (status: SubscriptionStatus) =>
   status === "past_due"
     ? { problem: "Your last payment failed", href: "/api/polar/portal", cta: "Update your card" }
-    : { problem: "The Free plan only publishes your oldest project", href: "/app/billing", cta: "Upgrade to Pro" };
+    : planOf({ subscriptionStatus: status }) === "pro"
+      ? { problem: `Pro publishes your ${PLANS.pro.projects} oldest projects`, href: "/app/settings", cta: "Delete a project" }
+      : { problem: "The Free plan only publishes your oldest project", href: "/app/billing", cta: "Upgrade to Pro" };

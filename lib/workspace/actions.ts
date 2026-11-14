@@ -1,16 +1,25 @@
 "use server";
 
-import { eq } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { getDb } from "@/db";
 import { violatedUniqueConstraint } from "@/db/errors";
-import { workspaces } from "@/db/schema";
+import { newWidgetKey, workspaces } from "@/db/schema";
 import { requireUser } from "@/lib/auth/server";
 import { projectLimit } from "@/lib/billing/plans";
 import { redirectWithNotice } from "@/lib/notice";
-import { ensureAccount, listWorkspaces, PROJECT_COOKIE, requireOwnWorkspace } from "./server";
+import {
+  ensureAccount,
+  listWorkspaces,
+  lockProjects,
+  openProject,
+  PROJECT_COOKIE,
+  projectCountSql,
+  projectLimitSql,
+  requireOwnWorkspace,
+} from "./server";
 import { parseForm, type WorkspaceFormState } from "./form";
 import { SLUG_TAKEN } from "./slug";
 
@@ -22,17 +31,6 @@ function slugTakenOrThrow(error: unknown, state: WorkspaceFormState): WorkspaceF
   throw error;
 }
 
-// Opens a project in /app: the cookie every /app page reads (#65). A year, like a preference.
-async function openProject(id: string) {
-  (await cookies()).set(PROJECT_COOKIE, id, {
-    httpOnly: true,
-    sameSite: "lax",
-    secure: process.env.NODE_ENV === "production",
-    path: "/",
-    maxAge: 60 * 60 * 24 * 365,
-  });
-}
-
 // Onboarding and "New project" (#65). The plan's limit is checked here, not only in the UI:
 // a Free account that already has its project goes to billing to move to Pro.
 export async function createWorkspace(
@@ -40,22 +38,35 @@ export async function createWorkspace(
   formData: FormData,
 ): Promise<WorkspaceFormState> {
   const user = await requireUser();
-  const [projects, account] = await Promise.all([listWorkspaces(), ensureAccount(user.id)]);
-  if (projects.length >= projectLimit(account)) redirect("/app/billing");
+  // Fast path for the UI; the insert below checks it again, under a lock.
+  const projects = await listWorkspaces();
+  if (projects.length >= projectLimit(projects[0] ?? { subscriptionStatus: "none" })) redirect("/app/billing");
 
   const state = parseForm(formData);
   if (state.errors) return state;
 
-  let id: string;
+  const { name, slug, widgetLang } = state.values;
+  const db = getDb();
+  let id: string | undefined;
   try {
-    [{ id }] = await getDb()
-      .insert(workspaces)
-      .values({ ownerId: user.id, ...state.values })
-      .returning({ id: workspaces.id });
+    // One transaction: the lock, then the insert only while the account is under its limit,
+    // so two parallel requests can't both take the last slot.
+    const [, inserted] = await db.batch([
+      db.execute(lockProjects(user.id)),
+      db.execute(sql`
+        insert into ${workspaces} (owner_id, name, slug, widget_lang, widget_key)
+        select ${user.id}::uuid, ${name}, ${slug}, ${widgetLang}::widget_lang, ${newWidgetKey()}
+        where ${projectCountSql(user.id)} < ${projectLimitSql(user.id)}
+        returning id`),
+    ]);
+    id = (inserted.rows[0] as { id: string } | undefined)?.id;
   } catch (error) {
     return slugTakenOrThrow(error, state);
   }
-  await openProject(id);
+  if (!id) redirect("/app/billing");
+
+  // Onboarding creates the account row; billing reads it later.
+  await Promise.all([ensureAccount(user.id), openProject(id)]);
   // The /app layout shows the project picker and the nav.
   revalidatePath("/app", "layout");
   redirect("/app");
@@ -109,10 +120,19 @@ export async function deleteWorkspace(
   if (String(formData.get("slug") ?? "").trim() !== workspace.slug) {
     return { error: "Type the project's slug exactly as it appears to confirm." };
   }
-  if ((await listWorkspaces()).length <= 1) {
+  const user = await requireUser();
+  const db = getDb();
+  // Under the same lock as creates: two tabs deleting the last two projects can't both succeed.
+  const [, deleted] = await db.batch([
+    db.execute(lockProjects(user.id)),
+    db.execute(sql`
+      delete from ${workspaces}
+      where ${workspaces.id} = ${workspace.id} and ${projectCountSql(user.id)} > 1
+      returning ${workspaces.id}`),
+  ]);
+  if (!deleted.rows.length) {
     return { error: "This is your only project. To remove it, delete your account." };
   }
-  await getDb().delete(workspaces).where(eq(workspaces.id, workspace.id));
   // The cookie may point to it; getCurrentWorkspace then falls back to the oldest.
   (await cookies()).delete(PROJECT_COOKIE);
   revalidatePath("/app", "layout");

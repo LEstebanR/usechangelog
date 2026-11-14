@@ -1,4 +1,4 @@
-import { asc, eq, getTableColumns, sql } from "drizzle-orm";
+import { asc, eq, getTableColumns, type SQL, sql } from "drizzle-orm";
 import { cookies } from "next/headers";
 import { notFound, redirect } from "next/navigation";
 import { cache } from "react";
@@ -24,7 +24,33 @@ const rank = sql<number>`(select count(*)::int + 1 from ${workspaces} as older
 const status = sql<SubscriptionStatus>`coalesce(${accounts.subscriptionStatus}, 'none')`;
 
 // projectLimit in SQL, built from PLANS and PRO_STATUSES; a test keeps it aligned with canPublish.
-export const publishesSql = sql`${rank} <= case when ${status} in ${PRO_STATUSES} then ${PLANS.pro.projects}::int else ${PLANS.free.projects}::int end`;
+// The limits are cast: Postgres would type the CASE's params as text.
+const limitFor = (subscriptionStatus: SQL) =>
+  sql`case when ${subscriptionStatus} in ${PRO_STATUSES} then ${PLANS.pro.projects}::int else ${PLANS.free.projects}::int end`;
+
+export const publishesSql = sql`${rank} <= ${limitFor(status)}`;
+
+// A user's project limit and project count, for writes that must respect them under
+// concurrency: run after lockProjects, in the same db.batch (one transaction).
+export const projectLimitSql = (userId: string) =>
+  limitFor(sql`coalesce((select ${accounts.subscriptionStatus} from ${accounts} where ${accounts.userId} = ${userId}), 'none')`);
+export const projectCountSql = (userId: string) =>
+  sql`(select count(*) from ${workspaces} where ${workspaces.ownerId} = ${userId})`;
+
+// Serializes a user's project creates and deletes, so two requests can't both pass the limit,
+// or both delete the second-to-last project.
+export const lockProjects = (userId: string) => sql`select pg_advisory_xact_lock(hashtext(${`projects:${userId}`}))`;
+
+// Opens a project in /app: the cookie every /app page reads. A year, like a preference.
+export async function openProject(id: string) {
+  (await cookies()).set(PROJECT_COOKIE, id, {
+    httpOnly: true,
+    sameSite: "lax",
+    secure: process.env.NODE_ENV === "production",
+    path: "/",
+    maxAge: 60 * 60 * 24 * 365,
+  });
+}
 
 // What canPublish needs, read with a left join on the account (no row means `none`).
 const publishing = { subscriptionStatus: status, rank };

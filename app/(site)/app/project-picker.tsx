@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { planOf } from "@/lib/billing/plans";
+import { PLANS, planOf, projectLimit } from "@/lib/billing/plans";
 import { canPublish } from "@/lib/billing/status";
 import { switchWorkspace } from "@/lib/workspace/actions";
 import type { Workspace } from "@/lib/workspace/server";
@@ -7,7 +7,9 @@ import type { Workspace } from "@/lib/workspace/server";
 // The project picker in /app's header (#65). No client code: a <details> menu whose items
 // are server forms that set the project cookie. Marks the projects the plan doesn't publish.
 // On Free at its limit, "New project" leads to billing instead of the form.
-export function ProjectPicker({ projects, current, limit }: { projects: Workspace[]; current: Workspace; limit: number }) {
+export function ProjectPicker({ projects, current }: { projects: Workspace[]; current: Workspace }) {
+  const plan = planOf(current);
+  const limit = projectLimit(current);
   const atLimit = projects.length >= limit;
 
   return (
@@ -20,7 +22,7 @@ export function ProjectPicker({ projects, current, limit }: { projects: Workspac
       </summary>
       <div className="absolute left-0 z-20 mt-2 w-64 border border-hairline bg-canvas shadow-lg sm:left-auto sm:right-0">
         <p className="border-b border-hairline px-4 py-2 text-xs uppercase tracking-wider text-graphite">
-          Projects · {projects.length} of {limit}
+          Projects · {PLANS[plan].name} publishes {limit}
         </p>
         <ul>
           {projects.map((project) => (
@@ -43,7 +45,7 @@ export function ProjectPicker({ projects, current, limit }: { projects: Workspac
             </li>
           ))}
         </ul>
-        {atLimit && planOf(current) === "pro" ? (
+        {atLimit && plan === "pro" ? (
           <p className="border-t border-hairline px-4 py-2.5 text-sm text-graphite">You&apos;re using all your projects.</p>
         ) : (
           <Link
