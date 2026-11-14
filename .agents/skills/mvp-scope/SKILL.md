@@ -17,6 +17,7 @@ The product rules and the out-of-scope list live in `AGENTS.md` → **Product ru
 - **Public page:** `usechangelog.com/{slug}` lists the project's published posts, newest first.
 - **Widget:** one script tag that shows the latest published posts in a "What's new" panel.
 - **Billing:** Free publishes 1 project, Pro (monthly, through Polar, with an optional free trial set in Polar) up to 3. The plan is the account's and decides which projects publish, the page and the widget (see `polar-billing`).
+- **Welcome email:** one email per account, when it creates its first project, through Resend (#76). No other emails: receipts come from Polar, and digests are out of scope.
 - **Landing and legal:** a marketing page with a sign-up CTA, plus privacy and terms pages.
 
 ## When a change isn't on this list
