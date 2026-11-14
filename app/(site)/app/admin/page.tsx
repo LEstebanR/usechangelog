@@ -21,7 +21,8 @@ export default async function AdminPage({ searchParams }: PageProps<"/app/admin"
   }));
 
   return (
-    <div className="mx-auto flex max-w-3xl flex-col gap-6">
+    // As wide as /app/admin/users, so switching pages doesn't shift the nav.
+    <div className="mx-auto flex max-w-4xl flex-col gap-6">
       <AdminNav current="/app/admin" />
       <div>
         <h1 className="font-display text-3xl font-medium tracking-tight">Feedback</h1>

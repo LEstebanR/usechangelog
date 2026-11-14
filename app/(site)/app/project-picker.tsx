@@ -22,7 +22,7 @@ export function ProjectPicker({ projects, current }: { projects: Workspace[]; cu
       </summary>
       <div className="absolute left-0 z-20 mt-2 w-64 border border-hairline bg-canvas shadow-lg sm:left-auto sm:right-0">
         <p className="border-b border-hairline px-4 py-2 text-xs uppercase tracking-wider text-graphite">
-          Projects · {PLANS[plan].name} publishes {limit}
+          Projects · {current.admin ? "Staff, no limit" : `${PLANS[plan].name} publishes ${limit}`}
         </p>
         <ul>
           {projects.map((project) => (

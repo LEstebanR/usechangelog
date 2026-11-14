@@ -25,7 +25,7 @@ The billing rules (Polar only, Free and Pro, sign-up free, `active` is Pro) are 
 ## Our rules
 
 - **Organization:** UseChangelog has its own, in sandbox and in production, never shared with another app (see **Identity**). Its support email must use the domain of its website, `usechangelog.com`.
-- **Product:** Pro, the only product in Polar, referenced by an env var. Free never goes through Polar. If Pro's price or free trial has to be shown, read it from Polar. The project limits per plan live in `lib/billing/plans.ts`, never in Polar.
+- **Product:** Pro, the only product in Polar, referenced by an env var. Free never goes through Polar. If Pro's price or free trial has to be shown, read it from Polar. The project limits per plan live in `lib/billing/plans.ts`, never in Polar. Staff (`admin` in `user_roles`) have no limit on any plan.
 - **Free trial:** optional, set on the product in Polar. Polar's `trialing` maps to `active` (Pro); the webhook stores the trial's end so the billing page can show it.
 - **Checkout:** start it from the signed-in app with the user's identity. Pass our account id (`accounts.id`) as `external_customer_id` so the webhook can map back to it.
 - **Webhook:**

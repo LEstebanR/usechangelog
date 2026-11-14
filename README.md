@@ -99,6 +99,7 @@ app/
     app/                The signed-in app: /app (posts), /app/posts/new, /app/posts/[id], /app/onboarding, /app/projects/new, /app/settings, /app/billing
     app/admin/          Admin only: the feedback users send (#28) and, at /app/admin/users, who signed up (#57)
   [slug]/               The public changelog at /{slug}. Its own root layout sets lang from the workspace
+  [slug]/og/            Its share image (next/og): name, latest posts and words in the workspace's language
   api/widget/[key]/     Public widget data (CORS open, 60-second CDN cache)
   api/polar/            Polar checkout, customer portal and webhook (the only writer of subscription state)
   icon.svg, apple-icon.png
@@ -110,8 +111,10 @@ lib/posts/              Post form parsing, workspace-scoped queries and post Ser
 lib/billing/            Plans and their limits (plans.ts), Polar config, revokeSubscriptionsInPolar(), mapPolarStatus(), canPublish() (the one publish gate) and the webhook handler
 lib/markdown.ts         renderMarkdown(): safe Markdown to HTML for the public page and the widget
 lib/widget/             The widget's words in 5 languages and the API payload
+lib/changelog/          The public page's words and what its share image says, per language
 public/widget.js        The embeddable "What's new" widget (vanilla JS, Shadow DOM)
-public/opengraph-image.png  Shared social image (1200×630)
+public/opengraph-image.png  Shared social image (1200×630) of the marketing site; each changelog has its own
+assets/fonts/           TTF fonts (OFL) for the share image
 scripts/smoke-app.ts    Signed-in smoke test (`bun run smoke`)
 scripts/widget-test.ts  Host pages to try the widget from another origin (`bun run widget-test`)
 db/
@@ -153,6 +156,7 @@ Open http://localhost:3000.
 | `bun run db:migrate` | Apply pending migrations (uses `DATABASE_URL_UNPOOLED`) |
 | `bun run check-env` | Check the required env vars and their format, without printing them. Locally it also checks the database and auth answer. Vercel runs it before migrating |
 | `bun run admin:grant <email>` | Gives an existing user the staff `admin` role (see [Admin](#admin)) |
+| `bun run hooks:install` | Once per clone: new worktrees get `.env.local` as a link to the main checkout's |
 | `bun run polar:state <slug>` | Read only: the subscription of a project's account in our database next to what Polar has, and what differs. Uses `.env.local` (develop + sandbox); for production, see below |
 | `bun run widget-test <widget-key> [base-url] [port]` | Host pages on another origin (`localhost:5050`) that load the widget: floating button, trigger + Spanish, hostile CSS, invalid key. For a protected preview, set `VERCEL_AUTOMATION_BYPASS_SECRET` |
 | `bun run smoke <email> [base-url]` | Signed-in smoke test of `/app`. Reuses the last session (`.smoke-session-*.json`, git-ignored), so it only sends a magic link when that expires; `SMOKE_LINK=<link>` skips the request. Never writes data, and refuses production URLs unless `SMOKE_ALLOW_PRODUCTION=1` |
@@ -267,7 +271,7 @@ psql "$(neonctl connection-string production)" -c "update accounts set subscript
 ```
 
 - The webhook still owns that column. If a courtesy account ever subscribes and then cancels, the webhook leaves it `canceled` and the courtesy is gone; give it again by hand if it should stay.
-- Today: `conexory`. With Free, our own changelog ([#67](https://github.com/LEstebanR/usechangelog/issues/67)) no longer needs one: it can be a project in the owner's account.
+- Staff don't need one: an account whose owner has the `admin` role has no project limit and publishes every project on any plan ([#77](https://github.com/LEstebanR/usechangelog/issues/77)). Courtesy is for non-staff accounts only; today there are none.
 - If there are ever more than a handful, open an issue for a real flag instead of this list.
 
 ## End-to-end check

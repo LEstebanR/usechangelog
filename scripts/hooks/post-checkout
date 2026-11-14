@@ -1,0 +1,11 @@
+#!/bin/sh
+# Links .env.local in a new worktree to the main checkout's, so every worktree shares one
+# env file and a rotated secret reaches all of them. Runs on `git worktree add` (any tool,
+# herdr included) and on every checkout; it only acts when .env.local is missing.
+# Installed by `bun run hooks:install`.
+main="$(git worktree list --porcelain | sed -n '1s/^worktree //p')"
+here="$(git rev-parse --show-toplevel)"
+[ "$main" = "$here" ] && exit 0
+[ -f "$main/.env.local" ] || exit 0
+[ -e "$here/.env.local" ] || [ -L "$here/.env.local" ] || ln -s "$main/.env.local" "$here/.env.local"
+exit 0
