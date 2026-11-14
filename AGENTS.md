@@ -29,7 +29,7 @@ This list is the source of truth. The skills in `.agents/skills/` add implementa
   - teams or roles, SSO or social login other than Google
   - Stripe, an Agency/Business plan, per-project, per-seat or annual pricing
   - Check `.agents/skills/mvp-scope` for what *is* in before adding a feature.
-- **Language:** the app, landing, legal pages and public page are English only. Posts are never translated. The one exception is the widget chrome (its button, title, tags and dates): English by default, or Spanish, Portuguese, French or German, chosen per workspace in settings (`lib/widget/copy.ts`).
+- **Language:** the app, landing and legal pages are English only. Posts are never translated. The exception is the chrome around the posts, in the widget (its button, title, tags and dates, `lib/widget/copy.ts`) and on the public page (its title, section labels, tags, dates and footer prefix, `lib/changelog/copy.ts`): English by default, or Spanish, Portuguese, French or German, chosen per workspace in settings with one setting for both.
 
 ## Code conventions
 

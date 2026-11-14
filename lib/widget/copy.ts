@@ -11,6 +11,9 @@ export const LANG_NAMES: Record<WidgetLang, string> = {
   de: "Deutsch",
 };
 
+// The words for each category and "Coming soon", shared by the widget and the public page.
+export type TagCopy = { new: string; improved: string; fixed: string; coming: string };
+
 type Copy = {
   button: string;
   title: string;
@@ -18,7 +21,7 @@ type Copy = {
   close: string;
   empty: string;
   latest: string;
-  tags: { new: string; improved: string; fixed: string; coming: string };
+  tags: TagCopy;
 };
 
 export const WIDGET_COPY: Record<WidgetLang, Copy> = {

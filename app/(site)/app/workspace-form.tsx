@@ -98,12 +98,12 @@ export function WorkspaceForm({ action, initial, origin, submitLabel, showWidget
       {showWidgetLang && (
         <Chips
           name="widgetLang"
-          legend="Widget language"
+          legend="Language"
           options={WIDGET_LANGS}
           value={state.values.widgetLang}
           label={(lang) => LANG_NAMES[lang]}
           chipClass={() => "px-3 py-1.5 text-sm peer-checked:border-ink peer-checked:bg-ink peer-checked:text-canvas"}
-          hint="The widget's own words: its button, title and dates. Your posts show as you wrote them."
+          hint="The words around your posts on the widget and the public page: titles, tags and dates. Your posts show as you wrote them."
         />
       )}
 
