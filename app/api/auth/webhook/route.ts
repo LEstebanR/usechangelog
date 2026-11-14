@@ -1,4 +1,5 @@
 import { verifyNeonWebhook } from "@/lib/auth/webhook";
+import { describeError } from "@/lib/email/layout";
 import { sendMagicLink } from "@/lib/email/magic-link";
 
 // Neon Auth's webhook (#83), subscribed to send.magic_link on `production` only. With the
@@ -24,7 +25,7 @@ export async function POST(request: Request) {
   try {
     valid = await verifyNeonWebhook(rawBody, request.headers);
   } catch (error) {
-    console.error("[magic-link] couldn't load Neon's signing keys:", (error as Error).message);
+    console.error("[magic-link] couldn't load Neon's signing keys:", describeError(error));
     return new Response(null, { status: 500 });
   }
   if (!valid) return new Response(null, { status: 401 });
