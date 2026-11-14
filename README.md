@@ -23,7 +23,7 @@
 
 ## Status
 
-> **Live at [usechangelog.com](https://www.usechangelog.com).** Free publishes one project (its public page and widget); Pro, billed monthly by Polar, publishes up to three. The MVP was built issue by issue, in the order listed in [Roadmap](#roadmap); see [End-to-end check](#end-to-end-check) for how it's verified.
+> **Live at [usechangelog.com](https://www.usechangelog.com).** Free publishes one project (its public page and widget); Pro, billed monthly by Polar, publishes up to three. The MVP was built issue by issue, in the order listed in [Roadmap](#roadmap); see [End-to-end check](#end-to-end-check) for how it's verified. Our own updates are at [usechangelog.com/usechangelog](https://www.usechangelog.com/usechangelog): a regular project in the owner's account, linked from the landing's footer and opened from its header with our own widget.
 
 ## What it is
 

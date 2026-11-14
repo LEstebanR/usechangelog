@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
+import Script from "next/script";
 import { PLANS } from "@/lib/billing/plans";
 import { readPlan } from "@/lib/billing/polar";
-import { audience, brand, closing, example, footer, hero, how, posts, problem, publicPath, shippedPosts, signIn, widget } from "./content";
+import { audience, brand, closing, example, footer, hero, how, ownChangelog, posts, problem, publicPath, shippedPosts, signIn, widget } from "./content";
 import { Latest } from "./latest";
 import { pageMetadata, siteDescription, siteTitle } from "./metadata";
 import { Reveal } from "./reveal";
@@ -129,6 +130,16 @@ export default async function Home() {
                 {link.label}
               </a>
             ))}
+            {/* Opens our own widget (#67), loaded at the end of the page with data-trigger. */}
+            <button
+              type="button"
+              id="whats-new"
+              aria-haspopup="dialog"
+              aria-expanded="false"
+              className="whitespace-nowrap text-graphite hover:text-ink"
+            >
+              {ownChangelog.whatsNew}
+            </button>
             {/* Same page as Get started (one magic link flow), so phones show only Get started. */}
             <a href={signIn.href} className="hidden whitespace-nowrap text-graphite hover:text-ink sm:inline">
               {signIn.label}
@@ -456,6 +467,10 @@ export default async function Home() {
 
       <SiteFooter>
         <span aria-hidden="true">·</span>
+        <a href={ownChangelog.link.href} className="hover:text-ink">
+          {ownChangelog.link.label}
+        </a>
+        <span aria-hidden="true">·</span>
         <span className="tabular-nums">
           © {footer.year} {brand}
         </span>
@@ -465,6 +480,7 @@ export default async function Home() {
           <span className="sr-only">love</span> by <span className="font-medium text-ink">{footer.credit.name}</span>
         </a>
       </SiteFooter>
+      <Script src="/widget.js" data-key={ownChangelog.widgetKey} data-trigger="#whats-new" strategy="afterInteractive" />
     </div>
   );
 }

@@ -35,7 +35,9 @@ export default async function AppLayout({ children }: LayoutProps<"/app">) {
     <div className="min-h-dvh bg-wash">
       <EnterSubmits />
       <SiteHeader home="/app" compact>
-        <div className="flex items-center gap-2 sm:gap-3">
+        {/* min-w-0: on a narrow phone the picker and the preview shrink and truncate, so the
+            header never scrolls sideways. Sign out keeps its size. */}
+        <div className="flex min-w-0 items-center gap-2 sm:gap-3">
           {workspace && <ProjectPicker projects={projects} current={workspace} />}
           {workspace && (
             <WhatsNewPreview
@@ -48,7 +50,7 @@ export default async function AppLayout({ children }: LayoutProps<"/app">) {
               posts={posts.map(({ body, ...p }) => ({ ...p, html: renderMarkdown(body), publishedOn: p.publishedOn ?? "" }))}
             />
           )}
-          <form action={signOut} className="flex items-center gap-4">
+          <form action={signOut} className="flex shrink-0 items-center gap-4">
           <span className="hidden text-sm text-graphite sm:inline">{user.email}</span>
           <SubmitButton
             pendingLabel="Signing out…"

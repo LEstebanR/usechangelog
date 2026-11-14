@@ -159,6 +159,16 @@ export const closing = {
 
 export const signIn = { label: "Sign in", href: "/sign-in" };
 
+// Our own changelog (#67): a regular project, slug `usechangelog`, in the owner's account.
+// The landing links its public page and opens its widget from the header. The key is the
+// project's, public by design; it must exist on the database the page reads, so local and
+// previews (the `develop` branch) have a copy of the project with the same key.
+export const ownChangelog = {
+  link: { href: "/usechangelog", label: "Changelog" },
+  whatsNew: "What's new",
+  widgetKey: "vfUfQVy7shwe5NvqS9JYfg",
+};
+
 // Who runs UseChangelog, and the legal pages (#18). Each page keeps its own "Last updated" date.
 export const legal = {
   operator: "LEsteban (Luis Esteban Ramírez)",
