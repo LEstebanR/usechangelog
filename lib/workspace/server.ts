@@ -3,7 +3,7 @@ import { cookies } from "next/headers";
 import { notFound, redirect } from "next/navigation";
 import { cache } from "react";
 import { getDb } from "@/db";
-import { accounts, workspaces } from "@/db/schema";
+import { accounts, userRoles, workspaces } from "@/db/schema";
 import { requireUser } from "@/lib/auth/server";
 import { PLANS, PRO_STATUSES } from "@/lib/billing/plans";
 import type { SubscriptionStatus } from "@/lib/billing/status";
@@ -23,17 +23,28 @@ const rank = sql<number>`(select count(*)::int + 1 from ${workspaces} as older
 // The account's status, `none` without an account row (left join).
 const status = sql<SubscriptionStatus>`coalesce(${accounts.subscriptionStatus}, 'none')`;
 
+// Whether a user has our staff role: staff have no project limit (#77).
+const isAdminSql = (userId: SQL | string) =>
+  sql<boolean>`exists (select 1 from ${userRoles} where ${userRoles.userId} = ${userId} and ${userRoles.role} = 'admin')`;
+const owner = sql`${workspaces.ownerId}`;
+
+// No limit, in SQL: Postgres' largest int, as projectLimit's Infinity.
+const NO_LIMIT = 2147483647;
+
 // projectLimit in SQL, built from PLANS and PRO_STATUSES; a test keeps it aligned with canPublish.
 // The limits are cast: Postgres would type the CASE's params as text.
-const limitFor = (subscriptionStatus: SQL) =>
-  sql`case when ${subscriptionStatus} in ${PRO_STATUSES} then ${PLANS.pro.projects}::int else ${PLANS.free.projects}::int end`;
+const limitFor = (subscriptionStatus: SQL, admin: SQL) =>
+  sql`case when ${admin} then ${NO_LIMIT}::int when ${subscriptionStatus} in ${PRO_STATUSES} then ${PLANS.pro.projects}::int else ${PLANS.free.projects}::int end`;
 
-export const publishesSql = sql`${rank} <= ${limitFor(status)}`;
+export const publishesSql = sql`${rank} <= ${limitFor(status, isAdminSql(owner))}`;
 
 // A user's project limit and project count, for writes that must respect them under
 // concurrency: run after lockProjects, in the same db.batch (one transaction).
 export const projectLimitSql = (userId: string) =>
-  limitFor(sql`coalesce((select ${accounts.subscriptionStatus} from ${accounts} where ${accounts.userId} = ${userId}), 'none')`);
+  limitFor(
+    sql`coalesce((select ${accounts.subscriptionStatus} from ${accounts} where ${accounts.userId} = ${userId}), 'none')`,
+    isAdminSql(userId),
+  );
 export const projectCountSql = (userId: string) =>
   sql`(select count(*) from ${workspaces} where ${workspaces.ownerId} = ${userId})`;
 
@@ -53,7 +64,7 @@ export async function openProject(id: string) {
 }
 
 // What canPublish needs, read with a left join on the account (no row means `none`).
-const publishing = { subscriptionStatus: status, rank };
+const publishing = { subscriptionStatus: status, rank, admin: isAdminSql(owner) };
 
 // The signed-in user's account (#65), or null before onboarding. Cached per request.
 export const getCurrentAccount = cache(async () => {

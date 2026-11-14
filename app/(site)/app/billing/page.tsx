@@ -23,7 +23,8 @@ export default async function BillingPage({ searchParams }: PageProps<"/app/bill
   // Billing is for after onboarding, like every tab.
   if (!projects.length) redirect("/app/onboarding");
   // No account row before onboarding created it, or before accounts existed: Free.
-  const billing = { subscriptionStatus: account?.subscriptionStatus ?? ("none" as const) };
+  // Staff (#77) have no limit; every project row carries the owner's role.
+  const billing = { subscriptionStatus: account?.subscriptionStatus ?? ("none" as const), admin: projects[0].admin };
   const status = billing.subscriptionStatus;
   const plan = PLANS[planOf(billing)];
   const limit = projectLimit(billing);
@@ -44,7 +45,7 @@ export default async function BillingPage({ searchParams }: PageProps<"/app/bill
         <div className="flex flex-wrap items-baseline justify-between gap-2">
           <h2 className="font-display text-xl font-medium">Your plan: {plan.name}</h2>
           <p className="text-sm text-graphite tabular-nums">
-            Publishes {limit} {limit === 1 ? "project" : "projects"}
+            {billing.admin ? "Staff: every project publishes" : `Publishes ${limit} ${limit === 1 ? "project" : "projects"}`}
           </p>
         </div>
         <ul className="mt-4 divide-y divide-hairline border border-hairline text-sm">

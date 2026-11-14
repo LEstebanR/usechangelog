@@ -36,12 +36,13 @@ describe("listPublicChangelogs (sitemap)", () => {
   const { sql, params } = listPublicChangelogs().toSQL();
 
   // The same rule as canPublish (and so isIndexable, the page's noindex): the project's rank
-  // among its account's projects, against a limit built from PRO_STATUSES and PLANS...
+  // among its account's projects, against a limit built from PRO_STATUSES and PLANS, with no
+  // limit (Postgres' largest int, as projectLimit's Infinity) when the owner is staff (#77)...
   // The limits are cast: Postgres would infer the CASE's params as text and refuse `int <= text`.
   test("only projects the account's plan publishes, by age", () => {
     expect(sql).toContain('"workspaces"."id" in (select "workspaces"."id" from "workspaces" left join "accounts" on "accounts"."user_id" = "workspaces"."owner_id"');
-    expect(sql).toMatch(/\(select count\(\*\)::int \+ 1 from "workspaces" as older\s+where older\.owner_id = "workspaces"\."owner_id"\s+and \(older\.created_at, older\.id\) < \("workspaces"\."created_at", "workspaces"\."id"\)\) <= case when coalesce\("accounts"\."subscription_status", 'none'\) in \(\$\d+\) then \$\d+::int else \$\d+::int end/);
-    expect(params).toEqual(["published", ...PRO_STATUSES, PLANS.pro.projects, PLANS.free.projects]);
+    expect(sql).toMatch(/\(select count\(\*\)::int \+ 1 from "workspaces" as older\s+where older\.owner_id = "workspaces"\."owner_id"\s+and \(older\.created_at, older\.id\) < \("workspaces"\."created_at", "workspaces"\."id"\)\) <= case when exists \(select 1 from "user_roles" where "user_roles"\."user_id" = "workspaces"\."owner_id" and "user_roles"\."role" = 'admin'\) then \$\d+::int when coalesce\("accounts"\."subscription_status", 'none'\) in \(\$\d+\) then \$\d+::int else \$\d+::int end/);
+    expect(params).toEqual(["published", 2147483647, ...PRO_STATUSES, PLANS.pro.projects, PLANS.free.projects]);
   });
 
   // ...and at least one published post.

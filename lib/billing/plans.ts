@@ -14,10 +14,12 @@ export type Plan = keyof typeof PLANS;
 // same rule (the sitemap) uses this list.
 export const PRO_STATUSES = ["active"] as const satisfies readonly SubscriptionStatus[];
 
-export type WithStatus = { subscriptionStatus: SubscriptionStatus };
+// `admin`: the account's owner has our staff role (user_roles). Staff aren't limited by a plan.
+export type WithStatus = { subscriptionStatus: SubscriptionStatus; admin?: boolean };
 
 export const planOf = (account: WithStatus): Plan =>
   (PRO_STATUSES as readonly SubscriptionStatus[]).includes(account.subscriptionStatus) ? "pro" : "free";
 
 // How many projects the account can have, and how many of them publish: the oldest ones.
-export const projectLimit = (account: WithStatus) => PLANS[planOf(account)].projects;
+// Staff have no limit, whatever their plan (#77): every project they own publishes.
+export const projectLimit = (account: WithStatus) => (account.admin ? Infinity : PLANS[planOf(account)].projects);

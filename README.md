@@ -271,7 +271,7 @@ psql "$(neonctl connection-string production)" -c "update accounts set subscript
 ```
 
 - The webhook still owns that column. If a courtesy account ever subscribes and then cancels, the webhook leaves it `canceled` and the courtesy is gone; give it again by hand if it should stay.
-- Today: `conexory`. With Free, our own changelog ([#67](https://github.com/LEstebanR/usechangelog/issues/67)) no longer needs one: it can be a project in the owner's account.
+- Staff don't need one: an account whose owner has the `admin` role has no project limit and publishes every project on any plan ([#77](https://github.com/LEstebanR/usechangelog/issues/77)). Courtesy is for non-staff accounts only; today there are none.
 - If there are ever more than a handful, open an issue for a real flag instead of this list.
 
 ## End-to-end check

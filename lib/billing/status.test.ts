@@ -46,6 +46,13 @@ describe("canPublish (by age, #65)", () => {
     const ranks = [1, 2, 3];
     expect(ranks.filter((rank) => canPublish({ subscriptionStatus: "canceled", rank }))).toEqual([1]);
   });
+
+  test("staff publish every project, on any plan (#77)", () => {
+    for (const status of ["active", "past_due", "canceled", "none"] as const) {
+      expect(canPublish({ subscriptionStatus: status, admin: true, rank: 50 })).toBe(true);
+    }
+    expect(canPublish({ subscriptionStatus: "none", admin: false, rank: 2 })).toBe(false);
+  });
 });
 
 describe("hasSubscription", () => {

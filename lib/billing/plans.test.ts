@@ -19,4 +19,10 @@ describe("projectLimit", () => {
     expect(projectLimit({ subscriptionStatus: "past_due" })).toBe(1);
     expect(projectLimit({ subscriptionStatus: "active" })).toBe(3);
   });
+
+  test("staff have no limit, whatever the plan (#77)", () => {
+    expect(projectLimit({ subscriptionStatus: "none", admin: true })).toBe(Infinity);
+    expect(projectLimit({ subscriptionStatus: "active", admin: true })).toBe(Infinity);
+    expect(projectLimit({ subscriptionStatus: "none", admin: false })).toBe(1);
+  });
 });
