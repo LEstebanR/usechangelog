@@ -26,6 +26,7 @@ Review a change against `AGENTS.md` → Product rules and Code conventions. Thos
   - A migration that drops or renames something the current code reads breaks production during `vercel-build`. Flag it unless it's the second PR of a two-step change, or the owner accepted the window in the PR.
   - If the PR stacks a fix-up migration on another migration that isn't in `main`, it should be regenerated instead.
   - A hand-written `sql` with an enum, a `CASE` or a cast was run once against `develop`, and the PR says so. CI has no database.
+  - Another open PR adds a migration with the same number (`gh pr list`, then each PR's `db/migrations/`). Both reach `develop` on push, so agree the merge order now: the one with the lower journal `when` merges first, and the other is renumbered keeping its SQL and its `when`, with its snapshot chained to `main`'s. Regenerating it would give it a new `when`, and `develop` would try to apply it again.
 - **Env vars:**
   - A new `process.env.X` must be in `scripts/check-env.ts` with its format and in `.env.example` with no value.
   - No client, SDK or env read at import time.
@@ -35,6 +36,7 @@ Review a change against `AGENTS.md` → Product rules and Code conventions. Thos
   - Unescaped Markdown or HTML on the public page or the widget.
   - A `mailto:` or `href` built from user input without validating it.
   - A new public endpoint without the same limits as its neighbours (rate limit, size).
+  - A user's personal data (email, name) in a log line, including a vendor's error message that may echo it back. Log an id instead, or redact it.
 
 ### Should fix
 
