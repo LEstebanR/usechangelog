@@ -20,6 +20,12 @@ describe("subscriptionLabel", () => {
     expect(subscriptionLabel({ ...base, cancelAtPeriodEnd: true, currentPeriodEnd: date })).toBe("active · cancels Dec 1, 2026");
   });
 
+  test("a canceled trial shows both", () => {
+    expect(subscriptionLabel({ ...base, trialEndsAt: date, cancelAtPeriodEnd: true, currentPeriodEnd: date })).toBe(
+      "active · trial until Dec 1, 2026 · cancels Dec 1, 2026",
+    );
+  });
+
   test("dates only show while active", () => {
     expect(subscriptionLabel({ ...base, subscriptionStatus: "canceled", trialEndsAt: date })).toBe("canceled");
   });

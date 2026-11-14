@@ -80,7 +80,7 @@ export default async function AdminUsersPage() {
                 <span>
                   Signed up <When date={u.createdAt} />
                 </span>
-                <span>Last sign-in {u.lastSignInAt ? <When date={u.lastSignInAt} /> : "—"}</span>
+                <span>Last sign-in {u.lastSignInAt ? <When date={u.lastSignInAt} /> : "no session on record"}</span>
                 {u.workspace && <span>{postsLabel(u.posts, u.published)}</span>}
               </div>
             </li>

@@ -16,9 +16,11 @@ export function subscriptionLabel(w: {
   currentPeriodEnd: Date | null;
 }) {
   if (w.subscriptionStatus !== "active") return w.subscriptionStatus;
-  if (w.trialEndsAt) return `active · trial until ${day(w.trialEndsAt)}`;
-  if (w.cancelAtPeriodEnd && w.currentPeriodEnd) return `active · cancels ${day(w.currentPeriodEnd)}`;
-  return "active";
+  // A trial can be canceled too, so both parts can show.
+  const parts = ["active"];
+  if (w.trialEndsAt) parts.push(`trial until ${day(w.trialEndsAt)}`);
+  if (w.cancelAtPeriodEnd && w.currentPeriodEnd) parts.push(`cancels ${day(w.currentPeriodEnd)}`);
+  return parts.join(" · ");
 }
 
 export const postsLabel = (total: number, published: number) =>
