@@ -69,6 +69,7 @@ An account has several projects (`workspaces` in code). The plan is the account'
 | Database | [Neon](https://neon.com) Postgres, with Drizzle ORM and migrations in the repo | ✅ In use |
 | Auth | Neon Managed Better Auth: magic link and Google | ✅ In use |
 | Payments | [Polar](https://polar.sh) as merchant of record: the Pro plan (Free never goes through Polar), sandbox on previews | ✅ In use |
+| Email | [Resend](https://resend.com): magic links over SMTP (set in Neon Auth) and the welcome email through its API (`resend`) | ✅ In use |
 | Analytics | [Vercel Web Analytics](https://vercel.com/docs/analytics): cookieless page views on the site and public changelogs (`@vercel/analytics`) | ✅ In use |
 
 The reasoning behind each choice is in its issue. For example, [#4](https://github.com/LEstebanR/usechangelog/issues/4) explains why it's Neon's auth and not Clerk.
@@ -112,6 +113,7 @@ lib/billing/            Plans and their limits (plans.ts), Polar config, revokeS
 lib/markdown.ts         renderMarkdown(): safe Markdown to HTML for the public page and the widget
 lib/widget/             The widget's words in 5 languages and the API payload
 lib/changelog/          The public page's words and what its share image says, per language
+lib/email/              The Resend client and the welcome email: its copy and the once-per-account send (#76)
 public/widget.js        The embeddable "What's new" widget (vanilla JS, Shadow DOM)
 public/opengraph-image.png  Shared social image (1200×630) of the marketing site; each changelog has its own
 assets/fonts/           TTF fonts (OFL) for the share image
@@ -177,6 +179,7 @@ Every variable the code reads is in `.env.example`, by name only. `bun run check
 | `POLAR_WEBHOOK_SECRET` | Webhook signature check | Sandbox endpoint secret | Production endpoint secret | Polar → Settings → Webhooks. Locally, the secret `polar listen` prints |
 | `POLAR_ALLOW_DISCOUNT_CODES` | Optional and temporary: discount field in the checkout during Polar's account review | — | Only during the review | Set by hand, delete after |
 | `NEXT_PUBLIC_SITE_URL` | Canonical URL for metadata (`metadataBase`, `og:url`) | Unset: the preview's own URL (`VERCEL_URL`) | `https://www.usechangelog.com` | Fixed |
+| `RESEND_API_KEY` | The welcome email (#76). Without it nothing is sent | Optional, the same key to try it | Required (`check-env`) | Resend → API Keys: `usechangelog-production`, *Sending access*, domain `usechangelog.com` |
 | `VERCEL_AUTOMATION_BYPASS_SECRET` | Optional, local only: `widget-test` and `smoke` against a protected preview | — | — | Vercel → Deployment Protection → Protection Bypass for Automation |
 | `SMOKE_LINK`, `SMOKE_ALLOW_PRODUCTION` | Optional, local only: `bun run smoke` | — | — | You |
 | `VERCEL`, `VERCEL_ENV`, `VERCEL_URL` | Which environment this is | Set by Vercel | Set by Vercel | Never set them yourself |
@@ -251,6 +254,8 @@ polar listen http://localhost:3000/api/polar/webhook
 
 - **Production:** https://www.usechangelog.com (`usechangelog.com` redirects there), deployed from `main`. Neon Auth on the `production` branch trusts `https://www.usechangelog.com`, and the Polar production webhook points to `https://www.usechangelog.com/api/polar/webhook`; a webhook doesn't follow the redirect.
 - **Sign-in email:** production sends magic links from `UseChangelog <hello@usechangelog.com>` through [Resend](https://resend.com)'s SMTP, set on the `production` branch with `neonctl neon-auth config email-provider update` (#24). DNS on Vercel: Resend's DKIM (`resend._domainkey`), SPF and bounce MX (`send`), and DMARC `p=none` (`_dmarc`). The app name in the email is set with the auth config API, and `allow_localhost` is off on production. Previews and local use `develop`, which keeps Neon's shared sender. Support is `support@usechangelog.com`: [ImprovMX](https://improvmx.com) forwards the domain's mail (MX `mx1`/`mx2.improvmx.com` and SPF `include:spf.improvmx.com` on the root).
+- **Welcome email:** one per account, sent right after signing up, by magic link or Google: Neon Auth doesn't tell us about sign-ups, so the onboarding page (`/app/onboarding`, where a new account lands) sends it, through Resend's API, from the same sender with Reply-To `support@usechangelog.com` (#76). It asks for the first project and runs in `after()`, so it never slows or blocks onboarding. The claim is one upsert on `accounts` that also creates the row: it sets `welcome_email_sent_at` only while it's null, and a failed send sets it back to null (logged as `[welcome]`), so the next visit to onboarding tries again. Accounts that had a project before #76 were backfilled. Without `RESEND_API_KEY` nothing is sent.
+- **Resend account:** `usechangelog.com` lives in the same free Resend team as Conexory, with its own sending-only key restricted to the domain. The quota is the team's and shared by both products, magic links included: 100 emails a day and 3,000 a month, received mail counting too. If Conexory spends the day's quota, nobody can sign in to UseChangelog until the next day. When the team goes past ~70 emails in a day or ~2,000 in a month (Resend → Usage), move UseChangelog to a team of its own on Pro: a new key and plan in Resend, no code changes.
 - **Google sign-in:** production uses UseChangelog's own Google OAuth client (brand-verified consent screen, scopes `openid`, `email`, `profile`), set on the `production` branch with `neonctl neon-auth oauth-provider` (#25). Its redirect URI is `{NEON_AUTH_BASE_URL}/callback/google`. Previews and local use `develop`, which keeps Neon's shared Google credentials, so Google's screen shows Neon there.
 - **Previews:** every pull request gets its own Vercel preview. Previews don't get their own Neon branch: they share `develop` with local dev, database and auth (see [Local database](#local-database)), so a preview's URL must be added to `develop`'s auth domains before signing in there. Its URL goes in the PR description.
 - **Migrations:** Vercel runs `vercel-build`: it checks the env vars (`check-env`), applies pending migrations to the deployment's database, then runs `next build`.
@@ -343,7 +348,7 @@ The issue tracker is the backlog. Each issue carries a number in its title, in b
 | 30 | Admin: no project limit for staff | [#77](https://github.com/LEstebanR/usechangelog/issues/77) | ✅ Done |
 | 31 | Own changelog: UseChangelog publishes its updates at `/usechangelog` | [#67](https://github.com/LEstebanR/usechangelog/issues/67) | ✅ Done |
 | 32 | Admin: mark feedback as resolved | [#75](https://github.com/LEstebanR/usechangelog/issues/75) | ✅ Done |
-| 33 | Email: welcome when the first project is created | [#76](https://github.com/LEstebanR/usechangelog/issues/76) | Open |
+| 33 | Email: welcome when the first project is created | [#76](https://github.com/LEstebanR/usechangelog/issues/76) | ✅ Done |
 
 ### Out of scope
 

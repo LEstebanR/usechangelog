@@ -64,6 +64,13 @@
       "when": 1794677857101,
       "tag": "0008_feedback_status",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1794677861007,
+      "tag": "0009_welcome_email",
+      "breakpoints": true
     }
   ]
 }

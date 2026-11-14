@@ -27,7 +27,8 @@ export default async function AdminPage({ searchParams }: PageProps<"/app/admin"
 
   const kindFilters = [undefined, ...FEEDBACK_KINDS].map((k) => ({
     href: adminHref(k, status),
-    label: `${k ? FEEDBACK_LABELS[k] : "All"} · ${k ? (open[k] ?? 0) : totalOpen}`,
+    label: k ? FEEDBACK_LABELS[k] : "All",
+    open: k ? (open[k] ?? 0) : totalOpen,
     current: kind === k,
   }));
   const statusFilters = [...FEEDBACK_STATUSES, undefined].map((s) => ({
@@ -43,30 +44,43 @@ export default async function AdminPage({ searchParams }: PageProps<"/app/admin"
       <div>
         <h1 className="font-display text-3xl font-medium tracking-tight">Feedback</h1>
         <p className="mt-2 text-sm text-graphite">
-          What users send from the app, newest first. Answer them by email. Counts are open messages.
+          What users send from the app, newest first. Answer them by email. The counts are open messages.
         </p>
       </div>
 
-      <div className="flex flex-col gap-2">
-        {(
-          [
-            ["Filter by kind", kindFilters],
-            ["Filter by status", statusFilters],
-          ] as const
-        ).map(([label, filters]) => (
-          <nav key={label} aria-label={label} className="flex flex-wrap gap-1.5">
-            {filters.map((f) => (
-              <Link
-                key={f.href}
-                href={f.href}
-                aria-current={f.current ? "page" : undefined}
-                className="border border-hairline px-3 py-1 text-sm text-graphite hover:text-ink aria-[current=page]:border-ink aria-[current=page]:bg-ink aria-[current=page]:text-canvas"
-              >
-                {f.label}
-              </Link>
+      {/* One toolbar: the kind as tabs, like the app's nav, with each kind's open count, and
+          the status as a segmented control on the right. On a phone the status drops below. */}
+      <div className="flex flex-col gap-3 border-b border-hairline sm:flex-row sm:items-end sm:justify-between">
+        <nav aria-label="Filter by kind" className="-mb-px overflow-x-auto">
+          <ul className="flex gap-6">
+            {kindFilters.map((f) => (
+              <li key={f.href}>
+                <Link
+                  href={f.href}
+                  aria-current={f.current ? "page" : undefined}
+                  className="group flex items-center gap-2 whitespace-nowrap border-b-2 border-transparent py-3 text-sm font-medium text-graphite transition-colors hover:text-ink aria-[current=page]:border-blue aria-[current=page]:text-ink"
+                >
+                  {f.label}
+                  <span className="border border-hairline px-1.5 text-xs tabular-nums text-graphite group-aria-[current=page]:border-ink group-aria-[current=page]:text-ink">
+                    {f.open}
+                  </span>
+                </Link>
+              </li>
             ))}
-          </nav>
-        ))}
+          </ul>
+        </nav>
+        <nav aria-label="Filter by status" className="mb-3 flex self-start border border-hairline sm:self-auto">
+          {statusFilters.map((f) => (
+            <Link
+              key={f.href}
+              href={f.href}
+              aria-current={f.current ? "page" : undefined}
+              className="border-l border-hairline px-3 py-1 text-sm text-graphite transition-colors first:border-l-0 hover:text-ink aria-[current=page]:bg-ink aria-[current=page]:text-canvas"
+            >
+              {f.label}
+            </Link>
+          ))}
+        </nav>
       </div>
 
       {items.length === 0 ? (
