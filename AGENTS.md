@@ -21,7 +21,7 @@ This list is the source of truth. The skills in `.agents/skills/` add implementa
 - **Public page:** the slug lives in the path (`usechangelog.com/{slug}`), never in a subdomain.
 - **Auth:** Neon Managed Better Auth with magic link and Google, nothing else. No passwords, SSO or other social providers. The same email by either method is the same user. See `.agents/skills/auth`.
 - **Billing:** Polar, never Stripe. Two plans: Free, which never goes through Polar, and Pro, the only product in Polar, monthly. The subscription is the account's, not a project's. Pro's price is never hardcoded in code or copy; it comes from Polar. The project limits live in `lib/billing/plans.ts`. See `.agents/skills/polar-billing`.
-- **Paywall:** sign-up is free. Free publishes 1 project and Pro up to 3: the account's oldest projects publish (public page, widget, sitemap), as many as the plan allows; the rest keep their posts but aren't public. Pro is a subscription in state `active`; a free trial counts as `active`, and whether there is one, and how long, is set on the product in Polar, never in code. `past_due`, `canceled` and `none` are Free. No quotas on posts or widget traffic.
+- **Paywall:** sign-up is free. Free publishes 1 project and Pro up to 3: the account's oldest projects publish (public page, widget, sitemap), as many as the plan allows; the rest keep their posts but aren't public. Pro is a subscription in state `active`; a free trial counts as `active`, and whether there is one, and how long, is set on the product in Polar, never in code. `past_due`, `canceled` and `none` are Free. No quotas on posts or widget traffic. Exception: courtesy accounts are Pro without paying, set by staff by hand in `accounts`; there is no UI or code to grant them (README → Courtesy accounts).
 - **Out of scope:**
   - waitlist, voting, comments, reactions
   - RSS or feeds, email digests, scheduled posts
@@ -40,6 +40,7 @@ This list is the source of truth. The skills in `.agents/skills/` add implementa
 - **The `develop` Neon branch is permanent:** local dev and previews share it. Create or recreate it with `neonctl branches create --name develop --parent production` (no expiration), never from the Neon console, whose "Automatically delete branch after" is on by default and deleted the previous one after a day. Protect it in Neon if the plan allows.
 - **Env vars are checked before deploying:** `vercel-build` runs `bun run check-env` (`scripts/check-env.ts`) first. Add every new required var there with its expected format.
 - **No env vars at import time:** create clients (auth, database, SDKs) on first use, so `bun run build` passes without secrets.
+- **Worktrees in `.claude/worktrees/<issue>`:** one per issue, inside the repo, never as sibling folders. The folder is in `.gitignore` and in ESLint's ignores. Copy `.env.local` into each one and run `bun install` there.
 
 ## Verifying changes
 
