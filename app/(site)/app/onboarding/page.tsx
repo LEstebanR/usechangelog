@@ -1,5 +1,8 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
+import { after } from "next/server";
+import { requireUser } from "@/lib/auth/server";
+import { sendWelcomeEmail } from "@/lib/email/welcome";
 import { createWorkspace } from "@/lib/workspace/actions";
 import { getCurrentWorkspace } from "@/lib/workspace/server";
 import { getOrigin } from "@/lib/site";
@@ -8,7 +11,13 @@ import { WorkspaceForm } from "../workspace-form";
 export const metadata: Metadata = { title: "Set up your project — UseChangelog" };
 
 export default async function OnboardingPage() {
+  const user = await requireUser();
   if (await getCurrentWorkspace()) redirect("/app");
+  const origin = await getOrigin();
+  // The welcome email (#76). A new account lands here right after signing up, by magic link
+  // or Google: Neon Auth doesn't tell us about sign-ups. Once per account (the claim), after
+  // the page is sent, so a failed send never blocks onboarding.
+  after(() => sendWelcomeEmail(user.id, user.email, { appUrl: `${origin}/app` }));
 
   return (
     <div className="mx-auto max-w-lg border border-hairline bg-canvas p-8">
@@ -19,7 +28,7 @@ export default async function OnboardingPage() {
       <WorkspaceForm
         action={createWorkspace}
         initial={{ name: "", slug: "", widgetLang: "en" }}
-        origin={await getOrigin()}
+        origin={origin}
         submitLabel="Create project"
       />
     </div>

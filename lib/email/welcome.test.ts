@@ -3,19 +3,24 @@ import { beforeEach, describe, expect, mock, spyOn, test } from "bun:test";
 // No database and no Resend: both are mocked. The fake db keeps one account's
 // welcome_email_sent_at and applies the claim's `is null` condition itself.
 let sentAt: Date | null = null;
+let accountExists = true;
 const updates: (Date | null)[] = [];
+// The claim: an insert that, on conflict, sets the mark only while it's null.
+const claim = async () => {
+  if (accountExists && sentAt !== null) return [];
+  accountExists = true;
+  sentAt = new Date();
+  updates.push(sentAt);
+  return [{ id: "account-1" }];
+};
 const fakeDb = {
+  insert: () => ({ values: () => ({ onConflictDoUpdate: () => ({ returning: claim }) }) }),
+  // The release.
   update: () => ({
     set: ({ welcomeEmailSentAt }: { welcomeEmailSentAt: Date | null }) => ({
-      where: () => {
-        // The claim (a Date) only wins while the mark is null; the release (null) always applies.
-        const applied = welcomeEmailSentAt === null || sentAt === null;
-        if (applied) {
-          sentAt = welcomeEmailSentAt;
-          updates.push(welcomeEmailSentAt);
-        }
-        const rows = applied ? [{ id: "account-1" }] : [];
-        return Object.assign(Promise.resolve(rows), { returning: async () => rows });
+      where: async () => {
+        sentAt = welcomeEmailSentAt;
+        updates.push(welcomeEmailSentAt);
       },
     }),
   }),
@@ -29,14 +34,11 @@ mock.module("./client", () => ({ getResend: () => (hasKey ? { emails: { send } }
 
 const { sendWelcomeEmail, welcomeEmail, WELCOME_FROM, WELCOME_REPLY_TO } = await import("./welcome");
 
-const project = {
-  name: "Acme <Beta>",
-  publicUrl: "https://www.usechangelog.com/acme",
-  appUrl: "https://www.usechangelog.com/app",
-};
+const project = { appUrl: "https://www.usechangelog.com/app" };
 
 beforeEach(() => {
   sentAt = null;
+  accountExists = true;
   updates.length = 0;
   send.mockClear();
   hasKey = true;
@@ -46,20 +48,19 @@ beforeEach(() => {
 describe("welcomeEmail", () => {
   const { subject, text, html } = welcomeEmail(project);
 
-  test("links the project's public page and /app, in text and HTML", () => {
+  test("asks for the first project, links /app, and mentions posts and the widget", () => {
     expect(subject).toBe("Welcome to UseChangelog");
     for (const body of [text, html]) {
-      expect(body).toContain("https://www.usechangelog.com/acme");
       expect(body).toContain("https://www.usechangelog.com/app");
+      expect(body).toContain("first project");
+      expect(body).toContain("first post");
       expect(body).toContain("widget");
       expect(body).toContain("reply to this email");
     }
   });
 
-  test("escapes the project name in the HTML", () => {
-    expect(html).toContain("Acme &#60;Beta&#62;");
-    expect(html).not.toContain("<Beta>");
-    expect(text).toContain("Acme <Beta>");
+  test("escapes the link in the HTML", () => {
+    expect(welcomeEmail({ appUrl: 'https://x.test/app"><b>' }).html).not.toContain('"><b>');
   });
 
   test("never mentions a price", () => {
@@ -82,7 +83,14 @@ describe("sendWelcomeEmail", () => {
     expect(sentAt).toBeInstanceOf(Date);
   });
 
-  test("a second call (a second project, a parallel request) doesn't send again", async () => {
+  test("a new user without an account row: the claim creates it and sends", async () => {
+    accountExists = false;
+    await sendWelcomeEmail("user-1", "someone@example.com", project);
+    expect(send).toHaveBeenCalledTimes(1);
+    expect(accountExists).toBe(true);
+  });
+
+  test("a second call (onboarding opened again, a parallel request) doesn't send again", async () => {
     await Promise.all([
       sendWelcomeEmail("user-1", "someone@example.com", project),
       sendWelcomeEmail("user-1", "someone@example.com", project),
@@ -120,15 +128,15 @@ describe("sendWelcomeEmail", () => {
   });
 
   test("a database error never throws, and logs [welcome]", async () => {
-    const update = fakeDb.update;
-    fakeDb.update = () => {
+    const insert = fakeDb.insert;
+    fakeDb.insert = () => {
       throw new Error("connection refused");
     };
     const log = spyOn(console, "error").mockImplementation(() => {});
     await expect(sendWelcomeEmail("user-1", "someone@example.com", project)).resolves.toBeUndefined();
     expect(log.mock.calls.flat().join(" ")).toContain("[welcome]");
     expect(send).not.toHaveBeenCalled();
-    fakeDb.update = update;
+    fakeDb.insert = insert;
     log.mockRestore();
   });
 
