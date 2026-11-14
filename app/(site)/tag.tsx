@@ -3,6 +3,7 @@ import type { PostTag } from "./content";
 // The one category palette: landing, app list, editor chips and the What's new panel.
 // New is blue, Improved violet, Fixed green (a fix is good news, never a warning).
 // Full class names on purpose: Tailwind only generates classes it can read.
+// The share image draws these tags from colors.ts (TAG_COLORS): change both together.
 export const TAG_PALETTE: Record<PostTag, { tag: string; dot: string; pill: string; chip: string }> = {
   New: {
     tag: "border-blue bg-blue text-canvas",

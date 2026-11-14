@@ -2,10 +2,11 @@ import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { ImageResponse } from "next/og";
 import { canPublish } from "@/lib/billing/status";
-import { ogCard, OG_POSTS, type OgTag } from "@/lib/changelog/og";
+import { ogCard, OG_POSTS } from "@/lib/changelog/og";
 import { listPublishedPosts } from "@/lib/posts/server";
 import { changelogLanguage } from "@/lib/seo/language";
 import { getWorkspaceBySlug } from "@/lib/workspace/server";
+import { COLORS, TAG_COLORS } from "../../(site)/colors";
 import { brand } from "../../(site)/content";
 
 // A changelog's share image (#73): its name, its latest posts and its words, in its language.
@@ -29,17 +30,7 @@ const loadFonts = () =>
     throw error;
   }));
 
-// The site's palette (app/globals.css) and the tag colors of app/(site)/tag.tsx, as hex:
-// Satori doesn't read Tailwind classes.
-const ink = "#0e1116";
-const graphite = "#5a6170";
-const hairline = "#e4e7ec";
-const TAGS: Record<OgTag, { color: string; background: string; border: string }> = {
-  new: { color: "#ffffff", background: "#1d3a8f", border: "1px solid #1d3a8f" },
-  improved: { color: "#5b3fa8", background: "#f1edfa", border: "1px solid #c8bce4" },
-  fixed: { color: "#17694a", background: "#eaf5ef", border: "1px solid #a4c9b8" },
-  coming: { color: graphite, background: "transparent", border: `1px dashed ${graphite}` },
-};
+const { ink, graphite, hairline, gridline } = COLORS;
 
 export async function GET(_request: Request, { params }: RouteContext<"/[slug]/og">) {
   const workspace = await getWorkspaceBySlug((await params).slug.toLowerCase());
@@ -60,9 +51,9 @@ export async function GET(_request: Request, { params }: RouteContext<"/[slug]/o
           display: "flex",
           flexDirection: "column",
           padding: "72px",
-          background: "#ffffff",
+          background: COLORS.canvas,
           // The landing's faint vertical grid.
-          backgroundImage: "linear-gradient(to right, #f1f2f5 1px, transparent 1px)",
+          backgroundImage: `linear-gradient(to right, ${gridline} 1px, transparent 1px)`,
           backgroundSize: "88px 100%",
           backgroundPosition: "72px 0",
           color: ink,
@@ -71,7 +62,7 @@ export async function GET(_request: Request, { params }: RouteContext<"/[slug]/o
       >
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", fontSize: 28 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 16, color: graphite }}>
-            <div style={{ width: 14, height: 14, background: "#1d3a8f" }} />
+            <div style={{ width: 14, height: 14, background: COLORS.blue }} />
             {card.label}
           </div>
           <div style={{ display: "flex", gap: 8, color: graphite, fontSize: 24 }}>
@@ -112,7 +103,7 @@ export async function GET(_request: Request, { params }: RouteContext<"/[slug]/o
                     fontSize: 16,
                     letterSpacing: "0.08em",
                     textTransform: "uppercase",
-                    ...TAGS[post.tag],
+                    ...TAG_COLORS[post.tag],
                   }}
                 >
                   {post.label}
