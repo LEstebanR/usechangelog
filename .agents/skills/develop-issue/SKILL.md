@@ -62,6 +62,7 @@ Goal: a PR, ready for review and not merged, that meets every "Hecho cuando" ite
 
 - **Open the PR:** push, then open it with `.github/pull_request_template.md` filled in: `Closes #<issue>`, the Vercel preview URL, what changes and how it was tested. It is ready for review, never draft.
 - **Several issues in one PR:** from the start, give the description a "Hecho cuando" section with one block per issue, each item as a checkbox, and keep it updated as you verify. Don't leave it for the end.
+- **Payments on the preview:** if the PR tests payments on its preview, point the sandbox webhook of the UseChangelog organization in Polar to `https://usechangelog-git-<branch>-lestebanrs-projects.vercel.app/api/polar/webhook?x-vercel-protection-bypass=<VERCEL_AUTOMATION_BYPASS_SECRET>`. Then send an unsigned `POST` to that URL: it must answer 403 (our endpoint rejects the signature), not 302 (Vercel sending it to its login, which means a wrong or rotated secret).
 - **Wait for checks:** wait for CI (lint, typecheck, build, test) and for the Vercel preview to be Ready.
 - **Check every item:** go through each "Hecho cuando" item **on the preview** and record the result in the PR description. Explain any item that isn't met.
   - The owner can skip the preview check when it adds nothing over local, for example when the preview uses the same Neon branch (`develop`) that local already tested. Say so in the PR's "How it was tested" and in the checklist, and don't push for it.

@@ -248,10 +248,27 @@ polar listen http://localhost:3000/api/polar/webhook
 - **Production:** https://www.usechangelog.com (`usechangelog.com` redirects there), deployed from `main`. Neon Auth on the `production` branch trusts `https://www.usechangelog.com`, and the Polar production webhook points to `https://www.usechangelog.com/api/polar/webhook`; a webhook doesn't follow the redirect.
 - **Sign-in email:** production sends magic links from `UseChangelog <hello@usechangelog.com>` through [Resend](https://resend.com)'s SMTP, set on the `production` branch with `neonctl neon-auth config email-provider update` (#24). DNS on Vercel: Resend's DKIM (`resend._domainkey`), SPF and bounce MX (`send`), and DMARC `p=none` (`_dmarc`). The app name in the email is set with the auth config API, and `allow_localhost` is off on production. Previews and local use `develop`, which keeps Neon's shared sender. Support is `support@usechangelog.com`: [ImprovMX](https://improvmx.com) forwards the domain's mail (MX `mx1`/`mx2.improvmx.com` and SPF `include:spf.improvmx.com` on the root).
 - **Google sign-in:** production uses UseChangelog's own Google OAuth client (brand-verified consent screen, scopes `openid`, `email`, `profile`), set on the `production` branch with `neonctl neon-auth oauth-provider` (#25). Its redirect URI is `{NEON_AUTH_BASE_URL}/callback/google`. Previews and local use `develop`, which keeps Neon's shared Google credentials, so Google's screen shows Neon there.
-- **Previews:** every pull request gets its own Vercel preview, with its own Neon branch and auth. Its URL goes in the PR description.
+- **Previews:** every pull request gets its own Vercel preview. Previews don't get their own Neon branch: they share `develop` with local dev, database and auth (see [Local database](#local-database)), so a preview's URL must be added to `develop`'s auth domains before signing in there. Its URL goes in the PR description.
 - **Migrations:** Vercel runs `vercel-build`: it checks the env vars (`check-env`), applies pending migrations to the deployment's database, then runs `next build`.
-- **Billing:** Production uses the `UseChangelog` organization in Polar production; previews and local use the `UseChangelog` organization in Polar sandbox (`POLAR_SERVER`, enforced by `check-env`). The organization belongs to this app alone: Polar has one customer per email per organization, so sharing it with another app blocks that app's customers from subscribing here (#60). Polar sends webhooks to `/api/polar/webhook`; for a protected preview, the sandbox endpoint uses the branch URL with `?x-vercel-protection-bypass=<secret>`. Locally, `polar listen` forwards them.
+- **Billing:** Production uses the `UseChangelog` organization in Polar production; previews and local use the `UseChangelog` organization in Polar sandbox (`POLAR_SERVER`, enforced by `check-env`). The organization belongs to this app alone: Polar has one customer per email per organization, so sharing it with another app blocks that app's customers from subscribing here (#60). Polar sends webhooks to `/api/polar/webhook`. Locally, `polar listen` forwards them.
+  - **Sandbox webhook on a preview:** the sandbox endpoint in Polar points to one preview at a time, so change it in every PR that tests payments: the branch URL plus `?x-vercel-protection-bypass=<VERCEL_AUTOMATION_BYPASS_SECRET>`. An unsigned `POST` to that URL must answer 403 (our endpoint); a 302 means Vercel is sending it to its login.
+  - **Rotating the bypass secret:** if `VERCEL_AUTOMATION_BYPASS_SECRET` is rotated in Vercel, sandbox webhooks stop arriving (Vercel answers 302) until the endpoint URL in Polar is updated with the new secret. It happened on 2026-10-13.
 - **CI:** [GitHub Actions](.github/workflows/ci.yml) runs `lint`, `typecheck`, `build` and `test` as separate checks on every PR and on each push to `main`.
+
+### Courtesy accounts
+
+A courtesy account publishes without paying: its workspace has `subscription_status = 'active'` and no subscription in Polar. It's a staff exception, set by hand in the `production` Neon branch; there is no UI or code for it, and no column marks it.
+
+```bash
+# Give it
+psql "$(neonctl connection-string production)" -c "update workspaces set subscription_status = 'active' where slug = '<slug>'"
+# Take it away
+psql "$(neonctl connection-string production)" -c "update workspaces set subscription_status = 'none' where slug = '<slug>'"
+```
+
+- The webhook still owns that column. If a courtesy account ever subscribes and then cancels, the webhook leaves it `canceled` and the courtesy is gone; give it again by hand if it should stay.
+- Today: `conexory`. Planned: `usechangelog`, our own changelog ([#67](https://github.com/LEstebanR/usechangelog/issues/67)).
+- If there are ever more than a handful, open an issue for a real flag instead of this list.
 
 ## End-to-end check
 
@@ -285,29 +302,40 @@ The manual run-through of the whole product (#10). Run it on a preview with Pola
 
 ## Roadmap
 
-The issue tracker is the backlog. Issues are numbered in build order; each one lists its dependencies, decisions and a "Hecho cuando" (done when) checklist.
+The issue tracker is the backlog. Each issue carries a number in its title, in build order, and lists its dependencies, decisions and a "Hecho cuando" (done when) checklist. Bugs have no number and aren't listed.
 
-| # | Issue | |
-| --- | --- | --- |
-| 1 | Database and auth: Neon + magic link | [#4](https://github.com/LEstebanR/usechangelog/issues/4) |
-| 2 | Workspace: onboarding, slug, settings | [#5](https://github.com/LEstebanR/usechangelog/issues/5) |
-| 3 | Post admin: create, edit, publish | [#6](https://github.com/LEstebanR/usechangelog/issues/6) |
-| 4 | Public changelog page | [#7](https://github.com/LEstebanR/usechangelog/issues/7) |
-| 5 | Embeddable widget | [#8](https://github.com/LEstebanR/usechangelog/issues/8) |
-| 6 | Tests for the critical rules | [#12](https://github.com/LEstebanR/usechangelog/issues/12) |
-| 7 | Polar checkout: one monthly plan | [#14](https://github.com/LEstebanR/usechangelog/issues/14) |
-| 8 | Polar webhook and subscription state | [#15](https://github.com/LEstebanR/usechangelog/issues/15) |
-| 9 | Publishing, page and widget only with an active plan | [#16](https://github.com/LEstebanR/usechangelog/issues/16) |
-| 10 | Polar customer portal | [#17](https://github.com/LEstebanR/usechangelog/issues/17) |
-| 11 | Environment variables and site URL | [#13](https://github.com/LEstebanR/usechangelog/issues/13) |
-| 12 | Privacy and terms | [#18](https://github.com/LEstebanR/usechangelog/issues/18) |
-| 13 | SEO: metadata, sitemap, robots | [#19](https://github.com/LEstebanR/usechangelog/issues/19) |
-| 14 | Landing: open sign-up | [#9](https://github.com/LEstebanR/usechangelog/issues/9) |
-| 15 | End-to-end check of the MVP | [#10](https://github.com/LEstebanR/usechangelog/issues/10) |
-| 16 | Custom domain and branded auth email *(post-MVP)* | [#24](https://github.com/LEstebanR/usechangelog/issues/24) |
-| 17 | Sign in with Google | [#25](https://github.com/LEstebanR/usechangelog/issues/25) |
-| 19 | Delete your account | [#31](https://github.com/LEstebanR/usechangelog/issues/31) |
-| 20 | Custom 404 page | [#33](https://github.com/LEstebanR/usechangelog/issues/33) |
+| # | Issue | | Status |
+| --- | --- | --- | --- |
+| 0 | CI: lint, typecheck and build on every PR | [#11](https://github.com/LEstebanR/usechangelog/issues/11) | ✅ Done |
+| 0 | Repo skills and agents | [#20](https://github.com/LEstebanR/usechangelog/issues/20) | ✅ Done |
+| 1 | Database and auth: Neon + magic link | [#4](https://github.com/LEstebanR/usechangelog/issues/4) | ✅ Done |
+| 2 | Workspace: onboarding, slug, settings | [#5](https://github.com/LEstebanR/usechangelog/issues/5) | ✅ Done |
+| 3 | Post admin: create, edit, publish | [#6](https://github.com/LEstebanR/usechangelog/issues/6) | ✅ Done |
+| 4 | Public changelog page | [#7](https://github.com/LEstebanR/usechangelog/issues/7) | ✅ Done |
+| 5 | Embeddable widget | [#8](https://github.com/LEstebanR/usechangelog/issues/8) | ✅ Done |
+| 6 | Polar checkout: one monthly plan | [#14](https://github.com/LEstebanR/usechangelog/issues/14) | ✅ Done |
+| 7 | Polar webhook and subscription state | [#15](https://github.com/LEstebanR/usechangelog/issues/15) | ✅ Done |
+| 8 | Publishing, page and widget only with an active plan | [#16](https://github.com/LEstebanR/usechangelog/issues/16) | ✅ Done |
+| 9 | Polar customer portal | [#17](https://github.com/LEstebanR/usechangelog/issues/17) | ✅ Done |
+| 10 | Privacy and terms | [#18](https://github.com/LEstebanR/usechangelog/issues/18) | ✅ Done |
+| 11 | Feedback from the app | [#28](https://github.com/LEstebanR/usechangelog/issues/28) | ✅ Done |
+| 12 | Tests for the critical rules | [#12](https://github.com/LEstebanR/usechangelog/issues/12) | ✅ Done |
+| 13 | Environment variables and site URL | [#13](https://github.com/LEstebanR/usechangelog/issues/13) | ✅ Done |
+| 14 | Landing: open sign-up | [#9](https://github.com/LEstebanR/usechangelog/issues/9) | ✅ Done |
+| 15 | End-to-end check of the MVP | [#10](https://github.com/LEstebanR/usechangelog/issues/10) | ✅ Done |
+| 16 | SEO: metadata, sitemap, robots | [#19](https://github.com/LEstebanR/usechangelog/issues/19) | ✅ Done |
+| 17 | Custom domain and branded auth email *(post-MVP)* | [#24](https://github.com/LEstebanR/usechangelog/issues/24) | ✅ Done |
+| 18 | Sign in with Google | [#25](https://github.com/LEstebanR/usechangelog/issues/25) | ✅ Done |
+| 19 | Delete your account | [#31](https://github.com/LEstebanR/usechangelog/issues/31) | ✅ Done |
+| 20 | Custom 404 page | [#33](https://github.com/LEstebanR/usechangelog/issues/33) | ✅ Done |
+| 22 | Polar: an organization of our own | [#60](https://github.com/LEstebanR/usechangelog/issues/60) | ✅ Done |
+| 23 | Security: rotate the database password exposed in Vercel logs | [#61](https://github.com/LEstebanR/usechangelog/issues/61) | Open |
+| 24 | Docs: courtesy accounts, roadmap and previews in the README | [#64](https://github.com/LEstebanR/usechangelog/issues/64) | ✅ Done |
+| 25 | Plans: Free and Pro, with several projects per account | [#65](https://github.com/LEstebanR/usechangelog/issues/65) | Open |
+| 26 | Admin: see the registered users | [#57](https://github.com/LEstebanR/usechangelog/issues/57) | Open |
+| 27 | Launch: full test sign-up in production before outreach | [#62](https://github.com/LEstebanR/usechangelog/issues/62) | ✅ Done |
+| 27 | Own changelog: UseChangelog publishes its updates at `/usechangelog` | [#67](https://github.com/LEstebanR/usechangelog/issues/67) | Open |
+| 28 | Launch: get the first 5 to 10 real users | [#58](https://github.com/LEstebanR/usechangelog/issues/58) | ✅ Done |
 
 ### Out of scope
 
