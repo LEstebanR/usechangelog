@@ -24,6 +24,8 @@ const checks: [name: string, pattern: RegExp, hint: string][] = [
 ];
 // Previews and local use their own URL; only Production needs the canonical one (#13).
 if (isProduction) checks.push(["NEXT_PUBLIC_SITE_URL", /^https:\/\/[^/\s]+\/?$/, "the https:// origin of the production site"]);
+// The welcome email (#76). Optional elsewhere: without it, nothing is sent.
+if (isProduction) checks.push(["RESEND_API_KEY", /^re_\S+$/, "a Resend API key (re_…) with sending access to usechangelog.com"]);
 
 const problems = checks.flatMap(([name, pattern, hint]) => {
   const value = process.env[name];

@@ -10,6 +10,9 @@ let dbAllows: boolean;
 let inserted: number;
 let cookie: string | undefined;
 let accountEnsured: boolean;
+// Callbacks passed to after() (#76), run by hand: Next runs them after the response.
+let afterCallbacks: (() => unknown)[];
+let welcomed: unknown[][];
 
 mock.module("next/navigation", () => ({
   redirect: (url: string) => {
@@ -21,7 +24,14 @@ mock.module("next/navigation", () => ({
 }));
 mock.module("next/cache", () => ({ revalidatePath: () => {} }));
 mock.module("next/headers", () => ({ cookies: async () => ({ delete: () => {} }) }));
-mock.module("@/lib/auth/server", () => ({ requireUser: async () => ({ id: "user-1" }) }));
+mock.module("next/server", () => ({ after: (callback: () => unknown) => afterCallbacks.push(callback) }));
+mock.module("@/lib/site", () => ({ getOrigin: async () => "https://www.usechangelog.com" }));
+mock.module("@/lib/email/welcome", () => ({
+  sendWelcomeEmail: async (...args: unknown[]) => {
+    welcomed.push(args);
+  },
+}));
+mock.module("@/lib/auth/server", () => ({ requireUser: async () => ({ id: "user-1", email: "someone@example.com" }) }));
 mock.module("@/db", () => ({
   getDb: () => ({
     execute: (query: unknown) => query,
@@ -61,6 +71,8 @@ describe("createWorkspace (plan limit)", () => {
     inserted = 0;
     cookie = undefined;
     accountEnsured = false;
+    afterCallbacks = [];
+    welcomed = [];
   });
 
   test("Free creates its first project and opens it", async () => {
@@ -68,6 +80,20 @@ describe("createWorkspace (plan limit)", () => {
     expect(inserted).toBe(1);
     expect(cookie).toBe("ws-new");
     expect(accountEnsured).toBe(true);
+  });
+
+  // The once-per-account check lives in sendWelcomeEmail (lib/email/welcome.test.ts).
+  test("schedules the welcome email after the response, with the project's links", async () => {
+    await expect(create()).rejects.toThrow(/^redirect:\/app$/);
+    expect(welcomed).toEqual([]);
+    await Promise.all(afterCallbacks.map((callback) => callback()));
+    expect(welcomed).toEqual([
+      [
+        "user-1",
+        "someone@example.com",
+        { name: "Acme", publicUrl: "https://www.usechangelog.com/acme", appUrl: "https://www.usechangelog.com/app" },
+      ],
+    ]);
   });
 
   test("Free with one project is sent to billing, and nothing is created", async () => {
@@ -101,5 +127,6 @@ describe("createWorkspace (plan limit)", () => {
     await expect(create()).rejects.toThrow("redirect:/app/billing");
     expect(cookie).toBeUndefined();
     expect(accountEnsured).toBe(false);
+    expect(afterCallbacks).toEqual([]);
   });
 });

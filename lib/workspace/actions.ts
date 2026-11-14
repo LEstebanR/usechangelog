@@ -4,11 +4,14 @@ import { eq, sql } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
+import { after } from "next/server";
 import { getDb } from "@/db";
 import { violatedUniqueConstraint } from "@/db/errors";
 import { newWidgetKey, workspaces } from "@/db/schema";
 import { requireUser } from "@/lib/auth/server";
 import { projectLimit } from "@/lib/billing/plans";
+import { sendWelcomeEmail } from "@/lib/email/welcome";
+import { getOrigin } from "@/lib/site";
 import { redirectWithNotice } from "@/lib/notice";
 import {
   ensureAccount,
@@ -67,6 +70,10 @@ export async function createWorkspace(
 
   // Onboarding creates the account row; billing reads it later.
   await Promise.all([ensureAccount(user.id), openProject(id)]);
+  // Once per account (#76), after the redirect: a failed send never blocks onboarding.
+  const origin = await getOrigin();
+  const project = { name, publicUrl: `${origin}/${slug}`, appUrl: `${origin}/app` };
+  after(() => sendWelcomeEmail(user.id, user.email, project));
   // The /app layout shows the project picker and the nav.
   revalidatePath("/app", "layout");
   redirect("/app");
