@@ -25,11 +25,15 @@ export const siteOpenGraph = {
 // A page's own title, description, canonical, Open Graph and Twitter card (#19). `path` is
 // resolved against metadataBase, so it points to production or to the preview. `locale` is
 // og:locale (e.g. "es_ES") for a public changelog in another language; crawlers assume en_US.
-export const pageMetadata = ({ title, description, path, locale }: {
+// `image` replaces the shared image, e.g. a changelog's own (#73).
+type OgImage = { url: string; width: number; height: number; alt: string };
+
+export const pageMetadata = ({ title, description, path, locale, image = ogImage }: {
   title: string;
   description: string;
   path: string;
   locale?: string;
+  image?: OgImage;
 }) => ({
   // On the same object as the relative image, so the image resolves against the site URL
   // even when this page replaces the layout's Open Graph.
@@ -37,8 +41,8 @@ export const pageMetadata = ({ title, description, path, locale }: {
   title,
   description,
   alternates: { canonical: path },
-  openGraph: { ...siteOpenGraph, title, description, url: path, images: [ogImage], ...(locale ? { locale } : {}) },
-  twitter: { card: "summary_large_image" as const, title, description, images: [ogImage.url] },
+  openGraph: { ...siteOpenGraph, title, description, url: path, images: [image], ...(locale ? { locale } : {}) },
+  twitter: { card: "summary_large_image" as const, title, description, images: [image.url] },
 });
 
 export const signInMetadata = {

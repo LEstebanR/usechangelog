@@ -41,6 +41,8 @@ export async function generateMetadata({ params }: PageProps<"/[slug]">): Promis
       description: copy.description(workspace.name),
       path: `/${slug}`,
       locale: ogLocale(lang),
+      // Its own share image, in its language (#73).
+      image: { url: `/${slug}/og`, width: 1200, height: 630, alt: copy.title(workspace.name) },
     }),
     ...(indexable ? {} : { robots: { index: false, follow: true } }),
   };

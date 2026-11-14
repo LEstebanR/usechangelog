@@ -14,6 +14,15 @@ describe("pageMetadata", () => {
   });
 });
 
+describe("pageMetadata with its own image", () => {
+  test("uses it for Open Graph and Twitter, with the locale", () => {
+    const image = { url: "/acme/og", width: 1200, height: 630, alt: "Novedades de Acme" };
+    const meta = pageMetadata({ title: "Novedades de Acme", description: "…", path: "/acme", locale: "es_ES", image });
+    expect(meta.openGraph).toMatchObject({ images: [image], locale: "es_ES" });
+    expect(meta.twitter.images).toEqual(["/acme/og"]);
+  });
+});
+
 describe("signInMetadata", () => {
   test("has its own title and description, and is not indexed", () => {
     expect(signInMetadata.title).toBe("Sign in — UseChangelog");

@@ -99,6 +99,7 @@ app/
     app/                The signed-in app: /app (posts), /app/posts/new, /app/posts/[id], /app/onboarding, /app/projects/new, /app/settings, /app/billing
     app/admin/          Admin only: the feedback users send (#28) and, at /app/admin/users, who signed up (#57)
   [slug]/               The public changelog at /{slug}. Its own root layout sets lang from the workspace
+  [slug]/og/            Its share image (next/og): name, latest posts and words in the workspace's language
   api/widget/[key]/     Public widget data (CORS open, 60-second CDN cache)
   api/polar/            Polar checkout, customer portal and webhook (the only writer of subscription state)
   icon.svg, apple-icon.png
@@ -110,8 +111,10 @@ lib/posts/              Post form parsing, workspace-scoped queries and post Ser
 lib/billing/            Plans and their limits (plans.ts), Polar config, revokeSubscriptionsInPolar(), mapPolarStatus(), canPublish() (the one publish gate) and the webhook handler
 lib/markdown.ts         renderMarkdown(): safe Markdown to HTML for the public page and the widget
 lib/widget/             The widget's words in 5 languages and the API payload
+lib/changelog/          The public page's words and what its share image says, per language
 public/widget.js        The embeddable "What's new" widget (vanilla JS, Shadow DOM)
-public/opengraph-image.png  Shared social image (1200×630)
+public/opengraph-image.png  Shared social image (1200×630) of the marketing site; each changelog has its own
+assets/fonts/           TTF fonts (OFL) for the share image
 scripts/smoke-app.ts    Signed-in smoke test (`bun run smoke`)
 scripts/widget-test.ts  Host pages to try the widget from another origin (`bun run widget-test`)
 db/
