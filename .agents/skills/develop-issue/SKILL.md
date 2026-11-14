@@ -51,6 +51,7 @@ Goal: a PR, ready for review and not merged, that meets every "Hecho cuando" ite
 ## 5. Verify locally
 
 - Run the `verifier` agent, or the same commands it runs: lint, typecheck, build, and tests if they exist. Everything must pass.
+- **Hand-written SQL runs once against `develop`:** CI builds without a database, so a type error in raw `sql` (a `CASE` whose params Postgres types as `text`, an enum without a cast) only shows up on the preview build. Run each new query once with a throwaway `bun scripts/_check.ts` that only reads, and delete the script afterwards. To check a write, run it as a `select` with the same `where`, or inside a `db.batch` that fails and rolls back.
 - For runtime behavior, use the `next-dev-loop` skill against `next dev`.
 - In the browser, fill forms with JS (the native `value` setter plus an `input` event, then `form.requestSubmit(button)`) instead of typing and clicking by coordinates: pages hydrate after load and layouts shift with the window size, so typed text gets lost and clicks land on the wrong button.
   - Find the button by its text and check `location.pathname` in the same script before submitting. A page can redirect first (a signed-in visitor on `/sign-in` lands in `/app`), and "the first form" is then a different one, such as Sign out.
@@ -59,6 +60,8 @@ Goal: a PR, ready for review and not merged, that meets every "Hecho cuando" ite
 - For anything behind sign-in, `bun run smoke <email> [base-url]` signs in with a real magic link (you paste it from the email) and checks `/app` and onboarding. It reuses the saved session, so it only spends a Neon email when the session has expired; don't sign in by hand for each check. It never writes to the database.
 
 ## 6. Open the PR and verify on the preview
+
+- **A migration reaches `develop` on push:** the preview's `vercel-build` runs `db:migrate` against `develop`, which local dev and every other preview share. Before pushing a branch with a migration, tell the owner, and get their OK if it drops or alters something that `main` still reads.
 
 - **Open the PR:** push, then open it with `.github/pull_request_template.md` filled in: `Closes #<issue>`, the Vercel preview URL, what changes and how it was tested. It is ready for review, never draft.
 - **Several issues in one PR:** from the start, give the description a "Hecho cuando" section with one block per issue, each item as a checkbox, and keep it updated as you verify. Don't leave it for the end.
@@ -89,6 +92,9 @@ If the change affects something `README.md` documents, update it in the same PR.
 - Roadmap.
 
 ## 9. Report
+
+Before reporting, run `git fetch` and `gh pr view <n> --json mergeable` again. If `main` moved, merge it and check that what was merged meanwhile doesn't read anything this PR changed (a column, a function, a rule).
+
 
 Tell the owner:
 - the PR link;
