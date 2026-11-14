@@ -29,6 +29,7 @@ The auth rules (magic link and Google only, one account and one workspace, no te
 
 - **Magic Link** on, 15-minute expiry, new user registration on.
 - **Email on `production`:** custom SMTP through Resend, sender `UseChangelog <hello@usechangelog.com>`; check it with `neonctl neon-auth config email-provider get --branch production` and test it with `… email-provider test --recipient-email <you>`. The name inside the email is the branch's auth application name (`neonctl api /projects/{id}/branches/{branch}/auth/config -X PATCH -F name=UseChangelog`), not the project name. `allow_localhost` is off on `production`, on on `develop`.
+- **Magic link email (#83):** our own, not Neon's. On `production`, the `send.magic_link` webhook points to `https://www.usechangelog.com/api/auth/webhook` (`app/api/auth/webhook/route.ts`, a static segment that wins over `[...path]`), and Neon stops sending its email. The route verifies the signature first (`lib/auth/webhook.ts`: Ed25519 detached JWS over `base64url("${timestamp}.${base64url(rawBody)}")`, JWKS at `${NEON_AUTH_BASE_URL}/.well-known/jwks.json` cached in memory and refetched on an unknown `kid`, timestamps within 5 minutes), then sends `lib/email/magic-link.ts` through Resend with `idempotencyKey: magic-link/<event_id>`. Answers: 401 bad signature, 400 anything but `send.magic_link` with `link_type: sign-in`, 500 when the JWKS or Resend fails (Neon retries), 200 sent. The event is blocking: 3 failed attempts within 15 s fail the sign-in, with no fallback. Never log the address, link or token. `develop` has no webhook; point it at a preview only while testing (README → Deployment) and turn it off after.
 - **Google** only. `production` uses our own OAuth client (Google Cloud project "UseChangelog", brand-verified consent screen, scopes `openid`, `email`, `profile`, redirect URI `{NEON_AUTH_BASE_URL}/callback/google`): check it with `neonctl neon-auth oauth-provider list --branch production`. `develop` and previews keep Neon's shared credentials, so Google's screen shows Neon there.
 - Previews get their own auth per branch through the Vercel integration.
 
@@ -45,7 +46,7 @@ The auth rules (magic link and Google only, one account and one workspace, no te
 
 ## Not in the MVP
 
-Passwords, other social providers, SSO, MFA, passkeys, organizations, an account page. A fully branded email template (Neon's `send.magic_link` webhook) can come later; today Neon's template goes out through our SMTP.
+Passwords, other social providers, SSO, MFA, passkeys, organizations, an account page.
 
 ## Final step: improvements
 
