@@ -99,6 +99,13 @@ describe("createWorkspace (plan limit)", () => {
     ]);
   });
 
+  test("a later project (Pro) schedules no welcome email", async () => {
+    status = "active";
+    projectCount = 1;
+    await expect(create()).rejects.toThrow(/^redirect:\/app$/);
+    expect(afterCallbacks).toEqual([]);
+  });
+
   test("Free with one project is sent to billing, and nothing is created", async () => {
     projectCount = 1;
     await expect(create()).rejects.toThrow("redirect:/app/billing");

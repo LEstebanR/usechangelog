@@ -35,7 +35,7 @@ export const accounts = pgTable("accounts", {
   // Polar's modified_at of the last event applied: older or retried events never overwrite it.
   subscriptionUpdatedAt: timestamp("subscription_updated_at", { withTimezone: true }),
   // When the welcome email was claimed (#76): set once, back to null if sending fails.
-  // Accounts from before the email were backfilled with created_at, so they never get it.
+  // Accounts that had a project before the email were backfilled with created_at.
   welcomeEmailSentAt: timestamp("welcome_email_sent_at", { withTimezone: true }),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });

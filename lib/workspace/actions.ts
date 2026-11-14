@@ -70,9 +70,12 @@ export async function createWorkspace(
 
   // Onboarding creates the account row; billing reads it later.
   await Promise.all([ensureAccount(user.id), openProject(id)]);
-  // Once per account (#76), after the redirect: a failed send never blocks onboarding.
-  const project = { name, publicUrl: await publicUrl(slug), appUrl: `${await getOrigin()}/app` };
-  after(() => sendWelcomeEmail(user.id, user.email, project));
+  // The welcome email (#76), only for the account's first project and after the redirect:
+  // a failed send never blocks onboarding. The account's mark stops a parallel duplicate.
+  if (!projects.length) {
+    const project = { name, publicUrl: await publicUrl(slug), appUrl: `${await getOrigin()}/app` };
+    after(() => sendWelcomeEmail(user.id, user.email, project));
+  }
   // The /app layout shows the project picker and the nav.
   revalidatePath("/app", "layout");
   redirect("/app");
