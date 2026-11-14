@@ -1,12 +1,17 @@
-import { desc, eq, sql } from "drizzle-orm";
+import { and, count, desc, eq, sql } from "drizzle-orm";
 import { getDb } from "@/db";
 import { user } from "@/db/neon-auth";
 import { feedback, workspaces } from "@/db/schema";
-import { FEEDBACK_PER_HOUR, type FeedbackKind } from "./form";
+import { FEEDBACK_PER_HOUR, type FeedbackKind, type FeedbackStatus } from "./form";
 
 // The latest feedback for the admin view (#28), with who sent it and from which workspace.
-// `kind` filters; without it, every kind. Returns the query, which runs when awaited.
-export function listFeedback({ kind, limit = 200 }: { kind?: FeedbackKind; limit?: number } = {}) {
+// `kind` and `status` (#75) filter; without them, every one. Returns the query, which runs
+// when awaited.
+export function listFeedback({
+  kind,
+  status,
+  limit = 200,
+}: { kind?: FeedbackKind; status?: FeedbackStatus; limit?: number } = {}) {
   return getDb()
     .select({
       id: feedback.id,
@@ -14,13 +19,15 @@ export function listFeedback({ kind, limit = 200 }: { kind?: FeedbackKind; limit
       message: feedback.message,
       page: feedback.page,
       createdAt: feedback.createdAt,
+      status: feedback.status,
+      resolvedAt: feedback.resolvedAt,
       email: user.email,
       workspace: workspaces.slug,
     })
     .from(feedback)
     .innerJoin(user, eq(user.id, feedback.userId))
     .leftJoin(workspaces, eq(workspaces.id, feedback.workspaceId))
-    .where(kind ? eq(feedback.kind, kind) : undefined)
+    .where(and(kind ? eq(feedback.kind, kind) : undefined, status ? eq(feedback.status, status) : undefined))
     .orderBy(desc(feedback.createdAt))
     .limit(limit);
 }
@@ -46,4 +53,22 @@ export async function insertFeedback(
       returning ${feedback.id}`),
   ]);
   return inserted.rows.length > 0;
+}
+
+// Open messages per kind, for the admin filters (#75). A kind with none is missing.
+export function openCounts() {
+  return getDb()
+    .select({ kind: feedback.kind, open: count() })
+    .from(feedback)
+    .where(eq(feedback.status, "open"))
+    .groupBy(feedback.kind);
+}
+
+// Moves a message to a status (#75): resolved_at is when it left open, null once reopened.
+// Returns the query, which runs when awaited; an unknown id changes nothing.
+export function setFeedbackStatus(id: string, status: FeedbackStatus) {
+  return getDb()
+    .update(feedback)
+    .set({ status, resolvedAt: status === "open" ? null : sql`now()` })
+    .where(eq(feedback.id, id));
 }

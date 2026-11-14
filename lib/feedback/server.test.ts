@@ -2,7 +2,7 @@ import { describe, expect, test } from "bun:test";
 
 // Built, never run: no database in CI.
 process.env.DATABASE_URL ??= "postgresql://test:test@localhost/test";
-const { listFeedback } = await import("./server");
+const { listFeedback, openCounts, setFeedbackStatus } = await import("./server");
 const { adminRoleQuery } = await import("@/lib/auth/roles");
 
 describe("adminRoleQuery", () => {
@@ -27,5 +27,33 @@ describe("listFeedback", () => {
     const filtered = listFeedback({ kind: "bug", limit: 50 }).toSQL();
     expect(filtered.sql).toContain('"feedback"."kind" = $1');
     expect(filtered.params).toEqual(["bug", 50]);
+  });
+
+  test("filters by status and kind together", () => {
+    const { sql, params } = listFeedback({ kind: "idea", status: "open" }).toSQL();
+    expect(sql).toContain('("feedback"."kind" = $1 and "feedback"."status" = $2)');
+    expect(params).toEqual(["idea", "open", 200]);
+  });
+});
+
+describe("openCounts", () => {
+  test("open messages, grouped by kind", () => {
+    const { sql, params } = openCounts().toSQL();
+    expect(sql).toContain('where "feedback"."status" = $1 group by "feedback"."kind"');
+    expect(params).toEqual(["open"]);
+  });
+});
+
+describe("setFeedbackStatus", () => {
+  test("resolving stamps resolved_at", () => {
+    const { sql, params } = setFeedbackStatus("f1", "done").toSQL();
+    expect(sql).toContain('"resolved_at" = now()');
+    expect(params).toEqual(["done", "f1"]);
+  });
+
+  test("reopening clears resolved_at", () => {
+    const { sql, params } = setFeedbackStatus("f1", "open").toSQL();
+    expect(sql).toContain('"resolved_at" = $2');
+    expect(params).toEqual(["open", null, "f1"]);
   });
 });

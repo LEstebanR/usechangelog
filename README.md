@@ -97,7 +97,7 @@ app/
     markdown-body.tsx   A post body rendered from Markdown (styles in markdown-styles.ts)
     (auth)/sign-in/     Sign-in: Google or a magic link
     app/                The signed-in app: /app (posts), /app/posts/new, /app/posts/[id], /app/onboarding, /app/projects/new, /app/settings, /app/billing
-    app/admin/          Admin only: the feedback users send (#28) and, at /app/admin/users, who signed up (#57)
+    app/admin/          Admin only: the feedback users send (#28, statuses #75) and, at /app/admin/users, who signed up (#57)
   [slug]/               The public changelog at /{slug}. Its own root layout sets lang from the workspace
   [slug]/og/            Its share image (next/og): name, latest posts and words in the workspace's language
   api/widget/[key]/     Public widget data (CORS open, 60-second CDN cache)
@@ -194,7 +194,7 @@ Every variable the code reads is in `.env.example`, by name only. `bun run check
 Users send feedback from **Feedback** in the app's nav (#28). Every message is in the `feedback` table, and admins read them at `/app/admin` (see below). To query them in Neon's SQL editor:
 
 ```sql
-select f.created_at, f.kind, u.email, w.slug, f.page, f.message
+select f.created_at, f.kind, f.status, u.email, w.slug, f.page, f.message
 from feedback f
 join neon_auth."user" u on u.id = f.user_id
 left join workspaces w on w.id = f.workspace_id
@@ -202,11 +202,11 @@ order by f.created_at desc
 limit 50;
 ```
 
-Answer by email, by hand.
+Answer by email, by hand. Then mark the message in `/app/admin` (#75): each one is open, done or dismissed, named after its kind (a bug is Fixed or Won't fix, an idea Shipped or Declined, other Answered or Archived).
 
 ### Admin
 
-`admin` is our own staff role, in the `user_roles` table (customers never have one). An admin sees an **Admin** tab in the app, and `/app/admin` lists the feedback, newest first, filterable by kind. `/app/admin/users` lists everyone who signed up (newest 200), with their workspace, subscription (as the webhook stored it), posts and latest sign-in, plus totals. Anyone else gets a 404 on both.
+`admin` is our own staff role, in the `user_roles` table (customers never have one). An admin sees an **Admin** tab in the app, and `/app/admin` lists the feedback, newest first, filterable by kind and status (open by default, with the open count per kind), and marks each message resolved or reopens it. `/app/admin/users` lists everyone who signed up (newest 200), with their workspace, subscription (as the webhook stored it), posts and latest sign-in, plus totals. Anyone else gets a 404 on both.
 
 Grant it to someone who has signed in at least once on that environment:
 
@@ -340,6 +340,7 @@ The issue tracker is the backlog. Each issue carries a number in its title, in b
 | 27 | Launch: full test sign-up in production before outreach | [#62](https://github.com/LEstebanR/usechangelog/issues/62) | ✅ Done |
 | 27 | Own changelog: UseChangelog publishes its updates at `/usechangelog` | [#67](https://github.com/LEstebanR/usechangelog/issues/67) | Open |
 | 28 | Launch: get the first 5 to 10 real users | [#58](https://github.com/LEstebanR/usechangelog/issues/58) | ✅ Done |
+| 29 | Admin: mark feedback as resolved | [#75](https://github.com/LEstebanR/usechangelog/issues/75) | ✅ Done |
 
 ### Out of scope
 
