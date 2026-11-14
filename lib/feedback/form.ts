@@ -1,5 +1,6 @@
 // Feedback from signed-in users to us (#28). Pure: no server imports, so it's tested.
 import { oneOf } from "@/lib/posts/form";
+import { UUID } from "@/lib/uuid";
 
 export const FEEDBACK_KINDS = ["bug", "idea", "other"] as const;
 export type FeedbackKind = (typeof FEEDBACK_KINDS)[number];
@@ -22,8 +23,6 @@ export const STATUS_ACTIONS: Record<FeedbackKind, Record<FeedbackStatus, string>
   other: { open: "Reopen", done: "Mark answered", dismissed: "Archive" },
 };
 
-const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-
 // The admin's status form: which message and its new status. Null when either is invalid.
 export function parseStatusChange(formData: FormData) {
   const id = String(formData.get("id") ?? "");
@@ -35,7 +34,7 @@ export function parseStatusChange(formData: FormData) {
 // kind is every kind.
 export function parseAdminFilters(params: { kind?: string | string[]; status?: string | string[] }) {
   const kind = FEEDBACK_KINDS.find((k) => k === params.kind);
-  const status = params.status === "all" ? undefined : (FEEDBACK_STATUSES.find((s) => s === params.status) ?? "open");
+  const status = params.status === "all" ? undefined : oneOf(FEEDBACK_STATUSES, params.status, "open");
   return { kind, status };
 }
 

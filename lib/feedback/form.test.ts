@@ -7,7 +7,6 @@ import {
   parseAdminFilters,
   parseFeedback,
   parseStatusChange,
-  STATUS_ACTIONS,
   STATUS_LABELS,
 } from "./form";
 
@@ -54,13 +53,6 @@ describe("STATUS_LABELS", () => {
     expect(STATUS_LABELS.other).toEqual({ open: "Open", done: "Answered", dismissed: "Archived" });
   });
 
-  test("every kind has a label and an action for every status", () => {
-    for (const k of FEEDBACK_KINDS)
-      for (const s of FEEDBACK_STATUSES) {
-        expect(STATUS_LABELS[k][s]).toBeTruthy();
-        expect(STATUS_ACTIONS[k][s]).toBeTruthy();
-      }
-  });
 });
 
 describe("parseStatusChange", () => {

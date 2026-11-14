@@ -17,9 +17,6 @@ import { AdminNav } from "./admin-nav";
 
 export const generateMetadata = () => adminMetadata("Admin");
 
-const FILTER =
-  "border border-hairline px-3 py-1 text-sm text-graphite hover:text-ink aria-[current=page]:border-ink aria-[current=page]:bg-ink aria-[current=page]:text-canvas";
-
 // What users send us from the app (#28), newest first, open by default (#75). Admins only:
 // anyone else gets a 404.
 export default async function AdminPage({ searchParams }: PageProps<"/app/admin">) {
@@ -52,20 +49,25 @@ export default async function AdminPage({ searchParams }: PageProps<"/app/admin"
       </div>
 
       <div className="flex flex-col gap-2">
-        <nav aria-label="Filter by kind" className="flex flex-wrap gap-1.5">
-          {kindFilters.map((f) => (
-            <Link key={f.href} href={f.href} aria-current={f.current ? "page" : undefined} className={FILTER}>
-              {f.label}
-            </Link>
-          ))}
-        </nav>
-        <nav aria-label="Filter by status" className="flex flex-wrap gap-1.5">
-          {statusFilters.map((f) => (
-            <Link key={f.href} href={f.href} aria-current={f.current ? "page" : undefined} className={FILTER}>
-              {f.label}
-            </Link>
-          ))}
-        </nav>
+        {(
+          [
+            ["Filter by kind", kindFilters],
+            ["Filter by status", statusFilters],
+          ] as const
+        ).map(([label, filters]) => (
+          <nav key={label} aria-label={label} className="flex flex-wrap gap-1.5">
+            {filters.map((f) => (
+              <Link
+                key={f.href}
+                href={f.href}
+                aria-current={f.current ? "page" : undefined}
+                className="border border-hairline px-3 py-1 text-sm text-graphite hover:text-ink aria-[current=page]:border-ink aria-[current=page]:bg-ink aria-[current=page]:text-canvas"
+              >
+                {f.label}
+              </Link>
+            ))}
+          </nav>
+        ))}
       </div>
 
       {items.length === 0 ? (
@@ -104,8 +106,6 @@ export default async function AdminPage({ searchParams }: PageProps<"/app/admin"
                 </span>
                 <form action={setStatus} className="flex flex-wrap gap-1.5 sm:ml-auto">
                   <input type="hidden" name="id" value={item.id} />
-                  {kind && <input type="hidden" name="kind" value={kind} />}
-                  <input type="hidden" name="view" value={status ?? "all"} />
                   {FEEDBACK_STATUSES.filter((s) => s !== item.status).map((s) => (
                     <button
                       key={s}
