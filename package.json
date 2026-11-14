@@ -18,7 +18,8 @@
     "widget-test": "bun scripts/widget-test.ts",
     "check-env": "bun scripts/check-env.ts",
     "polar:state": "bun scripts/polar-state.ts",
-    "admin:grant": "bun scripts/admin-grant.ts"
+    "admin:grant": "bun scripts/admin-grant.ts",
+    "hooks:install": "cp scripts/hooks/post-checkout \"$(git rev-parse --git-common-dir)/hooks/post-checkout\""
   },
   "dependencies": {
     "@neondatabase/auth": "0.5.0-beta",

@@ -156,6 +156,7 @@ Open http://localhost:3000.
 | `bun run db:migrate` | Apply pending migrations (uses `DATABASE_URL_UNPOOLED`) |
 | `bun run check-env` | Check the required env vars and their format, without printing them. Locally it also checks the database and auth answer. Vercel runs it before migrating |
 | `bun run admin:grant <email>` | Gives an existing user the staff `admin` role (see [Admin](#admin)) |
+| `bun run hooks:install` | Once per clone: new worktrees get `.env.local` as a link to the main checkout's |
 | `bun run polar:state <slug>` | Read only: the subscription of a project's account in our database next to what Polar has, and what differs. Uses `.env.local` (develop + sandbox); for production, see below |
 | `bun run widget-test <widget-key> [base-url] [port]` | Host pages on another origin (`localhost:5050`) that load the widget: floating button, trigger + Spanish, hostile CSS, invalid key. For a protected preview, set `VERCEL_AUTOMATION_BYPASS_SECRET` |
 | `bun run smoke <email> [base-url]` | Signed-in smoke test of `/app`. Reuses the last session (`.smoke-session-*.json`, git-ignored), so it only sends a magic link when that expires; `SMOKE_LINK=<link>` skips the request. Never writes data, and refuses production URLs unless `SMOKE_ALLOW_PRODUCTION=1` |

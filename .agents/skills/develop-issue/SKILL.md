@@ -63,6 +63,7 @@ Goal: a PR, ready for review and not merged, that meets every "Hecho cuando" ite
 
 - **A migration reaches `develop` on push:** the preview's `vercel-build` runs `db:migrate` against `develop`, which local dev and every other preview share. Before pushing a branch with a migration, tell the owner, and get their OK if it drops or alters something that `main` still reads.
 
+- **A stacked PR's base may be gone:** if the branch was cut from another PR's branch, run `gh pr view <base-pr> --json state` before opening it. If that PR is merged, merge `origin/main` into the branch and open the PR against `main`; its branch is usually deleted on merge, and GitHub refuses a PR against it.
 - **Open the PR:** push, then open it with `.github/pull_request_template.md` filled in: `Closes #<issue>`, the Vercel preview URL, what changes and how it was tested. It is ready for review, never draft.
 - **Several issues in one PR:** from the start, give the description a "Hecho cuando" section with one block per issue, each item as a checkbox, and keep it updated as you verify. Don't leave it for the end.
 - **Payments on the preview:** if the PR tests payments on its preview, point the sandbox webhook of the UseChangelog organization in Polar to `https://usechangelog-git-<branch>-lestebanrs-projects.vercel.app/api/polar/webhook?x-vercel-protection-bypass=<VERCEL_AUTOMATION_BYPASS_SECRET>`. Then send an unsigned `POST` to that URL: it must answer 403 (our endpoint rejects the signature), not 302 (Vercel sending it to its login, which means a wrong or rotated secret).
