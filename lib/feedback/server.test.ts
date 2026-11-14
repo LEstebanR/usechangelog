@@ -45,9 +45,9 @@ describe("openCounts", () => {
 });
 
 describe("setFeedbackStatus", () => {
-  test("resolving stamps resolved_at", () => {
+  test("resolving stamps resolved_at once, keeping an earlier one", () => {
     const { sql, params } = setFeedbackStatus("f1", "done").toSQL();
-    expect(sql).toContain('"resolved_at" = now()');
+    expect(sql).toContain('"resolved_at" = coalesce("feedback"."resolved_at", now())');
     expect(params).toEqual(["done", "f1"]);
   });
 

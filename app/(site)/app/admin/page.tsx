@@ -72,7 +72,7 @@ export default async function AdminPage({ searchParams }: PageProps<"/app/admin"
 
       {items.length === 0 ? (
         <p className="border border-dashed border-hairline bg-canvas px-6 py-12 text-center text-graphite">
-          No feedback{kind || status ? " here" : " yet"}.
+          No {status ? `${STATUS_FILTER_LABELS[status].toLowerCase()} ` : ""}feedback{kind ? " of this kind" : ""}.
         </p>
       ) : (
         <ul className="divide-y divide-hairline border border-hairline bg-canvas">

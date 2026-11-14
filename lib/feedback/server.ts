@@ -64,11 +64,12 @@ export function openCounts() {
     .groupBy(feedback.kind);
 }
 
-// Moves a message to a status (#75): resolved_at is when it left open, null once reopened.
+// Moves a message to a status (#75): resolved_at is when it left open, kept from done to
+// dismissed (or a repeated submit), null once reopened.
 // Returns the query, which runs when awaited; an unknown id changes nothing.
 export function setFeedbackStatus(id: string, status: FeedbackStatus) {
   return getDb()
     .update(feedback)
-    .set({ status, resolvedAt: status === "open" ? null : sql`now()` })
+    .set({ status, resolvedAt: status === "open" ? null : sql`coalesce(${feedback.resolvedAt}, now())` })
     .where(eq(feedback.id, id));
 }

@@ -52,7 +52,6 @@ describe("STATUS_LABELS", () => {
     expect(STATUS_LABELS.idea).toEqual({ open: "Open", done: "Shipped", dismissed: "Declined" });
     expect(STATUS_LABELS.other).toEqual({ open: "Open", done: "Answered", dismissed: "Archived" });
   });
-
 });
 
 describe("parseStatusChange", () => {
