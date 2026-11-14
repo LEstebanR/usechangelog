@@ -1,19 +1,11 @@
-import type { Metadata } from "next";
 import Link from "next/link";
-import { AdminNav } from "./admin-nav";
-import { isAdmin, requireAdmin } from "@/lib/auth/roles";
-import { getUser } from "@/lib/auth/server";
+import { dateTime } from "@/lib/admin/format";
+import { adminMetadata, requireAdmin } from "@/lib/auth/roles";
 import { FEEDBACK_KINDS, FEEDBACK_LABELS } from "@/lib/feedback/form";
 import { listFeedback } from "@/lib/feedback/server";
+import { AdminNav } from "./admin-nav";
 
-// The title only names the page for admins; anyone else gets the 404's, so nothing hints it exists.
-export async function generateMetadata(): Promise<Metadata> {
-  const user = await getUser();
-  return user && (await isAdmin(user.id)) ? { title: "Admin — UseChangelog" } : { title: "Page not found — UseChangelog" };
-}
-
-const dateTime = (date: Date) =>
-  date.toLocaleString("en-US", { month: "short", day: "numeric", year: "numeric", hour: "2-digit", minute: "2-digit", timeZone: "UTC" });
+export const generateMetadata = () => adminMetadata("Admin");
 
 // What users send us from the app (#28), newest first. Admins only: anyone else gets a 404.
 export default async function AdminPage({ searchParams }: PageProps<"/app/admin">) {

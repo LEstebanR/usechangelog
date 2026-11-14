@@ -1,22 +1,9 @@
-import type { Metadata } from "next";
-import { postsLabel, subscriptionLabel } from "@/lib/admin/format";
-import { listUsers, userCounts } from "@/lib/admin/server";
-import { isAdmin, requireAdmin } from "@/lib/auth/roles";
-import { getUser } from "@/lib/auth/server";
+import { dateTime, postsLabel, subscriptionLabel } from "@/lib/admin/format";
+import { listUsers, USERS_LIMIT, userCounts } from "@/lib/admin/server";
+import { adminMetadata, requireAdmin } from "@/lib/auth/roles";
 import { AdminNav } from "../admin-nav";
 
-const LIMIT = 200;
-
-// The title only names the page for admins; anyone else gets the 404's, so nothing hints it exists.
-export async function generateMetadata(): Promise<Metadata> {
-  const user = await getUser();
-  return user && (await isAdmin(user.id))
-    ? { title: "Users — UseChangelog", robots: { index: false, follow: false } }
-    : { title: "Page not found — UseChangelog" };
-}
-
-const dateTime = (date: Date) =>
-  date.toLocaleString("en-US", { month: "short", day: "numeric", year: "numeric", hour: "2-digit", minute: "2-digit", timeZone: "UTC" });
+export const generateMetadata = () => adminMetadata("Users");
 
 function When({ date }: { date: Date }) {
   return (
@@ -30,7 +17,7 @@ function When({ date }: { date: Date }) {
 // Read here, on the server: no route or action returns this list.
 export default async function AdminUsersPage() {
   await requireAdmin();
-  const [users, [counts]] = await Promise.all([listUsers({ limit: LIMIT }), userCounts()]);
+  const [users, [counts]] = await Promise.all([listUsers(), userCounts()]);
   const totals = [
     { label: "Users", value: counts.total },
     { label: "With a workspace", value: counts.withWorkspace },
@@ -60,9 +47,9 @@ export default async function AdminUsersPage() {
         ))}
       </dl>
 
-      {counts.total > LIMIT && (
+      {counts.total > USERS_LIMIT && (
         <p className="text-sm text-graphite">
-          Showing the newest {LIMIT} of {counts.total}.
+          Showing the newest {USERS_LIMIT} of {counts.total}.
         </p>
       )}
 
@@ -77,16 +64,16 @@ export default async function AdminUsersPage() {
                   {u.email}
                 </a>
                 {u.workspace ? (
-                  <a href={`/${u.workspace}`} target="_blank" rel="noopener" className="text-sm underline underline-offset-4">
-                    /{u.workspace}
-                  </a>
+                  <>
+                    <a href={`/${u.workspace.slug}`} target="_blank" rel="noopener" className="text-sm underline underline-offset-4">
+                      /{u.workspace.slug}
+                    </a>
+                    <span className="border border-hairline px-1.5 py-0.5 text-xs font-medium text-ink sm:ml-auto">
+                      {subscriptionLabel(u.workspace)}
+                    </span>
+                  </>
                 ) : (
                   <span className="text-sm text-graphite">No workspace yet</span>
-                )}
-                {u.subscriptionStatus && (
-                  <span className="border border-hairline px-1.5 py-0.5 text-xs font-medium text-ink sm:ml-auto">
-                    {subscriptionLabel({ ...u, subscriptionStatus: u.subscriptionStatus, cancelAtPeriodEnd: Boolean(u.cancelAtPeriodEnd) })}
-                  </span>
                 )}
               </div>
               <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-graphite">

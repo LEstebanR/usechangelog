@@ -1,6 +1,11 @@
 import type { SubscriptionStatus } from "@/lib/billing/status";
+import { formatDay, toDay } from "@/lib/posts/form";
 
-const day = (date: Date) => date.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric", timeZone: "UTC" });
+const day = (date: Date) => formatDay(toDay(date));
+
+// Date and time in UTC, for both admin pages.
+export const dateTime = (date: Date) =>
+  date.toLocaleString("en-US", { month: "short", day: "numeric", year: "numeric", hour: "2-digit", minute: "2-digit", timeZone: "UTC" });
 
 // A workspace's subscription for the admin users view (#57), as the webhook stored it. A
 // trial is `active` with trial_ends_at; a cancellation is `active` until the period ends.

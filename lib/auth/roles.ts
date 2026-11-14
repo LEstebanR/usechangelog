@@ -1,9 +1,10 @@
 import { and, eq } from "drizzle-orm";
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { cache } from "react";
 import { getDb } from "@/db";
 import { userRoles } from "@/db/schema";
-import { requireUser } from "./server";
+import { getUser, requireUser } from "./server";
 
 // Our staff role (#28), stored in user_roles; customers never have one. The query is
 // returned unrun, so its rule is tested from its SQL.
@@ -23,4 +24,13 @@ export async function requireAdmin() {
   const user = await requireUser();
   if (!(await isAdmin(user.id))) notFound();
   return user;
+}
+
+// Metadata for an admin page: its title only for admins; anyone else gets the 404's, so
+// nothing hints the page exists.
+export async function adminMetadata(title: string): Promise<Metadata> {
+  const user = await getUser();
+  return user && (await isAdmin(user.id))
+    ? { title: `${title} — UseChangelog`, robots: { index: false, follow: false } }
+    : { title: "Page not found — UseChangelog" };
 }
