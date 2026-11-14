@@ -57,6 +57,13 @@
       "when": 1794618321516,
       "tag": "0007_accounts",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1794677861007,
+      "tag": "0008_welcome_email",
+      "breakpoints": true
     }
   ]
 }
