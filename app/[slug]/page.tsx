@@ -8,7 +8,7 @@ import { listPublishedPosts } from "@/lib/posts/server";
 import { changelogJsonLd } from "@/lib/seo/json-ld";
 import { changelogLanguage } from "@/lib/seo/language";
 import { siteUrl } from "@/lib/site";
-import type { WidgetLang } from "@/lib/widget/copy";
+import type { TagCopy, WidgetLang } from "@/lib/widget/copy";
 import { getWorkspaceBySlug } from "@/lib/workspace/server";
 import { JsonLd } from "../json-ld";
 import { PostTags } from "../(site)/app/post-tags";
@@ -95,8 +95,8 @@ export default async function PublicChangelog({ params }: PageProps<"/[slug]">) 
           </p>
         ) : (
           <>
-            {coming.length > 0 && <PostList label={copy.coming} marker="dashed" posts={coming} lang={lang} />}
-            {shipped.length > 0 && <PostList label={copy.shipped} posts={shipped} lang={lang} />}
+            {coming.length > 0 && <PostList label={copy.tags.coming} marker="dashed" posts={coming} lang={lang} tags={copy.tags} />}
+            {shipped.length > 0 && <PostList label={copy.shipped} posts={shipped} lang={lang} tags={copy.tags} />}
           </>
         )}
       </main>
@@ -107,11 +107,12 @@ export default async function PublicChangelog({ params }: PageProps<"/[slug]">) 
 }
 
 // One block of the page, laid out like the landing's example changelog.
-function PostList({ label, marker, posts, lang }: {
+function PostList({ label, marker, posts, lang, tags }: {
   label: string;
   marker?: "dashed";
   posts: Post[];
   lang: WidgetLang;
+  tags: TagCopy;
 }) {
   return (
     <section aria-label={label} className="mt-14 md:mt-20">
@@ -127,7 +128,7 @@ function PostList({ label, marker, posts, lang }: {
                 {post.publishedOn && <time dateTime={post.publishedOn}>{formatDay(post.publishedOn, lang)}</time>}
               </div>
               <div className="md:col-span-3 md:pt-0.5">
-                <PostTags category={post.category} type={post.type} labels={PAGE_COPY[lang].tags} />
+                <PostTags category={post.category} type={post.type} labels={tags} />
               </div>
             </div>
             <div className="min-w-0 md:col-span-7">

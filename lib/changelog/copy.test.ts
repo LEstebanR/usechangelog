@@ -7,7 +7,7 @@ describe("public page copy", () => {
   test("every widget language has the page's words", () => {
     for (const lang of WIDGET_LANGS) {
       const copy = PAGE_COPY[lang];
-      expect(copy.label && copy.shipped && copy.coming && copy.empty && copy.poweredBy).toBeTruthy();
+      expect(copy.label && copy.shipped && copy.tags.coming && copy.empty && copy.poweredBy).toBeTruthy();
       expect(copy.title("Acme")).toContain("Acme");
     }
   });

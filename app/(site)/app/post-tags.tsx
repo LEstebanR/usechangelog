@@ -1,4 +1,5 @@
 import { LABELS, type Category, type PostType } from "@/lib/posts/form";
+import type { TagCopy } from "@/lib/widget/copy";
 import { Tag } from "../tag";
 
 // The landing's tags: the category, plus a dashed "Coming soon" for what's not shipped yet.
@@ -6,7 +7,7 @@ import { Tag } from "../tag";
 export function PostTags({ category, type, labels }: {
   category: Category;
   type: PostType;
-  labels?: Record<Category | "coming", string>;
+  labels?: TagCopy;
 }) {
   return (
     <span className="flex items-center gap-1.5">
