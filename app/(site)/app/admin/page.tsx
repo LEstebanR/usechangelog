@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { AdminNav } from "./admin-nav";
 import { isAdmin, requireAdmin } from "@/lib/auth/roles";
 import { getUser } from "@/lib/auth/server";
 import { FEEDBACK_KINDS, FEEDBACK_LABELS } from "@/lib/feedback/form";
@@ -29,6 +30,7 @@ export default async function AdminPage({ searchParams }: PageProps<"/app/admin"
 
   return (
     <div className="mx-auto flex max-w-3xl flex-col gap-6">
+      <AdminNav current="/app/admin" />
       <div>
         <h1 className="font-display text-3xl font-medium tracking-tight">Feedback</h1>
         <p className="mt-2 text-sm text-graphite">What users send from the app, newest first. Answer them by email.</p>
