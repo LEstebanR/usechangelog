@@ -78,7 +78,7 @@ const rank = sql<number>`(select count(*)::int + 1 from ${workspaces} as older
 const status = sql<SubscriptionStatus>`coalesce(${accounts.subscriptionStatus}, 'none')`;
 
 // projectLimit in SQL, built from PLANS and PRO_STATUSES; a test keeps it aligned with canPublish.
-export const publishesSql = sql`${rank} <= case when ${status} in ${PRO_STATUSES} then ${PLANS.pro.projects} else ${PLANS.free.projects} end`;
+export const publishesSql = sql`${rank} <= case when ${status} in ${PRO_STATUSES} then ${PLANS.pro.projects}::int else ${PLANS.free.projects}::int end`;
 
 // What canPublish needs, read with a left join on the account: the public page and the widget
 // use it without a session.

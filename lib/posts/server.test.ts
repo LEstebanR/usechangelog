@@ -38,9 +38,10 @@ describe("listPublicChangelogs (sitemap)", () => {
 
   // The same rule as canPublish (and so isIndexable, the page's noindex): the project's rank
   // among its account's projects, against a limit built from PRO_STATUSES and PLANS...
+  // The limits are cast: Postgres would infer the CASE's params as text and refuse `int <= text`.
   test("only projects the account's plan publishes, by age", () => {
     expect(sql).toContain('left join "accounts" on "accounts"."user_id" = "workspaces"."owner_id"');
-    expect(sql).toMatch(/\(select count\(\*\)::int \+ 1 from "workspaces" as older\s+where older\.owner_id = "workspaces"\."owner_id"\s+and \(older\.created_at, older\.id\) < \("workspaces"\."created_at", "workspaces"\."id"\)\) <= case when coalesce\("accounts"\."subscription_status", 'none'\) in \(\$\d+\) then \$\d+ else \$\d+ end/);
+    expect(sql).toMatch(/\(select count\(\*\)::int \+ 1 from "workspaces" as older\s+where older\.owner_id = "workspaces"\."owner_id"\s+and \(older\.created_at, older\.id\) < \("workspaces"\."created_at", "workspaces"\."id"\)\) <= case when coalesce\("accounts"\."subscription_status", 'none'\) in \(\$\d+\) then \$\d+::int else \$\d+::int end/);
     expect(params).toEqual(["published", ...PRO_STATUSES, PLANS.pro.projects, PLANS.free.projects]);
   });
 
