@@ -63,6 +63,11 @@ describe("welcomeEmail", () => {
     expect(welcomeEmail({ appUrl: 'https://x.test/app"><b>' }).html).not.toContain('"><b>');
   });
 
+  test("the shared layout (#83) renders the same HTML as before it was extracted", () => {
+    const hash = new Bun.CryptoHasher("sha256").update(html).digest("hex");
+    expect(hash).toBe("a081f292bfa1aac2ea4f5df4787596a7cc856a20101d70edbedd158176d0c48d");
+  });
+
   test("never mentions a price", () => {
     for (const body of [subject, text, html]) expect(body).not.toMatch(/\$|USD|per month|\/mo\b|price/i);
   });
