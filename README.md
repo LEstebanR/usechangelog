@@ -338,12 +338,12 @@ The issue tracker is the backlog. Each issue carries a number in its title, in b
 | 25 | Plans: Free and Pro, with several projects per account | [#65](https://github.com/LEstebanR/usechangelog/issues/65) | ✅ Done |
 | 26 | Admin: see the registered users | [#57](https://github.com/LEstebanR/usechangelog/issues/57) | ✅ Done |
 | 27 | Launch: full test sign-up in production before outreach | [#62](https://github.com/LEstebanR/usechangelog/issues/62) | ✅ Done |
-| 27 | Own changelog: UseChangelog publishes its updates at `/usechangelog` | [#67](https://github.com/LEstebanR/usechangelog/issues/67) | ✅ Done |
 | 28 | Launch: get the first 5 to 10 real users | [#58](https://github.com/LEstebanR/usechangelog/issues/58) | ✅ Done |
-| 28 | Share image for each changelog, in its language | [#73](https://github.com/LEstebanR/usechangelog/issues/73) | ✅ Done |
-| 29 | Admin: mark feedback as resolved | [#75](https://github.com/LEstebanR/usechangelog/issues/75) | ✅ Done |
-| 29 | Email: welcome when the first project is created | [#76](https://github.com/LEstebanR/usechangelog/issues/76) | Open |
+| 29 | Share image for each changelog, in its language | [#73](https://github.com/LEstebanR/usechangelog/issues/73) | ✅ Done |
 | 30 | Admin: no project limit for staff | [#77](https://github.com/LEstebanR/usechangelog/issues/77) | ✅ Done |
+| 31 | Own changelog: UseChangelog publishes its updates at `/usechangelog` | [#67](https://github.com/LEstebanR/usechangelog/issues/67) | ✅ Done |
+| 32 | Admin: mark feedback as resolved | [#75](https://github.com/LEstebanR/usechangelog/issues/75) | ✅ Done |
+| 33 | Email: welcome when the first project is created | [#76](https://github.com/LEstebanR/usechangelog/issues/76) | Open |
 
 ### Out of scope
 
