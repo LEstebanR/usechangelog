@@ -6,7 +6,7 @@ describe("pageMetadata", () => {
 
   test("points Open Graph and Twitter at the shared image", () => {
     expect(meta.openGraph.images).toEqual([ogImage]);
-    expect(meta.twitter).toMatchObject({ card: "summary_large_image", images: [ogImage.url] });
+    expect(meta.twitter).toMatchObject({ card: "summary_large_image", images: [{ url: ogImage.url, alt: ogImage.alt }] });
     expect(ogImage.url).toBe("/opengraph-image.png");
     expect(ogImage.width).toBe(1200);
     expect(ogImage.height).toBe(630);
@@ -19,7 +19,7 @@ describe("pageMetadata with its own image", () => {
     const image = { url: "/acme/og", width: 1200, height: 630, alt: "Novedades de Acme" };
     const meta = pageMetadata({ title: "Novedades de Acme", description: "…", path: "/acme", locale: "es_ES", image });
     expect(meta.openGraph).toMatchObject({ images: [image], locale: "es_ES" });
-    expect(meta.twitter.images).toEqual(["/acme/og"]);
+    expect(meta.twitter.images).toEqual([{ url: "/acme/og", alt: "Novedades de Acme" }]);
   });
 });
 

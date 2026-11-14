@@ -9,12 +9,14 @@ import { getWorkspaceBySlug } from "@/lib/workspace/server";
 import { brand } from "../../(site)/content";
 
 // A changelog's share image (#73): its name, its latest posts and its words, in its language.
-// Same rule as the page: unknown or unpublished workspaces 404. Fresh like the page, with a
-// short CDN cache so a burst of crawlers shares one render.
+// Same rule as the page: unknown or unpublished workspaces 404. A 60-second CDN cache, like
+// the widget's, so a burst of crawlers shares one render and a project that stops publishing
+// stops showing within a minute. The page links it with ?v= its content, so a new post
+// gets a new URL on platforms that cache images by URL.
 export const dynamic = "force-dynamic";
 
-// Satori needs the font files themselves (TTF), read once per instance. next.config.ts
-// traces assets/fonts into this route.
+// Satori needs the font files themselves (TTF), read once per instance; a failed read is
+// retried on the next request. next.config.ts traces assets/fonts into this route.
 const font = (file: string) => readFile(join(process.cwd(), "assets/fonts", file));
 let fonts: Promise<Buffer[]> | undefined;
 const loadFonts = () =>
@@ -22,7 +24,10 @@ const loadFonts = () =>
     font("FunnelDisplay-Medium.ttf"),
     font("InstrumentSans-Regular.ttf"),
     font("InstrumentSans-Medium.ttf"),
-  ]));
+  ]).catch((error) => {
+    fonts = undefined;
+    throw error;
+  }));
 
 // The site's palette (app/globals.css) and the tag colors of app/(site)/tag.tsx, as hex:
 // Satori doesn't read Tailwind classes.
@@ -83,6 +88,8 @@ export async function GET(_request: Request, { params }: RouteContext<"/[slug]/o
             fontFamily: "Funnel Display",
             fontSize: card.nameSize,
             lineHeight: 1.02,
+            // A long name without spaces breaks instead of running off the card.
+            wordBreak: "break-word",
             letterSpacing: "-0.03em",
           }}
         >
@@ -111,7 +118,7 @@ export async function GET(_request: Request, { params }: RouteContext<"/[slug]/o
                   {post.label}
                 </div>
                 </div>
-                <div style={{ display: "flex", fontSize: 28, whiteSpace: "nowrap", overflow: "hidden" }}>{post.title}</div>
+                <div style={{ display: "flex", fontSize: 28, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{post.title}</div>
               </div>
             ))}
           </div>
@@ -127,7 +134,7 @@ export async function GET(_request: Request, { params }: RouteContext<"/[slug]/o
         { name: "Instrument Sans", data: sans, weight: 400, style: "normal" },
         { name: "Instrument Sans", data: sansMedium, weight: 500, style: "normal" },
       ],
-      headers: { "Cache-Control": "public, max-age=0, s-maxage=300, stale-while-revalidate=3600" },
+      headers: { "Cache-Control": "public, max-age=0, s-maxage=60" },
     },
   );
 }

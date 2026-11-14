@@ -3,6 +3,7 @@ import { notFound, permanentRedirect } from "next/navigation";
 import { cache } from "react";
 import { canPublish, isIndexable } from "@/lib/billing/status";
 import { PAGE_COPY } from "@/lib/changelog/copy";
+import { ogCard, ogVersion } from "@/lib/changelog/og";
 import { formatDay } from "@/lib/posts/form";
 import { listPublishedPosts } from "@/lib/posts/server";
 import { changelogJsonLd } from "@/lib/seo/json-ld";
@@ -32,8 +33,10 @@ export async function generateMetadata({ params }: PageProps<"/[slug]">): Promis
   const slug = (await params).slug.toLowerCase();
   const workspace = await getWorkspaceBySlug(slug);
   if (!workspace || !canPublish(workspace)) return {};
-  const indexable = isIndexable(workspace, (await getPublicPosts(workspace.id)).length);
+  const posts = await getPublicPosts(workspace.id);
+  const indexable = isIndexable(workspace, posts.length);
   const lang = changelogLanguage(workspace.widgetLang);
+  const version = ogVersion(ogCard({ name: workspace.name, lang, posts }));
   const copy = PAGE_COPY[lang];
   return {
     ...pageMetadata({
@@ -42,7 +45,7 @@ export async function generateMetadata({ params }: PageProps<"/[slug]">): Promis
       path: `/${slug}`,
       locale: ogLocale(lang),
       // Its own share image, in its language (#73).
-      image: { url: `/${slug}/og`, width: 1200, height: 630, alt: copy.title(workspace.name) },
+      image: { url: `/${slug}/og?v=${version}`, width: 1200, height: 630, alt: copy.title(workspace.name) },
     }),
     ...(indexable ? {} : { robots: { index: false, follow: true } }),
   };

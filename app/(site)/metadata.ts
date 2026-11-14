@@ -42,7 +42,7 @@ export const pageMetadata = ({ title, description, path, locale, image = ogImage
   description,
   alternates: { canonical: path },
   openGraph: { ...siteOpenGraph, title, description, url: path, images: [image], ...(locale ? { locale } : {}) },
-  twitter: { card: "summary_large_image" as const, title, description, images: [image.url] },
+  twitter: { card: "summary_large_image" as const, title, description, images: [{ url: image.url, alt: image.alt }] },
 });
 
 export const signInMetadata = {

@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { clip, OG_POSTS, ogCard } from "./og";
+import { clip, OG_POSTS, ogCard, ogVersion } from "./og";
 
 const post = (title: string, category: "new" | "improved" | "fixed" = "new", type: "shipped" | "coming" = "shipped") => ({
   title,
@@ -34,7 +34,7 @@ describe("ogCard", () => {
     const card = ogCard({ name: "A".repeat(80), lang: "en", posts: [post("B".repeat(80))] });
     expect(card.name).toHaveLength(40);
     expect(card.name.endsWith("…")).toBe(true);
-    expect(card.posts[0].title).toHaveLength(64);
+    expect(card.posts[0].title).toHaveLength(52);
     expect(card.nameSize).toBeLessThan(ogCard({ name: "Acme", lang: "en", posts: [] }).nameSize);
   });
 });
@@ -42,5 +42,17 @@ describe("ogCard", () => {
 describe("clip", () => {
   test("keeps short text and collapses whitespace", () => {
     expect(clip("  Dark\n mode ", 20)).toBe("Dark mode");
+  });
+
+  test("never splits an emoji", () => {
+    expect(clip("ab🚀cd", 4)).toBe("ab🚀…");
+  });
+});
+
+describe("ogVersion", () => {
+  test("changes with what the card shows, and only then", () => {
+    const card = (title: string) => ogCard({ name: "Acme", lang: "en", posts: [post(title)] });
+    expect(ogVersion(card("Dark mode"))).toBe(ogVersion(card("Dark mode")));
+    expect(ogVersion(card("Dark mode"))).not.toBe(ogVersion(card("Light mode")));
   });
 });
