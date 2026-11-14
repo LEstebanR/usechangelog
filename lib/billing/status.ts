@@ -1,4 +1,7 @@
-// A workspace's subscription, as the Polar webhook (#15) stores it. Pure: no SDK, no database.
+// An account's subscription, as the Polar webhook (#15) stores it, and what publishes.
+// Pure: no SDK, no database.
+
+import { projectLimit } from "./plans";
 
 export const SUBSCRIPTION_STATUSES = ["active", "past_due", "canceled", "none"] as const;
 export type SubscriptionStatus = (typeof SUBSCRIPTION_STATUSES)[number];
@@ -21,26 +24,26 @@ export const trialEnd = (subscription: { status: string; trial_end: string | Dat
 
 type WithStatus = { subscriptionStatus: SubscriptionStatus };
 
-// The one rule for what goes public: publishing, the public page and the widget (#16).
-// The statuses that publish. SQL that needs the same rule (the sitemap) uses this list too.
-export const PUBLIC_STATUSES = ["active"] as const satisfies readonly SubscriptionStatus[];
+// A project as the publishing rule sees it: its account's status and its place among the
+// account's projects by age (1 is the oldest).
+type Ranked = WithStatus & { rank: number };
 
-export const canPublish = (workspace: WithStatus) =>
-  (PUBLIC_STATUSES as readonly SubscriptionStatus[]).includes(workspace.subscriptionStatus);
+// The one rule for what goes public: publishing, the public page and the widget (#16, #65).
+// The account's N oldest projects publish, where N is its plan's limit: Free publishes one,
+// Pro up to three. The sitemap query applies the same rule in SQL, and a test keeps them aligned.
+export const canPublish = (workspace: Ranked) => workspace.rank <= projectLimit(workspace);
 
-// What search engines may index (#19): a changelog that can publish and has a published
-// post. The page's noindex uses this; the sitemap query applies the same two conditions in
-// SQL (PUBLIC_STATUSES and an inner join on published posts), and a test keeps them aligned.
-export const isIndexable = (workspace: WithStatus, publishedPosts: number) =>
+// What search engines may index (#19): a changelog that can publish and has a published post.
+export const isIndexable = (workspace: Ranked, publishedPosts: number) =>
   canPublish(workspace) && publishedPosts > 0;
 
 // A live subscription, paid or failing: it's managed in the portal, never checked out again.
-export const hasSubscription = (workspace: WithStatus) =>
-  workspace.subscriptionStatus === "active" || workspace.subscriptionStatus === "past_due";
+export const hasSubscription = (account: WithStatus) =>
+  account.subscriptionStatus === "active" || account.subscriptionStatus === "past_due";
 
-// Where a workspace that can't publish goes to fix it: a failed payment is fixed in Polar's
-// portal (#17), anything else by subscribing. The banner and the publish refusal both use it.
+// What to do about a project that doesn't publish: a failed payment is fixed in Polar's portal
+// (#17), anything else by moving to Pro. The banner and the publish refusal both use it.
 export const billingFix = (status: SubscriptionStatus) =>
   status === "past_due"
     ? { problem: "Your last payment failed", href: "/api/polar/portal", cta: "Update your card" }
-    : { problem: "You don't have an active subscription", href: "/app/billing", cta: "Subscribe" };
+    : { problem: "The Free plan only publishes your oldest project", href: "/app/billing", cta: "Upgrade to Pro" };

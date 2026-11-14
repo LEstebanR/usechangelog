@@ -5,7 +5,7 @@ description: How UseChangelog bills with Polar. Use when working on checkout, th
 
 # Polar billing
 
-The billing rules (Polar only, one monthly plan, sign-up free, only `active` publishes) are in `AGENTS.md` → **Product rules**. This skill is how to implement them. Read the current Polar docs before writing code; this isn't their API reference.
+The billing rules (Polar only, Free and Pro, sign-up free, `active` is Pro) are in `AGENTS.md` → **Product rules**. This skill is how to implement them. Read the current Polar docs before writing code; this isn't their API reference.
 
 ## Docs to read first
 
@@ -25,22 +25,22 @@ The billing rules (Polar only, one monthly plan, sign-up free, only `active` pub
 ## Our rules
 
 - **Organization:** UseChangelog has its own, in sandbox and in production, never shared with another app (see **Identity**). Its support email must use the domain of its website, `usechangelog.com`.
-- **Product:** reference it by an env var. If the price or the free trial has to be shown, read it from Polar.
-- **Free trial:** optional, set on the product in Polar. Polar's `trialing` maps to `active` (it publishes); the webhook stores the trial's end so the billing page can show it.
-- **Checkout:** start it from the signed-in app with the workspace owner's identity. Pass our account or workspace id so the webhook can map back to it.
+- **Product:** Pro, the only product in Polar, referenced by an env var. Free never goes through Polar. If Pro's price or free trial has to be shown, read it from Polar. The project limits per plan live in `lib/billing/plans.ts`, never in Polar.
+- **Free trial:** optional, set on the product in Polar. Polar's `trialing` maps to `active` (Pro); the webhook stores the trial's end so the billing page can show it.
+- **Checkout:** start it from the signed-in app with the user's identity. Pass our account id (`accounts.id`) as `external_customer_id` so the webhook can map back to it.
 - **Webhook:**
   - It is the only writer of subscription state.
   - Verify the signature with the webhook secret before reading the payload. Reject unsigned or invalid requests.
   - Handlers must be idempotent, because Polar retries deliveries.
-- **Stored state:** one per workspace: `active | past_due | canceled | none` (`none` means no subscription yet). Map Polar's status in a single function; `trialing` is `active`, and anything not clearly active or past due is `canceled`.
-- **Gate:** check the stored state in one place, server-side. For `past_due`, show a banner that links to the portal. Drafts stay editable in every state.
+- **Stored state:** one per account (the `accounts` table, one row per user): `active | past_due | canceled | none` (`none` means no subscription yet). Map Polar's status in a single function; `trialing` is `active`, and anything not clearly active or past due is `canceled`.
+- **Gate:** one rule, server-side (`canPublish`): a project publishes if it's among its account's oldest, as many as the plan allows. The sitemap applies the same rule in SQL, kept aligned by a test. For `past_due`, show a banner that links to the portal. Drafts and posts stay editable in every state.
 - **Customer portal:** the only place to change the payment method or cancel. Link to it from the app; don't build our own billing UI.
 - **Env vars:** access token, webhook secret and product id.
-- **Identity:** the workspace id is the Polar customer's `external_id`. The webhook (`lib/billing/webhook.ts`), the checkout's duplicate check (`hasActiveSubscriptionInPolar`) and account deletion (`revokeSubscriptionsInPolar`) all find the workspace by it. Polar has one customer per email per organization, so an organization shared with another app breaks this: a customer of the other app can't subscribe here, and their `external_id` isn't a workspace. That's why we moved off the shared one (#60).
+- **Identity:** the account id (`accounts.id`) is the Polar customer's `external_id`, which Polar never lets us change. Accounts migrated from the one-workspace model (#65) kept their workspace's id, so older customers still match. The webhook (`lib/billing/webhook.ts`), the checkout's duplicate check (`hasActiveSubscriptionInPolar`) and account deletion (`revokeSubscriptionsInPolar`) all find the account by it. Polar has one customer per email per organization, so an organization shared with another app breaks this: a customer of the other app can't subscribe here, and their `external_id` isn't an account. That's why we moved off the shared one (#60).
 
 ## Not in the MVP
 
-Coupons, multiple plans, annual billing, usage-based billing, seat pricing.
+Coupons, plans beyond Free and Pro, annual billing, usage-based billing, per-project or seat pricing, quotas on posts or traffic.
 
 The one exception to "no coupons" is Polar's account review: their team asks for a 100% code to go through the checkout. `POLAR_ALLOW_DISCOUNT_CODES=true` in Production turns the code field on for that time only; delete it once the account is approved.
 

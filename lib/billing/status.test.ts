@@ -1,5 +1,6 @@
 import { describe, expect, test } from "bun:test";
-import { billingFix, canPublish, hasSubscription, isIndexable, mapPolarStatus, PUBLIC_STATUSES, trialEnd } from "./status";
+import { PLANS } from "./plans";
+import { billingFix, canPublish, hasSubscription, isIndexable, mapPolarStatus, trialEnd } from "./status";
 
 describe("mapPolarStatus", () => {
   test("active stays active, also when it cancels at the period end", () => {
@@ -28,12 +29,22 @@ describe("mapPolarStatus", () => {
   });
 });
 
-describe("canPublish", () => {
-  test("only active publishes", () => {
-    expect(canPublish({ subscriptionStatus: "active" })).toBe(true);
+describe("canPublish (by age, #65)", () => {
+  test("Free publishes only the oldest project, whatever its status", () => {
     for (const status of ["past_due", "canceled", "none"] as const) {
-      expect(canPublish({ subscriptionStatus: status })).toBe(false);
+      expect(canPublish({ subscriptionStatus: status, rank: 1 })).toBe(true);
+      expect(canPublish({ subscriptionStatus: status, rank: 2 })).toBe(false);
     }
+  });
+
+  test("Pro (active, trial included) publishes the oldest three", () => {
+    for (let rank = 1; rank <= PLANS.pro.projects; rank++) expect(canPublish({ subscriptionStatus: "active", rank })).toBe(true);
+    expect(canPublish({ subscriptionStatus: "active", rank: PLANS.pro.projects + 1 })).toBe(false);
+  });
+
+  test("going from Pro to Free with three projects leaves only the oldest public", () => {
+    const ranks = [1, 2, 3];
+    expect(ranks.filter((rank) => canPublish({ subscriptionStatus: "canceled", rank }))).toEqual([1]);
   });
 });
 
@@ -47,9 +58,9 @@ describe("hasSubscription", () => {
 });
 
 describe("billingFix", () => {
-  test("a failed payment goes to the portal, anything else to billing", () => {
+  test("a failed payment goes to the portal, anything else to Pro in billing", () => {
     expect(billingFix("past_due").href).toBe("/api/polar/portal");
-    expect(billingFix("canceled").href).toBe("/app/billing");
+    expect(billingFix("canceled")).toMatchObject({ href: "/app/billing", cta: "Upgrade to Pro" });
     expect(billingFix("none").href).toBe("/app/billing");
   });
 });
@@ -64,17 +75,12 @@ describe("trialEnd", () => {
 
 describe("isIndexable", () => {
   test("a changelog that can publish and has a post", () => {
-    expect(isIndexable({ subscriptionStatus: "active" }, 1)).toBe(true);
-    expect(isIndexable({ subscriptionStatus: "active" }, 0)).toBe(false);
+    expect(isIndexable({ subscriptionStatus: "none", rank: 1 }, 1)).toBe(true);
+    expect(isIndexable({ subscriptionStatus: "active", rank: 1 }, 0)).toBe(false);
   });
 
-  test("never without a status that publishes, whatever its posts", () => {
-    for (const status of ["past_due", "canceled", "none"] as const) {
-      expect(isIndexable({ subscriptionStatus: status }, 5)).toBe(false);
-    }
-  });
-
-  test("follows PUBLIC_STATUSES, the list the sitemap query uses", () => {
-    for (const status of PUBLIC_STATUSES) expect(isIndexable({ subscriptionStatus: status }, 1)).toBe(true);
+  test("never a project the plan doesn't publish, whatever its posts", () => {
+    expect(isIndexable({ subscriptionStatus: "canceled", rank: 2 }, 5)).toBe(false);
+    expect(isIndexable({ subscriptionStatus: "active", rank: PLANS.pro.projects + 1 }, 5)).toBe(false);
   });
 });

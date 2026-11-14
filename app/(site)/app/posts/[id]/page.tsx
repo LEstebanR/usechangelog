@@ -8,13 +8,16 @@ import { PostForm } from "../post-form";
 export const metadata: Metadata = { title: "Edit post — UseChangelog" };
 
 export default async function EditPostPage({ params }: PageProps<"/app/posts/[id]">) {
-  const post = await requirePost((await params).id);
+  // The post's own project, which another tab may have switched away from (#65).
+  const { post, workspace } = await requirePost((await params).id);
   const published = post.status === "published";
 
   return (
     <div className="mx-auto max-w-5xl">
       <div className="mb-6 flex items-center gap-3 text-sm text-graphite">
         <Link href="/app" className="hover:text-ink">← All posts</Link>
+        <span aria-hidden="true">/</span>
+        <span>{workspace.name}</span>
         <span aria-hidden="true">/</span>
         <h1 className="text-ink">Edit post</h1>
         <span className={`border px-1.5 py-0.5 text-xs uppercase tracking-wider ${
@@ -24,7 +27,7 @@ export default async function EditPostPage({ params }: PageProps<"/app/posts/[id
         </span>
       </div>
       <PostForm
-        action={savePost.bind(null, post.id)}
+        action={savePost.bind(null, { postId: post.id })}
         initial={{
           title: post.title,
           body: post.body,

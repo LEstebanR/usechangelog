@@ -16,18 +16,18 @@ Changelog and product announcements for small teams: a public changelog page and
 
 This list is the source of truth. The skills in `.agents/skills/` add implementation detail and don't restate these rules.
 
-- **Account model:** one account, one workspace. No teams, no organizations.
+- **Account model:** one account, several projects (`workspaces` in code), as many as the plan allows. No teams, no organizations.
 - **Staff role:** `admin` (table `user_roles`) is for us, not for customers. Admins read the feedback at `/app/admin`; anyone else gets a 404 there. Grant it with `bun run admin:grant <email>`.
 - **Public page:** the slug lives in the path (`usechangelog.com/{slug}`), never in a subdomain.
 - **Auth:** Neon Managed Better Auth with magic link and Google, nothing else. No passwords, SSO or other social providers. The same email by either method is the same user. See `.agents/skills/auth`.
-- **Billing:** Polar, never Stripe. One monthly plan. The price is never hardcoded in code or copy; it comes from Polar. See `.agents/skills/polar-billing`.
-- **Paywall:** sign-up is free. Publishing, the public page and the widget require a subscription in state `active`. A free trial counts as `active`; whether there is one, and how long, is set on the product in Polar, never in code. `past_due`, `canceled` and `none` can't publish.
+- **Billing:** Polar, never Stripe. Two plans: Free, which never goes through Polar, and Pro, the only product in Polar, monthly. The subscription is the account's, not a project's. Pro's price is never hardcoded in code or copy; it comes from Polar. The project limits live in `lib/billing/plans.ts`. See `.agents/skills/polar-billing`.
+- **Paywall:** sign-up is free. Free publishes 1 project and Pro up to 3: the account's oldest projects publish (public page, widget, sitemap), as many as the plan allows; the rest keep their posts but aren't public. Pro is a subscription in state `active`; a free trial counts as `active`, and whether there is one, and how long, is set on the product in Polar, never in code. `past_due`, `canceled` and `none` are Free. No quotas on posts or widget traffic.
 - **Out of scope:**
   - waitlist, voting, comments, reactions
   - RSS or feeds, email digests, scheduled posts
   - custom domains, unread badge
   - teams or roles, SSO or social login other than Google
-  - Stripe, or a free tier that publishes without a subscription
+  - Stripe, an Agency/Business plan, per-project, per-seat or annual pricing
   - Check `.agents/skills/mvp-scope` for what *is* in before adding a feature.
 - **Language:** the app, landing, legal pages and public page are English only. Posts are never translated. The one exception is the widget chrome (its button, title, tags and dates): English by default, or Spanish, Portuguese, French or German, chosen per workspace in settings (`lib/widget/copy.ts`).
 

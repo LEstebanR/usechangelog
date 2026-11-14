@@ -5,14 +5,14 @@ import { getCurrentWorkspace } from "@/lib/workspace/server";
 import { getOrigin } from "@/lib/site";
 import { WorkspaceForm } from "../workspace-form";
 
-export const metadata: Metadata = { title: "Set up your workspace — UseChangelog" };
+export const metadata: Metadata = { title: "Set up your project — UseChangelog" };
 
 export default async function OnboardingPage() {
   if (await getCurrentWorkspace()) redirect("/app");
 
   return (
     <div className="mx-auto max-w-lg border border-hairline bg-canvas p-8">
-      <h1 className="font-display text-2xl font-medium tracking-tight">Set up your workspace</h1>
+      <h1 className="font-display text-2xl font-medium tracking-tight">Set up your project</h1>
       <p className="mt-3 mb-8 text-graphite">
         Pick the name your users will see and the URL of your public changelog.
       </p>
@@ -20,7 +20,7 @@ export default async function OnboardingPage() {
         action={createWorkspace}
         initial={{ name: "", slug: "", widgetLang: "en" }}
         origin={await getOrigin()}
-        submitLabel="Create workspace"
+        submitLabel="Create project"
       />
     </div>
   );

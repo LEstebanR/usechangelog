@@ -1,17 +1,20 @@
 import type { Metadata } from "next";
-import { setWidgetEnabled, updateWorkspace } from "@/lib/workspace/actions";
-import { requireWorkspace } from "@/lib/workspace/server";
+import { requireUser } from "@/lib/auth/server";
+import { deleteAccount } from "@/lib/account/actions";
+import { deleteWorkspace, setWidgetEnabled, updateWorkspace } from "@/lib/workspace/actions";
+import { listWorkspaces, requireWorkspace } from "@/lib/workspace/server";
 import { getOrigin, publicUrl } from "@/lib/site";
 import { secondaryButtonClass } from "../../form-styles";
 import { SubmitButton } from "../../submit-button";
 import { WorkspaceForm } from "../workspace-form";
-import { DeleteAccountForm } from "./delete-account-form";
+import { ConfirmDeleteForm } from "./confirm-delete-form";
 import { WidgetInstall } from "./widget-install";
 
 export const metadata: Metadata = { title: "Settings — UseChangelog" };
 
 export default async function SettingsPage() {
-  const workspace = await requireWorkspace();
+  // The open project's settings. Its actions are bound to its id, not the cookie (#65).
+  const [user, workspace, projects] = await Promise.all([requireUser(), requireWorkspace(), listWorkspaces()]);
   const [origin, url] = await Promise.all([getOrigin(), publicUrl(workspace.slug)]);
 
   return (
@@ -19,7 +22,7 @@ export default async function SettingsPage() {
       <h1 className="font-display text-3xl font-medium tracking-tight">Settings</h1>
 
       <section className="border border-hairline bg-canvas p-8">
-        <h2 className="font-display text-xl font-medium">Workspace</h2>
+        <h2 className="font-display text-xl font-medium">Project</h2>
         <p className="mt-2 mb-6 text-sm text-graphite">
           Public page:{" "}
           <a href={url} className="text-blue underline underline-offset-4">
@@ -27,7 +30,7 @@ export default async function SettingsPage() {
           </a>
         </p>
         <WorkspaceForm
-          action={updateWorkspace}
+          action={updateWorkspace.bind(null, workspace.id)}
           initial={{ name: workspace.name, slug: workspace.slug, widgetLang: workspace.widgetLang }}
           showWidgetLang
           origin={origin}
@@ -38,7 +41,7 @@ export default async function SettingsPage() {
       <section className="border border-hairline bg-canvas p-8">
         <h2 className="font-display text-xl font-medium">Widget</h2>
         <form
-          action={setWidgetEnabled}
+          action={setWidgetEnabled.bind(null, workspace.id)}
           className="mt-4 flex flex-wrap items-center justify-between gap-4 border border-hairline bg-wash p-4"
         >
           <input type="hidden" name="enabled" value={String(!workspace.widgetEnabled)} />
@@ -61,16 +64,34 @@ export default async function SettingsPage() {
         <WidgetInstall origin={origin} widgetKey={workspace.widgetKey} />
       </section>
 
+      {projects.length > 1 && (
+        <section aria-labelledby="delete-project" className="mt-8 border border-clay/40 bg-canvas p-8">
+          <h2 id="delete-project" className="font-display text-xl font-medium text-clay">
+            Delete project
+          </h2>
+          <p className="mt-2 text-sm text-graphite">
+            This deletes {workspace.name} and all its posts. Its public page{" "}
+            <span className="font-mono break-all">{url}</span> and its widget stop working. Your other projects and your
+            subscription stay as they are. This can&apos;t be undone.
+          </p>
+          <ConfirmDeleteForm
+            action={deleteWorkspace.bind(null, workspace.id)}
+            confirm={workspace.slug}
+            name="slug"
+            label="Delete project"
+          />
+        </section>
+      )}
+
       <section aria-labelledby="delete-account" className="mt-8 border border-clay/40 bg-canvas p-8">
         <h2 id="delete-account" className="font-display text-xl font-medium text-clay">
           Delete account
         </h2>
         <p className="mt-2 text-sm text-graphite">
-          This deletes your account, your workspace and all its posts. Your public page{" "}
-          <span className="font-mono break-all">{url}</span> and your widget stop working. If you have a subscription, it&apos;s
-          cancelled right away, without a refund. This can&apos;t be undone.
+          This deletes your account and all your projects and posts: their public pages and widgets stop working. If
+          you have a subscription, it&apos;s cancelled right away, without a refund. This can&apos;t be undone.
         </p>
-        <DeleteAccountForm slug={workspace.slug} />
+        <ConfirmDeleteForm action={deleteAccount} confirm={user.email} name="email" label="Delete account" />
       </section>
     </div>
   );

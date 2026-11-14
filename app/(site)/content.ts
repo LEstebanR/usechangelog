@@ -141,14 +141,20 @@ export const audience = {
   ],
 };
 
+// Free and Pro (#65). The limits come from PLANS; Pro's price and trial from Polar (#9).
 export const closing = {
   label: "Next",
   title: "Start your changelog.",
-  // The price and trial come from Polar (#9); without them, the plan line says only this.
-  plan: "Publishing is part of a monthly plan.",
-  planWithPrice: (price: string, trial: string | null) =>
-    `One monthly plan, ${price}${trial ? `, starting with a ${trial}` : ""}. Cancel any time.`,
-  status: "Sign up free. Publishing, your public page and the widget need the monthly plan.",
+  plans: {
+    free: { price: "Free", text: (projects: number) => `${projects} project with its public page and widget. No card needed.` },
+    pro: {
+      // Without the price from Polar, the card says only this.
+      price: "Monthly",
+      text: (projects: number, trial: string | null) =>
+        `Up to ${projects} projects, each with its own page and widget.${trial ? ` Starts with a ${trial}.` : ""} Cancel any time.`,
+    },
+  },
+  status: "Sign up free and publish your first changelog today.",
 };
 
 export const signIn = { label: "Sign in", href: "/sign-in" };

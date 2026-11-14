@@ -1,6 +1,7 @@
 "use server";
 
 import { requireUser } from "@/lib/auth/server";
+import { getCurrentWorkspace } from "@/lib/workspace/server";
 import { type FeedbackState, parseFeedback, RATE_LIMITED } from "./form";
 import { insertFeedback } from "./server";
 
@@ -10,7 +11,8 @@ export async function sendFeedback(_prev: FeedbackState, formData: FormData): Pr
   const { values, page, error } = parseFeedback(formData);
   if (error) return { values, error };
 
-  const saved = await insertFeedback(user.id, { ...values, page });
+  const workspace = await getCurrentWorkspace();
+  const saved = await insertFeedback(user.id, workspace?.id ?? null, { ...values, page });
   if (!saved) return { values, error: RATE_LIMITED };
 
   return { ok: true, values };

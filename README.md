@@ -23,7 +23,7 @@
 
 ## Status
 
-> **Live at [usechangelog.com](https://www.usechangelog.com).** Sign up is free; publishing, the public page and the widget need the monthly plan, billed by Polar. The MVP was built issue by issue, in the order listed in [Roadmap](#roadmap); see [End-to-end check](#end-to-end-check) for how it's verified.
+> **Live at [usechangelog.com](https://www.usechangelog.com).** Free publishes one project (its public page and widget); Pro, billed monthly by Polar, publishes up to three. The MVP was built issue by issue, in the order listed in [Roadmap](#roadmap); see [End-to-end check](#end-to-end-check) for how it's verified.
 
 ## What it is
 
@@ -38,7 +38,7 @@ Each post has:
 
 Posts are written in plain Markdown, saved as drafts and published when ready.
 
-It's global, self-serve and priced in USD. Sign-up is free; publishing needs a monthly plan.
+It's global, self-serve and priced in USD. Two plans: **Free** publishes one project, **Pro** up to three, with no other difference for now.
 
 ## How it works
 
@@ -55,7 +55,7 @@ flowchart LR
 2. **Get a public page:** published posts appear at `/{slug}`, with "Coming soon" first and then everything that shipped, newest first.
 3. **Embed the widget:** paste one `<script>` tag. The widget's chrome is English by default, or Spanish with `lang="es"`; posts show exactly as written.
 
-The public page and the widget only serve posts while the workspace has an **active** Polar subscription. If it lapses, nothing is deleted; the posts come back as soon as it's active again.
+An account has several projects (`workspaces` in code). The plan is the account's and comes from its Polar subscription: `active` (a trial included) is Pro, anything else is Free. Its oldest projects publish, as many as the plan allows (`lib/billing/plans.ts`); the rest keep their posts and drafts but have no public page, widget or sitemap entry. If Pro lapses, only the oldest project stays public; nothing is deleted, and the others come back as soon as it's active again.
 
 ## Tech stack
 
@@ -68,7 +68,7 @@ The public page and the widget only serve posts while the workspace has an **act
 | Package manager | [Bun](https://bun.sh) | ✅ In use |
 | Database | [Neon](https://neon.com) Postgres, with Drizzle ORM and migrations in the repo | ✅ In use |
 | Auth | Neon Managed Better Auth: magic link and Google | ✅ In use |
-| Payments | [Polar](https://polar.sh) as merchant of record: one monthly plan, sandbox on previews | ✅ In use |
+| Payments | [Polar](https://polar.sh) as merchant of record: the Pro plan (Free never goes through Polar), sandbox on previews | ✅ In use |
 | Analytics | [Vercel Web Analytics](https://vercel.com/docs/analytics): cookieless page views on the site and public changelogs (`@vercel/analytics`) | ✅ In use |
 
 The reasoning behind each choice is in its issue. For example, [#4](https://github.com/LEstebanR/usechangelog/issues/4) explains why it's Neon's auth and not Clerk.
@@ -96,7 +96,7 @@ app/
     tag.tsx             New / Improved / Fixed / Coming soon tags
     markdown-body.tsx   A post body rendered from Markdown (styles in markdown-styles.ts)
     (auth)/sign-in/     Sign-in: Google or a magic link
-    app/                The signed-in app: /app (posts), /app/posts/new, /app/posts/[id], /app/onboarding, /app/settings, /app/billing
+    app/                The signed-in app: /app (posts), /app/posts/new, /app/posts/[id], /app/onboarding, /app/projects/new, /app/settings, /app/billing
     app/admin/          Admin only: the feedback users send (#28)
   [slug]/               The public changelog at /{slug}. Its own root layout sets lang from the workspace
   api/widget/[key]/     Public widget data (CORS open, 60-second CDN cache)
@@ -105,9 +105,9 @@ app/
   api/auth/[...path]/   Auth handler, proxied to Neon
 lib/auth/               Server auth client and Server Actions (sign in, sign out)
 lib/account/            Deleting an account: deleteAccount() and the Neon API call (#31)
-lib/workspace/          Slug rules, form parsing, getCurrentWorkspace(), getWorkspaceBySlug() and workspace Server Actions
+lib/workspace/          Slug rules, form parsing, the open project (uc_project cookie), the account, getWorkspaceBySlug() and project Server Actions
 lib/posts/              Post form parsing, workspace-scoped queries and post Server Actions
-lib/billing/            Polar config, revokeSubscriptionsInPolar(), mapPolarStatus(), canPublish() (the one publish gate) and the webhook handler
+lib/billing/            Plans and their limits (plans.ts), Polar config, revokeSubscriptionsInPolar(), mapPolarStatus(), canPublish() (the one publish gate) and the webhook handler
 lib/markdown.ts         renderMarkdown(): safe Markdown to HTML for the public page and the widget
 lib/widget/             The widget's words in 5 languages and the API payload
 public/widget.js        The embeddable "What's new" widget (vanilla JS, Shadow DOM)
@@ -115,7 +115,7 @@ public/opengraph-image.png  Shared social image (1200×630)
 scripts/smoke-app.ts    Signed-in smoke test (`bun run smoke`)
 scripts/widget-test.ts  Host pages to try the widget from another origin (`bun run widget-test`)
 db/
-  schema.ts             Our tables (public schema): workspaces, posts
+  schema.ts             Our tables (public schema): accounts (billing), workspaces (projects), posts, feedback, user_roles
   neon-auth.ts          Read-only view of Neon's user table, for foreign keys
   migrations/           SQL migrations generated by drizzle-kit
 proxy.ts                Redirects /app to /sign-in without a session
@@ -153,7 +153,7 @@ Open http://localhost:3000.
 | `bun run db:migrate` | Apply pending migrations (uses `DATABASE_URL_UNPOOLED`) |
 | `bun run check-env` | Check the required env vars and their format, without printing them. Locally it also checks the database and auth answer. Vercel runs it before migrating |
 | `bun run admin:grant <email>` | Gives an existing user the staff `admin` role (see [Admin](#admin)) |
-| `bun run polar:state <slug>` | Read only: a workspace's subscription in our database next to what Polar has, and what differs. Uses `.env.local` (develop + sandbox); for production, see below |
+| `bun run polar:state <slug>` | Read only: the subscription of a project's account in our database next to what Polar has, and what differs. Uses `.env.local` (develop + sandbox); for production, see below |
 | `bun run widget-test <widget-key> [base-url] [port]` | Host pages on another origin (`localhost:5050`) that load the widget: floating button, trigger + Spanish, hostile CSS, invalid key. For a protected preview, set `VERCEL_AUTOMATION_BYPASS_SECRET` |
 | `bun run smoke <email> [base-url]` | Signed-in smoke test of `/app`. Reuses the last session (`.smoke-session-*.json`, git-ignored), so it only sends a magic link when that expires; `SMOKE_LINK=<link>` skips the request. Never writes data, and refuses production URLs unless `SMOKE_ALLOW_PRODUCTION=1` |
 
@@ -168,7 +168,7 @@ Every variable the code reads is in `.env.example`, by name only. `bun run check
 | `NEON_AUTH_COOKIE_SECRET` | Session cookie signing | Random, 32+ chars | Random, 32+ chars | `openssl rand -base64 32` |
 | `NEON_API_KEY`, `NEON_PROJECT_ID`, `NEON_BRANCH_ID` | Deleting an account: the user is deleted through the Neon API (#31) | `develop` branch id | `production` branch id | Neon → Organization settings → API keys (project-scoped); ids from `neonctl projects list` and `neonctl branches list` |
 | `POLAR_ACCESS_TOKEN` | Checkout, portal, plan price, cancelling on account deletion | Sandbox token | Production token | Polar → Settings → Developers (scopes: `checkouts:write`, `customer_sessions:write`, `products:read`, `subscriptions:read`, `subscriptions:write`) |
-| `POLAR_PRODUCT_ID` | The monthly plan | Sandbox product | Production product | Polar → Products |
+| `POLAR_PRODUCT_ID` | The Pro plan | Sandbox product | Production product | Polar → Products |
 | `POLAR_SERVER` | Which Polar to call | `sandbox` | `production` | Fixed; `check-env` enforces it |
 | `POLAR_WEBHOOK_SECRET` | Webhook signature check | Sandbox endpoint secret | Production endpoint secret | Polar → Settings → Webhooks. Locally, the secret `polar listen` prints |
 | `POLAR_ALLOW_DISCOUNT_CODES` | Optional and temporary: discount field in the checkout during Polar's account review | — | Only during the review | Set by hand, delete after |
@@ -215,6 +215,18 @@ DATABASE_URL="$(neonctl connection-string production --pooled)" bun run admin:gr
 
 To take it away, delete the user's row from `user_roles`.
 
+### Courtesy accounts
+
+A courtesy account is Pro without paying: its `subscription_status` set to `active` by hand, in the `accounts` table (one row per user). If the user has no row yet (they never opened a checkout), create it:
+
+```sql
+insert into accounts (user_id, subscription_status)
+select id, 'active' from neon_auth."user" where email = 'someone@example.com'
+on conflict (user_id) do update set subscription_status = 'active';
+```
+
+The webhook never touches it as long as there's no Polar subscription for that account.
+
 ### Checking a production subscription
 
 `bun run polar:state <slug>` reads whatever env it runs with. For production, take the database URL from Neon and Polar's production token from the Polar dashboard. Both stay in your shell, never in a file:
@@ -259,17 +271,17 @@ The manual run-through of the whole product (#10). Run it on a preview with Pola
 
 | # | Step | Expected |
 | --- | --- | --- |
-| 1 | Open the landing and click **Get started** | `/signup` lands on `/sign-in`. The closing section shows the plan's price and trial, read from Polar |
+| 1 | Open the landing and click **Get started** | `/signup` lands on `/sign-in`. The closing section shows Free and Pro, with Pro's price and trial read from Polar |
 | 2 | Ask for the magic link, open it from the email | You land in `/app` (onboarding the first time) |
-| 3 | Onboarding: name the workspace and pick its slug | `/app` with the public URL `/{slug}` |
-| 4 | Write 4 posts: New, Improved and Fixed as Shipped, and one Coming soon. Try **Publish** | "You don't have an active subscription. Subscribe to publish…", nothing is saved as published |
-| 5 | **Billing → Subscribe**, pay in Polar's checkout (sandbox: `4242 4242 4242 4242`) | Back on `/app/billing`: "Free trial" or "Active" within a few seconds (the webhook) |
+| 3 | Onboarding: name the project and pick its slug | `/app` with the public URL `/{slug}` |
+| 4 | Write 4 posts: New, Improved and Fixed as Shipped, and one Coming soon. Publish them. Then **+ New project** in the picker | The posts show on `/{slug}` on Free. The new project leads to `/app/billing` |
+| 5 | **Billing → Upgrade to Pro**, pay in Polar's checkout (sandbox: `4242 4242 4242 4242`) | Back on `/app/billing`: "Free trial" or "Active" within a few seconds (the webhook) |
 | 6 | Publish the 4 posts, open `/{slug}` | The posts are there, "Coming soon" first |
 | 7 | Install the widget using only **Settings → Widget**: a static HTML page and a Next.js app with a CSP (`bun run widget-test <key> [url]` serves host pages). Also with `lang="es"` | The panel shows the posts, in English and in Spanish, with no errors or warnings in the console |
-| 8 | **Manage subscription → Cancel** in Polar's portal. Then revoke it (Polar → Sales → Subscriptions) | "Ends on <date>" after cancelling. After revoking: `/{slug}` is a 404, the widget shows nothing, and `/app` shows the banner. The posts stay in the app |
+| 8 | **Manage subscription → Cancel** in Polar's portal. Then revoke it (Polar → Sales → Subscriptions) | "Ends on <date>" after cancelling. After revoking: only the oldest project stays on `/{slug}`; the others are a 404, their widget shows nothing, and `/app` shows the banner there. Their posts stay in the app |
 | 9 | Send feedback from the app | After [#28](https://github.com/LEstebanR/usechangelog/issues/28), which isn't built yet |
 | 10 | **Sign out** | `/app` redirects to `/sign-in` |
-| 11 | Sign in again, **Settings → Delete account**, type the slug | Lands on `/` with "Your account was deleted." The subscription is cancelled in Polar, `/{slug}` is a 404, and the slug is free for a new workspace (#31) |
+| 11 | Sign in again, **Settings → Delete account**, type your email | Lands on `/` with "Your account was deleted." The subscription is cancelled in Polar, `/{slug}` is a 404, and the slug is free for a new project (#31) |
 
 **Runs so far:**
 - **Local, Polar sandbox, 2026-10-07:**
@@ -308,15 +320,16 @@ The issue tracker is the backlog. Issues are numbered in build order; each one l
 | 17 | Sign in with Google | [#25](https://github.com/LEstebanR/usechangelog/issues/25) |
 | 19 | Delete your account | [#31](https://github.com/LEstebanR/usechangelog/issues/31) |
 | 20 | Custom 404 page | [#33](https://github.com/LEstebanR/usechangelog/issues/33) |
+| 25 | Plans: Free and Pro, with several projects per account | [#65](https://github.com/LEstebanR/usechangelog/issues/65) |
 
 ### Out of scope
 
 Kept out on purpose:
 - waitlist, voting, comments, reactions;
 - RSS, email digests, scheduled posts;
-- custom domains per workspace, an unread badge in the widget;
+- custom domains per project, an unread badge in the widget;
 - teams and roles, SSO, social login other than Google;
-- Stripe, a free tier that publishes without a subscription;
+- Stripe, an Agency/Business plan;
 - translations, apart from the widget's Spanish chrome.
 
 The full list lives in [`AGENTS.md`](AGENTS.md#product-rules).

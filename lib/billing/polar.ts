@@ -20,13 +20,13 @@ export function polarConfig() {
   return config;
 }
 
-// Whether Polar already has a live subscription for this workspace. Our row can lag behind
+// Whether Polar already has a live subscription for this account. Our row can lag behind
 // (the webhook takes a few seconds), so a second checkout asks Polar itself: one paid
-// subscription per workspace, never two.
-export async function hasActiveSubscriptionInPolar(workspaceId: string) {
+// subscription per account, never two.
+export async function hasActiveSubscriptionInPolar(accountId: string) {
   const { accessToken, environment } = polarConfig();
   const { items } = await listSubscriptions(createPolarCore({ accessToken, environment }))({
-    external_customer_id: workspaceId,
+    external_customer_id: accountId,
     active: true,
     limit: 1,
   });
@@ -37,13 +37,13 @@ export async function hasActiveSubscriptionInPolar(workspaceId: string) {
 // incomplete, unpaid or paused, which can resume) gets revoked.
 const ENDED = new Set(["canceled", "incomplete_expired"]);
 
-// Ends every subscription of the workspace that could still bill, right away and without a
+// Ends every subscription of the account that could still bill, right away and without a
 // refund. Deleting the account (#31) calls it first: if it throws, nothing is deleted. The
-// webhook that follows finds no workspace and skips it.
-export async function revokeSubscriptionsInPolar(workspaceId: string) {
+// webhook that follows finds no account and skips it.
+export async function revokeSubscriptionsInPolar(accountId: string) {
   const { accessToken, environment } = polarConfig();
   const polar = createPolarCore({ accessToken, environment });
-  const { items } = await listSubscriptions(polar)({ external_customer_id: workspaceId, limit: 100 });
+  const { items } = await listSubscriptions(polar)({ external_customer_id: accountId, limit: 100 });
   const live = items.filter((subscription) => !ENDED.has(subscription.status));
   await Promise.all(live.map((subscription) => revokeSubscriptions(polar)(subscription.id)));
 }
