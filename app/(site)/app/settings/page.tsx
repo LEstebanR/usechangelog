@@ -15,8 +15,11 @@ export const metadata: Metadata = { title: "Settings — UseChangelog" };
 export default async function SettingsPage() {
   // The open project's settings. Its actions are bound to its id, not the cookie (#65).
   const [user, workspace, projects] = await Promise.all([requireUser(), requireWorkspace(), listWorkspaces()]);
-  const [origin, urls] = await Promise.all([getOrigin(), Promise.all(projects.map((p) => publicUrl(p.slug)))]);
-  const url = urls[projects.findIndex((p) => p.id === workspace.id)];
+  const [origin, url, urls] = await Promise.all([
+    getOrigin(),
+    publicUrl(workspace.slug),
+    Promise.all(projects.map((p) => publicUrl(p.slug))),
+  ]);
 
   return (
     <div className="mx-auto flex max-w-lg flex-col gap-8">

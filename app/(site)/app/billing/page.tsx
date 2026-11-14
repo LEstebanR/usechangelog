@@ -12,25 +12,25 @@ export const metadata: Metadata = { title: "Billing — UseChangelog" };
 // The account's plan (#14, #65), its real state from the webhook (#15), how many projects it
 // uses, and the way to Pro or to Polar's portal (#17).
 export default async function BillingPage({ searchParams }: PageProps<"/app/billing">) {
-  await requireWorkspace();
-  const [account, projects, { price, trial }, { checkout }] = await Promise.all([
+  // The workspace carries the account's status (`none` before the first checkout); the
+  // account row, when there is one, has the dates and the Polar customer.
+  const [workspace, account, projects, { price, trial }, { checkout }] = await Promise.all([
+    requireWorkspace(),
     getCurrentAccount(),
     listWorkspaces(),
     readPlan(),
     searchParams,
   ]);
-  // Before the first checkout there's no account row: Free, no subscription.
-  const billing = account ?? { subscriptionStatus: "none" as const, currentPeriodEnd: null, trialEndsAt: null, cancelAtPeriodEnd: false, polarCustomerId: null };
-  const status = billing.subscriptionStatus;
-  const plan = PLANS[planOf(billing)];
-  const limit = projectLimit(billing);
+  const status = workspace.subscriptionStatus;
+  const plan = PLANS[planOf(workspace)];
+  const limit = projectLimit(workspace);
   const pastDue = status === "past_due";
   const backFromCheckout = checkout === "success";
   // Back from the checkout before the webhook has landed, or a free trial.
-  const shown = backFromCheckout && !hasSubscription(billing) ? "activating" : status === "active" && billing.trialEndsAt ? "trial" : status;
+  const shown = backFromCheckout && !hasSubscription(workspace) ? "activating" : status === "active" && account?.trialEndsAt ? "trial" : status;
   const { dot, title, detail } = STATUS[shown];
-  const day = (date: Date | null) => (date ? formatDay(toDay(date)) : "");
-  const dates = { periodEnd: day(billing.currentPeriodEnd), trialEnd: day(billing.trialEndsAt), canceling: billing.cancelAtPeriodEnd, price };
+  const day = (date: Date | null | undefined) => (date ? formatDay(toDay(date)) : "");
+  const dates = { periodEnd: day(account?.currentPeriodEnd), trialEnd: day(account?.trialEndsAt), canceling: Boolean(account?.cancelAtPeriodEnd), price };
 
   return (
     <div className="mx-auto flex max-w-lg flex-col gap-8">
@@ -52,7 +52,7 @@ export default async function BillingPage({ searchParams }: PageProps<"/app/bill
           <h2 className="font-display text-xl font-medium">Pro</h2>
           {price && <p className="font-display text-lg tabular-nums">{price}</p>}
         </div>
-        {trial && !hasSubscription(billing) && <p className="mt-1 text-sm font-medium text-green">Starts with a {trial}.</p>}
+        {trial && !hasSubscription(workspace) && <p className="mt-1 text-sm font-medium text-green">Starts with a {trial}.</p>}
         <p className="mt-2 text-sm text-graphite">
           Up to {PLANS.pro.projects} projects, each with its own public changelog page and widget. Free publishes{" "}
           {PLANS.free.projects}.
@@ -72,7 +72,7 @@ export default async function BillingPage({ searchParams }: PageProps<"/app/bill
             or a portal session. They take everything from the session, never from the form. */}
         {/* Stacked and full width on a phone, side by side from sm. */}
         <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:flex-wrap [&>*]:w-full sm:[&>*]:w-auto [&_button]:w-full">
-          {!hasSubscription(billing) && !backFromCheckout && (
+          {!hasSubscription(workspace) && !backFromCheckout && (
             <form action="/api/polar/checkout">
               <button type="submit" className={primaryButtonClass}>
                 Upgrade to Pro
@@ -84,7 +84,7 @@ export default async function BillingPage({ searchParams }: PageProps<"/app/bill
               Go to your posts
             </Link>
           )}
-          {billing.polarCustomerId && (
+          {account?.polarCustomerId && (
             <form action="/api/polar/portal">
               <button type="submit" className={pastDue ? primaryButtonClass : secondaryButtonClass}>
                 {pastDue ? "Update payment method" : "Manage subscription"}

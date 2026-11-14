@@ -1,14 +1,12 @@
 "use server";
 
-import { and, eq, inArray } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
-import { notFound } from "next/navigation";
 import { getDb } from "@/db";
 import { posts } from "@/db/schema";
 import { canPublish } from "@/lib/billing/status";
 import { redirectWithNotice } from "@/lib/notice";
-import { UUID } from "@/lib/uuid";
-import { listWorkspaces, requireOwnWorkspace } from "@/lib/workspace/server";
+import { requireOwnWorkspace } from "@/lib/workspace/server";
 import { parsePostForm, type PostFormState } from "./form";
 import { requirePost } from "./server";
 
@@ -71,16 +69,10 @@ export async function savePost(
   return { values: { ...state.values, publishedOn: next.publishedOn ?? "" }, notice };
 }
 
-// One query, scoped to the user's projects: nothing deleted means not yours, so 404.
+// Scoped to the post's own project, which requirePost checks is the user's: else 404.
 export async function deletePost(id: string) {
-  if (!UUID.test(id)) notFound();
-  const projects = await listWorkspaces();
-  if (!projects.length) notFound();
-  const deleted = await getDb()
-    .delete(posts)
-    .where(and(eq(posts.id, id), inArray(posts.workspaceId, projects.map((p) => p.id))))
-    .returning({ status: posts.status });
-  if (!deleted.length) notFound();
-  revalidatePath("/app", deleted[0].status === "published" ? "layout" : "page");
+  const { post, workspace } = await requirePost(id);
+  await getDb().delete(posts).where(and(eq(posts.id, post.id), eq(posts.workspaceId, workspace.id)));
+  revalidatePath("/app", post.status === "published" ? "layout" : "page");
   redirectWithNotice("deleted");
 }

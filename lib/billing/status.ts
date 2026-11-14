@@ -1,7 +1,7 @@
 // An account's subscription, as the Polar webhook (#15) stores it, and what publishes.
 // Pure: no SDK, no database.
 
-import { projectLimit } from "./plans";
+import { projectLimit, type WithStatus } from "./plans";
 
 export const SUBSCRIPTION_STATUSES = ["active", "past_due", "canceled", "none"] as const;
 export type SubscriptionStatus = (typeof SUBSCRIPTION_STATUSES)[number];
@@ -21,8 +21,6 @@ export function mapPolarStatus(status: string | null | undefined): SubscriptionS
 // trial_end after the trial converts, so the status decides.
 export const trialEnd = (subscription: { status: string; trial_end: string | Date | null }) =>
   subscription.status === "trialing" && subscription.trial_end ? new Date(subscription.trial_end) : null;
-
-type WithStatus = { subscriptionStatus: SubscriptionStatus };
 
 // A project as the publishing rule sees it: its account's status and its place among the
 // account's projects by age (1 is the oldest).

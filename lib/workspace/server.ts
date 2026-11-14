@@ -1,4 +1,4 @@
-import { asc, eq, sql } from "drizzle-orm";
+import { asc, eq, getTableColumns, sql } from "drizzle-orm";
 import { cookies } from "next/headers";
 import { notFound, redirect } from "next/navigation";
 import { cache } from "react";
@@ -13,6 +13,22 @@ import { UUID } from "@/lib/uuid";
 // as they are; two tabs share it, which is why actions on a post use the post's own project.
 export const PROJECT_COOKIE = "uc_project";
 
+// A project's rank among its account's projects, in SQL: 1 plus how many are older.
+// By created_at, then id. The one definition of "oldest": /app, the public page, the
+// widget and the sitemap all read it.
+const rank = sql<number>`(select count(*)::int + 1 from ${workspaces} as older
+  where older.owner_id = ${workspaces.ownerId}
+  and (older.created_at, older.id) < (${workspaces.createdAt}, ${workspaces.id}))`;
+
+// The account's status, `none` without an account row (left join).
+const status = sql<SubscriptionStatus>`coalesce(${accounts.subscriptionStatus}, 'none')`;
+
+// projectLimit in SQL, built from PLANS and PRO_STATUSES; a test keeps it aligned with canPublish.
+export const publishesSql = sql`${rank} <= case when ${status} in ${PRO_STATUSES} then ${PLANS.pro.projects}::int else ${PLANS.free.projects}::int end`;
+
+// What canPublish needs, read with a left join on the account (no row means `none`).
+const publishing = { subscriptionStatus: status, rank };
+
 // The signed-in user's account (#65), or null before onboarding. Cached per request.
 export const getCurrentAccount = cache(async () => {
   const user = await requireUser();
@@ -21,10 +37,13 @@ export const getCurrentAccount = cache(async () => {
 });
 
 // The user's account, created the first time it's needed (onboarding, checkout).
+// One statement: the no-op update makes `returning` give back an existing row too.
 export async function ensureAccount(userId: string) {
-  const db = getDb();
-  await db.insert(accounts).values({ userId }).onConflictDoNothing({ target: accounts.userId });
-  const [account] = await db.select().from(accounts).where(eq(accounts.userId, userId)).limit(1);
+  const [account] = await getDb()
+    .insert(accounts)
+    .values({ userId })
+    .onConflictDoUpdate({ target: accounts.userId, set: { userId: sql`excluded.user_id` } })
+    .returning();
   return account;
 }
 
@@ -32,16 +51,12 @@ export async function ensureAccount(userId: string) {
 // status: what canPublish needs. Cached per request.
 export const listWorkspaces = cache(async () => {
   const user = await requireUser();
-  const [rows, account] = await Promise.all([
-    getDb()
-      .select()
-      .from(workspaces)
-      .where(eq(workspaces.ownerId, user.id))
-      .orderBy(asc(workspaces.createdAt), asc(workspaces.id)),
-    getCurrentAccount(),
-  ]);
-  const subscriptionStatus = account?.subscriptionStatus ?? "none";
-  return rows.map((workspace, i) => ({ ...workspace, rank: i + 1, subscriptionStatus }));
+  return getDb()
+    .select({ ...getTableColumns(workspaces), ...publishing })
+    .from(workspaces)
+    .leftJoin(accounts, eq(accounts.userId, workspaces.ownerId))
+    .where(eq(workspaces.ownerId, user.id))
+    .orderBy(asc(workspaces.createdAt), asc(workspaces.id));
 });
 
 export type Workspace = Awaited<ReturnType<typeof listWorkspaces>>[number];
@@ -67,22 +82,6 @@ export async function requireOwnWorkspace(id: string) {
   if (!workspace) notFound();
   return workspace;
 }
-
-// A project's rank among its account's projects, in SQL: 1 plus how many are older.
-// The same order as listWorkspaces (created_at, then id).
-const rank = sql<number>`(select count(*)::int + 1 from ${workspaces} as older
-  where older.owner_id = ${workspaces.ownerId}
-  and (older.created_at, older.id) < (${workspaces.createdAt}, ${workspaces.id}))`;
-
-// The account's status, `none` without an account row (left join).
-const status = sql<SubscriptionStatus>`coalesce(${accounts.subscriptionStatus}, 'none')`;
-
-// projectLimit in SQL, built from PLANS and PRO_STATUSES; a test keeps it aligned with canPublish.
-export const publishesSql = sql`${rank} <= case when ${status} in ${PRO_STATUSES} then ${PLANS.pro.projects}::int else ${PLANS.free.projects}::int end`;
-
-// What canPublish needs, read with a left join on the account: the public page and the widget
-// use it without a session.
-const publishing = { subscriptionStatus: status, rank };
 
 // A workspace by its public slug, for the public page (#7).
 // Cached per request: the page and its metadata both read it.

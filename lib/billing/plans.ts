@@ -14,7 +14,7 @@ export type Plan = keyof typeof PLANS;
 // same rule (the sitemap) uses this list.
 export const PRO_STATUSES = ["active"] as const satisfies readonly SubscriptionStatus[];
 
-type WithStatus = { subscriptionStatus: SubscriptionStatus };
+export type WithStatus = { subscriptionStatus: SubscriptionStatus };
 
 export const planOf = (account: WithStatus): Plan =>
   (PRO_STATUSES as readonly SubscriptionStatus[]).includes(account.subscriptionStatus) ? "pro" : "free";

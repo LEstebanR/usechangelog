@@ -58,12 +58,18 @@ export async function countPublishedPosts(workspaceId: string) {
 // as many as the plan allows) and has at least one published post. `lastPost` is its newest
 // publish date. Returns the query, like above.
 export function listPublicChangelogs() {
-  return getDb()
-    .select({ slug: workspaces.slug, lastPost: max(posts.publishedOn) })
+  const db = getDb();
+  // Ranked once per project, in a subquery, not once per joined post.
+  const publishing = db
+    .select({ id: workspaces.id })
     .from(workspaces)
     .leftJoin(accounts, eq(accounts.userId, workspaces.ownerId))
+    .where(publishesSql);
+  return db
+    .select({ slug: workspaces.slug, lastPost: max(posts.publishedOn) })
+    .from(workspaces)
     .innerJoin(posts, and(eq(posts.workspaceId, workspaces.id), eq(posts.status, "published")))
-    .where(publishesSql)
+    .where(inArray(workspaces.id, publishing))
     .groupBy(workspaces.slug);
 }
 
