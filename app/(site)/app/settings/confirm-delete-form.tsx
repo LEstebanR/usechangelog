@@ -31,6 +31,9 @@ export function ConfirmDeleteForm({ action, confirm, name, label }: Props) {
         spellCheck={false}
         value={typed}
         onChange={(e) => setTyped(e.target.value)}
+        placeholder={confirm}
+        autoCapitalize="none"
+        type={name === "email" ? "email" : "text"}
         aria-invalid={Boolean(state.error)}
         aria-describedby={state.error ? `${id}-error` : undefined}
         className={inputClass}
