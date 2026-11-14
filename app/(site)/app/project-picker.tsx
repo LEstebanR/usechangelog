@@ -13,10 +13,10 @@ export function ProjectPicker({ projects, current }: { projects: Workspace[]; cu
   const atLimit = projects.length >= limit;
 
   return (
-    <details className="group relative">
+    <details className="group relative min-w-0">
       <summary className="flex max-w-48 cursor-pointer list-none items-center gap-2 border border-hairline bg-canvas px-3 py-2 text-sm font-medium hover:border-ink [&::-webkit-details-marker]:hidden">
         <span className="truncate">{current.name}</span>
-        <span aria-hidden="true" className="text-graphite transition-transform group-open:rotate-180">
+        <span aria-hidden="true" className="shrink-0 text-graphite transition-transform group-open:rotate-180">
           ▾
         </span>
       </summary>
