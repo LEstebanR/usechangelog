@@ -2,11 +2,13 @@ import type { Metadata } from "next";
 import { notFound, permanentRedirect } from "next/navigation";
 import { cache } from "react";
 import { canPublish, isIndexable } from "@/lib/billing/status";
-import { formatDay, LABELS } from "@/lib/posts/form";
+import { PAGE_COPY } from "@/lib/changelog/copy";
+import { formatDay } from "@/lib/posts/form";
 import { listPublishedPosts } from "@/lib/posts/server";
 import { changelogJsonLd } from "@/lib/seo/json-ld";
 import { changelogLanguage } from "@/lib/seo/language";
 import { siteUrl } from "@/lib/site";
+import type { WidgetLang } from "@/lib/widget/copy";
 import { getWorkspaceBySlug } from "@/lib/workspace/server";
 import { JsonLd } from "../json-ld";
 import { PostTags } from "../(site)/app/post-tags";
@@ -23,9 +25,6 @@ export const dynamic = "force-dynamic";
 
 type Post = Awaited<ReturnType<typeof listPublishedPosts>>[number];
 
-const changelogDescription = (name: string) => `What's new in ${name}: what shipped, and what's coming.`;
-
-
 // Each changelog shares as itself: its workspace's name, its own URL and canonical (#19).
 // Pages that 404 (unknown or unpaid) get the 404's metadata. A paid changelog with nothing
 // published yet isn't indexed until it has a post.
@@ -34,10 +33,11 @@ export async function generateMetadata({ params }: PageProps<"/[slug]">): Promis
   const workspace = await getWorkspaceBySlug(slug);
   if (!workspace || !canPublish(workspace)) return {};
   const indexable = isIndexable(workspace, (await getPublicPosts(workspace.id)).length);
+  const copy = PAGE_COPY[changelogLanguage(workspace.widgetLang)];
   return {
     ...pageMetadata({
-      title: `${workspace.name} Changelog`,
-      description: changelogDescription(workspace.name),
+      title: copy.title(workspace.name),
+      description: copy.description(workspace.name),
       path: `/${slug}`,
     }),
     ...(indexable ? {} : { robots: { index: false, follow: true } }),
@@ -59,17 +59,20 @@ export default async function PublicChangelog({ params }: PageProps<"/[slug]">) 
   const posts = await getPublicPosts(workspace.id);
   const coming = posts.filter((p) => p.type === "coming");
   const shipped = posts.filter((p) => p.type !== "coming");
-  const description = changelogDescription(workspace.name);
+  // The page's words follow the workspace's language, like the widget's.
+  const lang = changelogLanguage(workspace.widgetLang);
+  const copy = PAGE_COPY[lang];
+  const description = copy.description(workspace.name);
 
   return (
     <div className="relative isolate flex min-h-dvh flex-col">
       {posts.length > 0 && (
         <JsonLd
           data={changelogJsonLd({
-            name: `${workspace.name} Changelog`,
+            name: copy.title(workspace.name),
             description,
             url: `${siteUrl()}/${slug}`,
-            inLanguage: changelogLanguage(workspace.widgetLang),
+            inLanguage: lang,
             posts,
           })}
         />
@@ -79,7 +82,7 @@ export default async function PublicChangelog({ params }: PageProps<"/[slug]">) 
       <main className={`${container} flex-1 pb-20 pt-16 md:pb-28 md:pt-24`}>
         <div className="grid gap-y-4 md:grid-cols-12">
           <SectionLabel marker="filled" className="md:col-span-3 md:pt-4">
-            Changelog
+            {copy.label}
           </SectionLabel>
           <h1 className="text-balance font-display text-[2.75rem] font-medium leading-[1.02] tracking-[-0.03em] [overflow-wrap:anywhere] sm:text-6xl md:col-span-9">
             {workspace.name}
@@ -88,26 +91,27 @@ export default async function PublicChangelog({ params }: PageProps<"/[slug]">) 
 
         {posts.length === 0 ? (
           <p className="mt-14 border border-dashed border-hairline bg-canvas px-8 py-16 text-center text-lg text-graphite md:mt-20">
-            No updates yet.
+            {copy.empty}
           </p>
         ) : (
           <>
-            {coming.length > 0 && <PostList label={LABELS.coming} marker="dashed" posts={coming} />}
-            {shipped.length > 0 && <PostList label={LABELS.shipped} posts={shipped} />}
+            {coming.length > 0 && <PostList label={copy.coming} marker="dashed" posts={coming} lang={lang} />}
+            {shipped.length > 0 && <PostList label={copy.shipped} posts={shipped} lang={lang} />}
           </>
         )}
       </main>
 
-      <SiteFooter prefix="Powered by" />
+      <SiteFooter prefix={copy.poweredBy} />
     </div>
   );
 }
 
 // One block of the page, laid out like the landing's example changelog.
-function PostList({ label, marker, posts }: {
+function PostList({ label, marker, posts, lang }: {
   label: string;
   marker?: "dashed";
   posts: Post[];
+  lang: WidgetLang;
 }) {
   return (
     <section aria-label={label} className="mt-14 md:mt-20">
@@ -120,10 +124,10 @@ function PostList({ label, marker, posts }: {
           >
             <div className="flex flex-wrap items-center gap-3 md:contents">
               <div className="font-display text-sm tabular-nums text-graphite md:col-span-2 md:pt-1">
-                {post.publishedOn && <time dateTime={post.publishedOn}>{formatDay(post.publishedOn)}</time>}
+                {post.publishedOn && <time dateTime={post.publishedOn}>{formatDay(post.publishedOn, lang)}</time>}
               </div>
               <div className="md:col-span-3 md:pt-0.5">
-                <PostTags category={post.category} type={post.type} />
+                <PostTags category={post.category} type={post.type} labels={PAGE_COPY[lang].tags} />
               </div>
             </div>
             <div className="min-w-0 md:col-span-7">

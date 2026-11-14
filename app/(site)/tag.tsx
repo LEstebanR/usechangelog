@@ -30,12 +30,13 @@ export const TAG_PALETTE: Record<PostTag, { tag: string; dot: string; pill: stri
   },
 };
 
-export function Tag({ tag }: { tag: PostTag }) {
+// `label` shows the tag in another language (the public page); the palette stays keyed by `tag`.
+export function Tag({ tag, label }: { tag: PostTag; label?: string }) {
   return (
     <span
       className={`inline-block whitespace-nowrap border px-2 py-0.5 font-display text-[0.72rem] font-medium uppercase tracking-wider ${TAG_PALETTE[tag].tag}`}
     >
-      {tag}
+      {label ?? tag}
     </span>
   );
 }

@@ -345,7 +345,7 @@ Kept out on purpose:
 - custom domains per project, an unread badge in the widget;
 - teams and roles, SSO, social login other than Google;
 - Stripe, an Agency/Business plan;
-- translations, apart from the widget's Spanish chrome.
+- translations, apart from the chrome around the posts (widget and public page) in the workspace's language.
 
 The full list lives in [`AGENTS.md`](AGENTS.md#product-rules).
 
