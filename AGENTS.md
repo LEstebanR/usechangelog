@@ -21,7 +21,7 @@ This list is the source of truth. The skills in `.agents/skills/` add implementa
 - **Public page:** the slug lives in the path (`usechangelog.com/{slug}`), never in a subdomain.
 - **Auth:** Neon Managed Better Auth with magic link and Google, nothing else. No passwords, SSO or other social providers. The same email by either method is the same user. See `.agents/skills/auth`.
 - **Billing:** Polar, never Stripe. One monthly plan. The price is never hardcoded in code or copy; it comes from Polar. See `.agents/skills/polar-billing`.
-- **Paywall:** sign-up is free. Publishing, the public page and the widget require a subscription in state `active`. A free trial counts as `active`; whether there is one, and how long, is set on the product in Polar, never in code. `past_due`, `canceled` and `none` can't publish.
+- **Paywall:** sign-up is free. Publishing, the public page and the widget require a subscription in state `active`. A free trial counts as `active`; whether there is one, and how long, is set on the product in Polar, never in code. `past_due`, `canceled` and `none` can't publish. Exception: courtesy accounts that staff activate by hand; there is no UI or code to grant them (README → Courtesy accounts).
 - **Out of scope:**
   - waitlist, voting, comments, reactions
   - RSS or feeds, email digests, scheduled posts
