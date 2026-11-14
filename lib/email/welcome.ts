@@ -59,23 +59,40 @@ export async function sendWelcomeEmail(userId: string, to: string, project: Welc
     console.info("[welcome] RESEND_API_KEY is not set; skipping the welcome email");
     return;
   }
+  try {
+    await claimAndSend(resend, userId, to, project);
+  } catch (error) {
+    // The database failed (the claim or the release): logged under the same prefix.
+    console.error("[welcome] failed:", describe(error));
+  }
+}
 
+async function claimAndSend(
+  resend: NonNullable<ReturnType<typeof getResend>>,
+  userId: string,
+  to: string,
+  project: WelcomeProject,
+) {
   const db = getDb();
-  const claimed = await db
+  const [claimed] = await db
     .update(accounts)
     .set({ welcomeEmailSentAt: new Date() })
     .where(and(eq(accounts.userId, userId), isNull(accounts.welcomeEmailSentAt)))
     .returning({ id: accounts.id });
-  if (!claimed.length) return;
+  if (!claimed) return;
 
   // Resend returns its errors; a network failure throws. Either one releases the claim.
+  // The idempotency key makes Resend drop a retry of an email it already accepted (24 h).
   const failure = await resend.emails
-    .send({ from: WELCOME_FROM, to, replyTo: WELCOME_REPLY_TO, ...welcomeEmail(project) })
+    .send(
+      { from: WELCOME_FROM, to, replyTo: WELCOME_REPLY_TO, ...welcomeEmail(project) },
+      { idempotencyKey: `welcome/${claimed.id}` },
+    )
     .then(({ error }) => error, (error: unknown) => error);
   if (!failure) return;
 
-  console.error(`[welcome] sending failed for account ${claimed[0].id}:`, describe(failure));
-  await db.update(accounts).set({ welcomeEmailSentAt: null }).where(eq(accounts.id, claimed[0].id));
+  console.error(`[welcome] sending failed for account ${claimed.id}:`, describe(failure));
+  await db.update(accounts).set({ welcomeEmailSentAt: null }).where(eq(accounts.id, claimed.id));
 }
 
 // Resend's error, with any email address in its message redacted (it may echo the recipient).

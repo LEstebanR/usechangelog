@@ -23,7 +23,7 @@ const fakeDb = {
 mock.module("@/db", () => ({ getDb: () => fakeDb }));
 
 let sendResult: () => Promise<{ data: unknown; error: unknown }>;
-const send = mock((options: Record<string, unknown>) => (void options, sendResult()));
+const send = mock((options: Record<string, unknown>, requestOptions?: Record<string, unknown>) => (void options, void requestOptions, sendResult()));
 let hasKey = true;
 mock.module("./client", () => ({ getResend: () => (hasKey ? { emails: { send } } : null) }));
 
@@ -76,6 +76,7 @@ describe("sendWelcomeEmail", () => {
       to: "someone@example.com",
       replyTo: WELCOME_REPLY_TO,
     });
+    expect(send.mock.calls[0][1]).toEqual({ idempotencyKey: "welcome/account-1" });
     expect(WELCOME_FROM).toBe("UseChangelog <hello@usechangelog.com>");
     expect(WELCOME_REPLY_TO).toBe("support@usechangelog.com");
     expect(sentAt).toBeInstanceOf(Date);
@@ -115,6 +116,19 @@ describe("sendWelcomeEmail", () => {
     const log = spyOn(console, "error").mockImplementation(() => {});
     await sendWelcomeEmail("user-1", "someone@example.com", project);
     expect(sentAt).toBeNull();
+    log.mockRestore();
+  });
+
+  test("a database error never throws, and logs [welcome]", async () => {
+    const update = fakeDb.update;
+    fakeDb.update = () => {
+      throw new Error("connection refused");
+    };
+    const log = spyOn(console, "error").mockImplementation(() => {});
+    await expect(sendWelcomeEmail("user-1", "someone@example.com", project)).resolves.toBeUndefined();
+    expect(log.mock.calls.flat().join(" ")).toContain("[welcome]");
+    expect(send).not.toHaveBeenCalled();
+    fakeDb.update = update;
     log.mockRestore();
   });
 
