@@ -68,18 +68,10 @@ export async function sendWelcomeEmail(userId: string, to: string, project: Welc
     .returning({ id: accounts.id });
   if (!claimed.length) return;
 
-  let failure: unknown;
-  try {
-    const { error } = await resend.emails.send({
-      from: WELCOME_FROM,
-      to,
-      replyTo: WELCOME_REPLY_TO,
-      ...welcomeEmail(project),
-    });
-    failure = error;
-  } catch (error) {
-    failure = error;
-  }
+  // Resend returns its errors; a network failure throws. Either one releases the claim.
+  const failure = await resend.emails
+    .send({ from: WELCOME_FROM, to, replyTo: WELCOME_REPLY_TO, ...welcomeEmail(project) })
+    .then(({ error }) => error, (error: unknown) => error);
   if (!failure) return;
 
   console.error(`[welcome] sending failed for account ${claimed[0].id}:`, describe(failure));

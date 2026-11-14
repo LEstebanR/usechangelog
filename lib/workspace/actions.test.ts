@@ -25,7 +25,10 @@ mock.module("next/navigation", () => ({
 mock.module("next/cache", () => ({ revalidatePath: () => {} }));
 mock.module("next/headers", () => ({ cookies: async () => ({ delete: () => {} }) }));
 mock.module("next/server", () => ({ after: (callback: () => unknown) => afterCallbacks.push(callback) }));
-mock.module("@/lib/site", () => ({ getOrigin: async () => "https://www.usechangelog.com" }));
+mock.module("@/lib/site", () => ({
+  getOrigin: async () => "https://www.usechangelog.com",
+  publicUrl: async (slug: string) => `https://www.usechangelog.com/${slug}`,
+}));
 mock.module("@/lib/email/welcome", () => ({
   sendWelcomeEmail: async (...args: unknown[]) => {
     welcomed.push(args);
