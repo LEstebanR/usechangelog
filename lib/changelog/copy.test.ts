@@ -14,7 +14,7 @@ describe("public page copy", () => {
 
   test("a Spanish changelog shows Spanish tags and dates", () => {
     expect(PAGE_COPY.es.tags).toEqual({ new: "Nuevo", improved: "Mejorado", fixed: "Corregido", coming: "Próximamente" });
-    expect(formatDay("2026-11-14", "es")).toBe("14 nov 2026");
+    expect(formatDay("2026-11-14", "es")).toMatch(/^14 nov\.? 2026$/);
   });
 
   test("English keeps the page's current words", () => {

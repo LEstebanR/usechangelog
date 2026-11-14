@@ -8,7 +8,7 @@ import { listPublishedPosts } from "@/lib/posts/server";
 import { changelogJsonLd } from "@/lib/seo/json-ld";
 import { changelogLanguage } from "@/lib/seo/language";
 import { siteUrl } from "@/lib/site";
-import type { TagCopy, WidgetLang } from "@/lib/widget/copy";
+import type { WidgetLang } from "@/lib/widget/copy";
 import { getWorkspaceBySlug } from "@/lib/workspace/server";
 import { JsonLd } from "../json-ld";
 import { PostTags } from "../(site)/app/post-tags";
@@ -95,8 +95,8 @@ export default async function PublicChangelog({ params }: PageProps<"/[slug]">) 
           </p>
         ) : (
           <>
-            {coming.length > 0 && <PostList label={copy.tags.coming} marker="dashed" posts={coming} lang={lang} tags={copy.tags} />}
-            {shipped.length > 0 && <PostList label={copy.shipped} posts={shipped} lang={lang} tags={copy.tags} />}
+            {coming.length > 0 && <PostList label={copy.tags.coming} marker="dashed" posts={coming} lang={lang} />}
+            {shipped.length > 0 && <PostList label={copy.shipped} posts={shipped} lang={lang} />}
           </>
         )}
       </main>
@@ -107,13 +107,13 @@ export default async function PublicChangelog({ params }: PageProps<"/[slug]">) 
 }
 
 // One block of the page, laid out like the landing's example changelog.
-function PostList({ label, marker, posts, lang, tags }: {
+function PostList({ label, marker, posts, lang }: {
   label: string;
   marker?: "dashed";
   posts: Post[];
   lang: WidgetLang;
-  tags: TagCopy;
 }) {
+  const { tags } = PAGE_COPY[lang];
   return (
     <section aria-label={label} className="mt-14 md:mt-20">
       <SectionLabel marker={marker}>{label}</SectionLabel>

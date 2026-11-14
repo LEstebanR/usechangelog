@@ -98,7 +98,7 @@ export function WorkspaceForm({ action, initial, origin, submitLabel, showWidget
       {showWidgetLang && (
         <Chips
           name="widgetLang"
-          legend="Widget language"
+          legend="Language"
           options={WIDGET_LANGS}
           value={state.values.widgetLang}
           label={(lang) => LANG_NAMES[lang]}
