@@ -23,7 +23,7 @@
 
 ## Status
 
-> **Live at [usechangelog.com](https://www.usechangelog.com).** Free publishes one project (its public page and widget); Pro, billed monthly by Polar, publishes up to three. The MVP was built issue by issue, in the order listed in [Roadmap](#roadmap); see [End-to-end check](#end-to-end-check) for how it's verified.
+> **Live at [usechangelog.com](https://www.usechangelog.com).** Free publishes one project (its public page and widget); Pro, billed monthly by Polar, publishes up to three. The MVP was built issue by issue, in the order listed in [Roadmap](#roadmap); see [End-to-end check](#end-to-end-check) for how it's verified. Our own updates are at [usechangelog.com/usechangelog](https://www.usechangelog.com/usechangelog): a regular project in the owner's account, linked from the landing's footer and opened from its header with our own widget.
 
 ## What it is
 
@@ -338,7 +338,7 @@ The issue tracker is the backlog. Each issue carries a number in its title, in b
 | 25 | Plans: Free and Pro, with several projects per account | [#65](https://github.com/LEstebanR/usechangelog/issues/65) | Open |
 | 26 | Admin: see the registered users | [#57](https://github.com/LEstebanR/usechangelog/issues/57) | Open |
 | 27 | Launch: full test sign-up in production before outreach | [#62](https://github.com/LEstebanR/usechangelog/issues/62) | ✅ Done |
-| 27 | Own changelog: UseChangelog publishes its updates at `/usechangelog` | [#67](https://github.com/LEstebanR/usechangelog/issues/67) | Open |
+| 27 | Own changelog: UseChangelog publishes its updates at `/usechangelog` | [#67](https://github.com/LEstebanR/usechangelog/issues/67) | ✅ Done |
 | 28 | Launch: get the first 5 to 10 real users | [#58](https://github.com/LEstebanR/usechangelog/issues/58) | ✅ Done |
 
 ### Out of scope
