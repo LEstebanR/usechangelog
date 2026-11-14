@@ -23,7 +23,7 @@
 
 ## Status
 
-> **Live at [usechangelog.com](https://www.usechangelog.com).** Free publishes one project (its public page and widget); Pro, billed monthly by Polar, publishes up to three. The MVP was built issue by issue, in the order listed in [Roadmap](#roadmap); see [End-to-end check](#end-to-end-check) for how it's verified.
+> **Live at [usechangelog.com](https://www.usechangelog.com).** Free publishes one project (its public page and widget); Pro, billed monthly by Polar, publishes up to three. The MVP was built issue by issue, in the order listed in [Roadmap](#roadmap); see [End-to-end check](#end-to-end-check) for how it's verified. Our own updates are at [usechangelog.com/usechangelog](https://www.usechangelog.com/usechangelog): a regular project in the owner's account, linked from the landing's footer and opened from its header with our own widget.
 
 ## What it is
 
@@ -98,7 +98,7 @@ app/
     markdown-body.tsx   A post body rendered from Markdown (styles in markdown-styles.ts)
     (auth)/sign-in/     Sign-in: Google or a magic link
     app/                The signed-in app: /app (posts), /app/posts/new, /app/posts/[id], /app/onboarding, /app/projects/new, /app/settings, /app/billing
-    app/admin/          Admin only: the feedback users send (#28) and, at /app/admin/users, who signed up (#57)
+    app/admin/          Admin only: the feedback users send (#28, statuses #75) and, at /app/admin/users, who signed up (#57)
   [slug]/               The public changelog at /{slug}. Its own root layout sets lang from the workspace
   [slug]/og/            Its share image (next/og): name, latest posts and words in the workspace's language
   api/widget/[key]/     Public widget data (CORS open, 60-second CDN cache)
@@ -197,7 +197,7 @@ Every variable the code reads is in `.env.example`, by name only. `bun run check
 Users send feedback from **Feedback** in the app's nav (#28). Every message is in the `feedback` table, and admins read them at `/app/admin` (see below). To query them in Neon's SQL editor:
 
 ```sql
-select f.created_at, f.kind, u.email, w.slug, f.page, f.message
+select f.created_at, f.kind, f.status, u.email, w.slug, f.page, f.message
 from feedback f
 join neon_auth."user" u on u.id = f.user_id
 left join workspaces w on w.id = f.workspace_id
@@ -205,11 +205,11 @@ order by f.created_at desc
 limit 50;
 ```
 
-Answer by email, by hand.
+Answer by email, by hand. Then mark the message in `/app/admin` (#75): each one is open, done or dismissed, named after its kind (a bug is Fixed or Won't fix, an idea Shipped or Declined, other Answered or Archived).
 
 ### Admin
 
-`admin` is our own staff role, in the `user_roles` table (customers never have one). An admin sees an **Admin** tab in the app, and `/app/admin` lists the feedback, newest first, filterable by kind. `/app/admin/users` lists everyone who signed up (newest 200), with their workspace, subscription (as the webhook stored it), posts and latest sign-in, plus totals. Anyone else gets a 404 on both.
+`admin` is our own staff role, in the `user_roles` table (customers never have one). An admin sees an **Admin** tab in the app, and `/app/admin` lists the feedback, newest first, filterable by kind and status (open by default, with the open count per kind), and marks each message resolved or reopens it. `/app/admin/users` lists everyone who signed up (newest 200), with their workspace, subscription (as the webhook stored it), posts and latest sign-in, plus totals. Anyone else gets a 404 on both.
 
 Grant it to someone who has signed in at least once on that environment:
 
@@ -338,14 +338,17 @@ The issue tracker is the backlog. Each issue carries a number in its title, in b
 | 19 | Delete your account | [#31](https://github.com/LEstebanR/usechangelog/issues/31) | ✅ Done |
 | 20 | Custom 404 page | [#33](https://github.com/LEstebanR/usechangelog/issues/33) | ✅ Done |
 | 22 | Polar: an organization of our own | [#60](https://github.com/LEstebanR/usechangelog/issues/60) | ✅ Done |
-| 23 | Security: rotate the database password exposed in Vercel logs | [#61](https://github.com/LEstebanR/usechangelog/issues/61) | Open |
+| 23 | Security: rotate the database password exposed in Vercel logs | [#61](https://github.com/LEstebanR/usechangelog/issues/61) | ✅ Done |
 | 24 | Docs: courtesy accounts, roadmap and previews in the README | [#64](https://github.com/LEstebanR/usechangelog/issues/64) | ✅ Done |
-| 25 | Plans: Free and Pro, with several projects per account | [#65](https://github.com/LEstebanR/usechangelog/issues/65) | Open |
-| 26 | Admin: see the registered users | [#57](https://github.com/LEstebanR/usechangelog/issues/57) | Open |
+| 25 | Plans: Free and Pro, with several projects per account | [#65](https://github.com/LEstebanR/usechangelog/issues/65) | ✅ Done |
+| 26 | Admin: see the registered users | [#57](https://github.com/LEstebanR/usechangelog/issues/57) | ✅ Done |
 | 27 | Launch: full test sign-up in production before outreach | [#62](https://github.com/LEstebanR/usechangelog/issues/62) | ✅ Done |
-| 27 | Own changelog: UseChangelog publishes its updates at `/usechangelog` | [#67](https://github.com/LEstebanR/usechangelog/issues/67) | Open |
 | 28 | Launch: get the first 5 to 10 real users | [#58](https://github.com/LEstebanR/usechangelog/issues/58) | ✅ Done |
-| 29 | Email: welcome when an account creates its first project | [#76](https://github.com/LEstebanR/usechangelog/issues/76) | ✅ Done |
+| 29 | Share image for each changelog, in its language | [#73](https://github.com/LEstebanR/usechangelog/issues/73) | ✅ Done |
+| 30 | Admin: no project limit for staff | [#77](https://github.com/LEstebanR/usechangelog/issues/77) | ✅ Done |
+| 31 | Own changelog: UseChangelog publishes its updates at `/usechangelog` | [#67](https://github.com/LEstebanR/usechangelog/issues/67) | ✅ Done |
+| 32 | Admin: mark feedback as resolved | [#75](https://github.com/LEstebanR/usechangelog/issues/75) | ✅ Done |
+| 33 | Email: welcome when the first project is created | [#76](https://github.com/LEstebanR/usechangelog/issues/76) | ✅ Done |
 
 ### Out of scope
 

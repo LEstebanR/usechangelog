@@ -55,7 +55,7 @@ This list is the source of truth. The skills in `.agents/skills/` add implementa
 - PRs are ready for review, never draft. Don't merge; the owner merges.
 - Fill in `.github/pull_request_template.md`: the Vercel preview URL and `Closes #<issue>` for every issue it resolves, so GitHub closes them on merge.
 - Issues follow `.github/ISSUE_TEMPLATE/` and the `write-issue` skill.
-- To develop an issue, follow the `develop-issue` skill. It covers the plan checkpoint, the preview verification, simplify, code review and the README update.
+- To develop an issue, follow the `develop-issue` skill. It covers the plan checkpoint, the preview verification, the code review (the project's `review-pr` skill, not the generic `code-review`) and the README update.
 
 ## Skills
 

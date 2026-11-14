@@ -1,5 +1,5 @@
 {
-  "id": "7b658a8a-a8a3-4e53-a005-4368894b914c",
+  "id": "471372df-410b-41d0-8e2a-cb43868ebf8a",
   "prevId": "0d5c32d8-a158-4695-be18-6cbea9c83b5f",
   "version": "7",
   "dialect": "postgresql",
@@ -62,12 +62,6 @@
         },
         "subscription_updated_at": {
           "name": "subscription_updated_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "welcome_email_sent_at": {
-          "name": "welcome_email_sent_at",
           "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": false
@@ -160,6 +154,20 @@
           "primaryKey": false,
           "notNull": true,
           "default": "now()"
+        },
+        "status": {
+          "name": "status",
+          "type": "feedback_status",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'open'"
+        },
+        "resolved_at": {
+          "name": "resolved_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
         }
       },
       "indexes": {
@@ -520,6 +528,15 @@
         "bug",
         "idea",
         "other"
+      ]
+    },
+    "public.feedback_status": {
+      "name": "feedback_status",
+      "schema": "public",
+      "values": [
+        "open",
+        "done",
+        "dismissed"
       ]
     },
     "public.post_category": {

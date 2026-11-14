@@ -1,7 +1,7 @@
 import { randomBytes } from "node:crypto";
 import { boolean, date, index, pgEnum, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
 import { SUBSCRIPTION_STATUSES } from "@/lib/billing/status";
-import { FEEDBACK_KINDS } from "@/lib/feedback/form";
+import { FEEDBACK_KINDS, FEEDBACK_STATUSES } from "@/lib/feedback/form";
 import { CATEGORIES, TYPES } from "@/lib/posts/form";
 import { WIDGET_LANGS } from "@/lib/widget/copy";
 import { user } from "./neon-auth";
@@ -100,6 +100,7 @@ export const posts = pgTable(
 );
 
 export const feedbackKind = pgEnum("feedback_kind", FEEDBACK_KINDS);
+export const feedbackStatus = pgEnum("feedback_status", FEEDBACK_STATUSES);
 
 // What signed-in users write to us from the app (#28). Private: never shown in public.
 // Deleting the user deletes their messages; deleting a workspace keeps them, without it.
@@ -117,6 +118,9 @@ export const feedback = pgTable(
     // The app route it was sent from, e.g. /app/settings.
     page: text().notNull(),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    // Set by staff from /app/admin (#75). resolved_at is null while it's open.
+    status: feedbackStatus().notNull().default("open"),
+    resolvedAt: timestamp("resolved_at", { withTimezone: true }),
   },
   // The rate limit counts a user's messages in the last hour.
   (t) => [index("feedback_user_created_idx").on(t.userId, t.createdAt)],
