@@ -10,14 +10,6 @@ Closes #
 
 <!-- Concrete steps and results on the preview, plus anything local. Screenshots for UI changes (desktop and mobile). -->
 
-## Checklist
-
-- [ ] Every "Hecho cuando" item of the issue is done, or the gap is explained above
-- [ ] Tested on the Vercel preview, not only locally
-- [ ] CI is green (lint, typecheck, build, and test once it exists)
-- [ ] No secrets in git; new env var names are in `.env.example`
-- [ ] Nothing out of scope per `AGENTS.md` → Product rules
-
 ## Changelog
 
 <!-- Optional: a post for your customers, sent to UseChangelog as a draft when this pull request is merged.
@@ -26,3 +18,11 @@ Anything below Title and Category is the post's body, in Markdown. Nothing else 
 
 Title:
 Category: improved
+
+## Checklist
+
+- [ ] Every "Hecho cuando" item of the issue is done, or the gap is explained above
+- [ ] Tested on the Vercel preview, not only locally
+- [ ] CI is green (lint, typecheck, build, and test once it exists)
+- [ ] No secrets in git; new env var names are in `.env.example`
+- [ ] Nothing out of scope per `AGENTS.md` → Product rules

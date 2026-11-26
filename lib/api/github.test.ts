@@ -84,6 +84,8 @@ describe("githubWorkflow (#86)", () => {
   // We use it ourselves: our merged pull requests become drafts in /usechangelog.
   test("this repo runs the same workflow and template section", () => {
     expect(readFileSync(".github/workflows/usechangelog.yml", "utf8")).toBe(workflow);
-    expect(readFileSync(".github/pull_request_template.md", "utf8").endsWith(PR_TEMPLATE_SECTION)).toBe(true);
+    // Before Checklist, so that heading ends it and the attribution line at the bottom of our
+    // PR descriptions is never sent.
+    expect(readFileSync(".github/pull_request_template.md", "utf8")).toContain(`${PR_TEMPLATE_SECTION}\n## Checklist`);
   });
 });
