@@ -54,8 +54,38 @@ flowchart LR
 1. **Write a post:** title, Markdown body, category and type. Save it as a draft or publish it.
 2. **Get a public page:** published posts appear at `/{slug}`, with "Coming soon" first and then everything that shipped, newest first.
 3. **Embed the widget:** paste one `<script>` tag. The widget's chrome is English by default, or Spanish with `lang="es"`; posts show exactly as written.
+4. **Or draft from GitHub:** a merged pull request with a "Changelog" section becomes a draft, through the [API](#api); someone reviews and publishes it.
 
 An account has several projects (`workspaces` in code). The plan is the account's and comes from its Polar subscription: `active` (a trial included) is Pro, anything else is Free. Its oldest projects publish, as many as the plan allows (`lib/billing/plans.ts`); the rest keep their posts and drafts but have no public page, widget or sitemap entry. If Pro lapses, only the oldest project stays public; nothing is deleted, and the others come back as soon as it's active again.
+
+## API
+
+One endpoint, for creating drafts from CI (#86). Each project has at most one API key, created, rotated and revoked in **/app/settings → Drafts from GitHub**. The key (`uc_…`) is shown once; we store only its SHA-256.
+
+```
+POST /api/v1/posts
+Authorization: Bearer uc_…
+Content-Type: application/json
+
+{ "title": "Faster exports", "body": "Markdown, optional", "category": "new" | "improved" | "fixed",
+  "source": { "repo": "owner/name", "pr": 123 } }
+```
+
+- It always creates a **draft** of type Shipped in the key's project. Any other field (status, date, project) is ignored. Publishing happens in /app, where the plan applies.
+- Title and body follow the post form's limits (120 and 10,000 characters) and are rendered with the same safe Markdown.
+- One post per pull request: sending the same `source` again returns the existing post. Deleting the post lets it be created again.
+
+| Status | Body | When |
+| --- | --- | --- |
+| `201` | `{ id, status: "draft", created: true }` | Draft created |
+| `200` | `{ id, status: "draft" \| "published", created: false }` | That pull request already has a post (its current status) |
+| `400` | `{ error: "invalid_json" \| "invalid_request", message, fields? }` | Not JSON, not a JSON object, or invalid fields (one message per field) |
+| `401` | `{ error: "unauthorized", message }` | Missing, malformed, unknown or revoked key |
+| `413` | `{ error: "too_large", message }` | Request over 64 KB |
+| `429` | `{ error: "rate_limited", message }`, `Retry-After` | Over 60 drafts in the last hour for the project |
+| `500` | `{ error: "internal", message }` | Anything unexpected; nothing internal is returned or logged |
+
+The GitHub Actions workflow and the pull request template section are in [`examples/github-actions/`](examples/github-actions/) (settings hands out the same text with the deployment's URL). The workflow runs on `pull_request_target` when a pull request is merged into the default branch, never checks out its code, reads the key from the `USECHANGELOG_API_KEY` secret, and sends only the "Changelog" section: pull requests with an empty title there are skipped.
 
 ## Tech stack
 
@@ -102,6 +132,7 @@ app/
   [slug]/               The public changelog at /{slug}. Its own root layout sets lang from the workspace
   [slug]/og/            Its share image (next/og): name, latest posts and words in the workspace's language
   api/widget/[key]/     Public widget data (CORS open, 60-second CDN cache)
+  api/v1/posts/         Creates a draft from CI with a project's API key (#86, see API)
   api/polar/            Polar checkout, customer portal and webhook (the only writer of subscription state)
   icon.svg, apple-icon.png
   api/auth/[...path]/   Auth handler, proxied to Neon
@@ -110,6 +141,7 @@ lib/auth/               Server auth client, Server Actions (sign in, sign out) a
 lib/account/            Deleting an account: deleteAccount() and the Neon API call (#31)
 lib/workspace/          Slug rules, form parsing, the open project (uc_project cookie), the account, getWorkspaceBySlug() and project Server Actions
 lib/posts/              Post form parsing, workspace-scoped queries and post Server Actions
+lib/api/                API keys (create, rotate, revoke), the API's input and draft insert, and the GitHub workflow and PR template settings hands out (#86)
 lib/billing/            Plans and their limits (plans.ts), Polar config, revokeSubscriptionsInPolar(), mapPolarStatus(), canPublish() (the one publish gate) and the webhook handler
 lib/markdown.ts         renderMarkdown(): safe Markdown to HTML for the public page and the widget
 lib/widget/             The widget's words in 5 languages and the API payload
@@ -121,10 +153,11 @@ assets/fonts/           TTF fonts (OFL) for the share image
 scripts/smoke-app.ts    Signed-in smoke test (`bun run smoke`)
 scripts/widget-test.ts  Host pages to try the widget from another origin (`bun run widget-test`)
 db/
-  schema.ts             Our tables (public schema): accounts (billing), workspaces (projects), posts, feedback, user_roles
+  schema.ts             Our tables (public schema): accounts (billing), workspaces (projects), posts, api_keys, feedback, user_roles
   neon-auth.ts          Read-only view of Neon's user table, for foreign keys
   migrations/           SQL migrations generated by drizzle-kit
 proxy.ts                Redirects /app to /sign-in without a session
+examples/github-actions/  The workflow and PR template section for drafts from GitHub (#86), kept equal to settings' by a test
 .github/workflows/ci.yml  CI: lint, typecheck, build
 AGENTS.md               Product rules and conventions (read by AI agents and humans)
 .agents/skills/         Project skills for AI agents (symlinked in .claude/skills)
@@ -358,6 +391,7 @@ The issue tracker is the backlog. Each issue carries a number in its title, in b
 | 32 | Admin: mark feedback as resolved | [#75](https://github.com/LEstebanR/usechangelog/issues/75) | ✅ Done |
 | 33 | Email: welcome when the first project is created | [#76](https://github.com/LEstebanR/usechangelog/issues/76) | ✅ Done |
 | 34 | Email: magic link in our own design | [#83](https://github.com/LEstebanR/usechangelog/issues/83) | ✅ Done |
+| 35 | Drafts from merged GitHub pull requests | [#86](https://github.com/LEstebanR/usechangelog/issues/86) | ✅ Done |
 
 ### Out of scope
 
