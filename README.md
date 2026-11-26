@@ -426,6 +426,7 @@ Lighthouse on the production build: **98 / 100 / 100 / 100** on mobile and **100
 
 - **One issue, one branch, one PR,** opened from an up-to-date `main`. PRs are ready for review, never draft; the owner merges.
 - **The PR description** carries the Vercel preview URL and `Closes #<issue>`, so GitHub closes the issue on merge. Issue and PR templates live in `.github/`.
+- **Our changelog comes from the PRs:** a PR whose "Changelog" section has a title becomes a draft at `/usechangelog` when it's merged. Write it for customers, short, and leave the title empty for internal changes. The rules are in [`AGENTS.md`](AGENTS.md#pull-requests).
 - **Language:** code, commits, UI copy and PRs are in English; issues are in Spanish.
 - **Never commit secrets** or `.env*` files (except `.env.example`).
 
