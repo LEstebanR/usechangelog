@@ -30,8 +30,13 @@ jobs:
             const level = lines[start].trim().match(/^#+/)[0].length;
             const fields = {};
             const body = [];
+            let fence = null;
             for (const line of lines.slice(start + 1)) {
-              const heading = line.trim().match(/^(#{1,6})\s/);
+              // Inside a code fence, a "# comment" is code, not a heading that ends the section.
+              const marker = line.trim().match(/^(\x60{3,}|~{3,})/);
+              if (marker && !fence) fence = marker[1][0];
+              else if (marker && marker[1][0] === fence) fence = null;
+              const heading = !fence && !marker && line.trim().match(/^(#{1,6})\s/);
               if (heading && heading[1].length <= level) break;
               const field = line.match(/^\s*(title|category)\s*:(.*)$/i);
               if (field && !(field[1].toLowerCase() in fields)) fields[field[1].toLowerCase()] = field[2].trim();

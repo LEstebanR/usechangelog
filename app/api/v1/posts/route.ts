@@ -1,4 +1,4 @@
-import { type FieldErrors, parseDraftInput, REQUEST_MAX_BYTES } from "@/lib/api/input";
+import { type FieldErrors, isJsonObject, parseDraftInput, REQUEST_MAX_BYTES } from "@/lib/api/input";
 import { bearerKey, hashApiKey } from "@/lib/api/keys";
 import { createDraft, touchApiKey } from "@/lib/api/server";
 
@@ -23,6 +23,26 @@ const unauthorized = () =>
   });
 const tooLarge = () => error(413, "too_large", `Keep the request under ${REQUEST_MAX_BYTES / 1024} KB.`);
 
+// The body as text, or null past REQUEST_MAX_BYTES: read with a cap, so a large chunked
+// body (no Content-Length) is never buffered whole.
+async function readCapped(request: Request): Promise<string | null> {
+  if (!request.body) return "";
+  const reader = request.body.getReader();
+  const chunks: Uint8Array[] = [];
+  let size = 0;
+  for (;;) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    size += value.byteLength;
+    if (size > REQUEST_MAX_BYTES) {
+      await reader.cancel();
+      return null;
+    }
+    chunks.push(value);
+  }
+  return new TextDecoder().decode(Buffer.concat(chunks));
+}
+
 export async function POST(request: Request) {
   try {
     const key = bearerKey(request.headers.get("authorization"));
@@ -30,8 +50,8 @@ export async function POST(request: Request) {
 
     // Content-Length first, then the real size: the header may be missing or wrong.
     if (Number(request.headers.get("content-length") ?? 0) > REQUEST_MAX_BYTES) return tooLarge();
-    const raw = await request.text();
-    if (new TextEncoder().encode(raw).length > REQUEST_MAX_BYTES) return tooLarge();
+    const raw = await readCapped(request);
+    if (raw === null) return tooLarge();
 
     const [owner] = await touchApiKey(hashApiKey(key));
     if (!owner) return unauthorized();
@@ -42,6 +62,7 @@ export async function POST(request: Request) {
     } catch {
       return error(400, "invalid_json", "Send a JSON body.");
     }
+    if (!isJsonObject(json)) return error(400, "invalid_request", "Send a JSON object.");
     const input = parseDraftInput(json);
     if (!input.ok) return error(400, "invalid_request", "Some fields are invalid.", { fields: input.errors });
 
@@ -52,7 +73,7 @@ export async function POST(request: Request) {
       });
     }
     return Response.json(
-      { id: result.id, status: "draft", created: result.kind === "created" },
+      { id: result.id, status: result.kind === "created" ? "draft" : result.status, created: result.kind === "created" },
       { status: result.kind === "created" ? 201 : 200, headers: NO_STORE },
     );
   } catch (e) {

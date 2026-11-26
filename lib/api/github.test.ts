@@ -43,6 +43,15 @@ describe("changelogEntry (#86)", () => {
   });
 });
 
+test("a # comment inside a code fence stays in the body", () => {
+  const fence = "\x60\x60\x60";
+  expect(changelogEntry(`## Changelog\nTitle: CLI\nCategory: new\n${fence}bash\n# install\nnpm i x\n${fence}\n~~~\n## not a heading\n~~~\nAfter.\n## Next\nInternal`)).toEqual({
+    title: "CLI",
+    category: "new",
+    body: `${fence}bash\n# install\nnpm i x\n${fence}\n~~~\n## not a heading\n~~~\nAfter.`,
+  });
+});
+
 describe("githubWorkflow (#86)", () => {
   const workflow = githubWorkflow("https://www.usechangelog.com");
 

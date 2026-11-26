@@ -42,7 +42,11 @@ describe("parseDraftInput (#86)", () => {
     }
   });
 
-  test("anything but an object is refused", () => {
-    for (const json of [null, [], "x", 1]) expect(parseDraftInput(json).ok).toBe(false);
+  test("anything but an object is refused, with no field to blame", () => {
+    for (const json of [null, [], "x", 1]) expect(parseDraftInput(json)).toEqual({ ok: false, errors: {} });
+  });
+
+  test("the body's limit counts it trimmed", () => {
+    expect(parseDraftInput({ ...valid, body: "x".repeat(BODY_MAX) + "\n".repeat(20) })).toMatchObject({ ok: true });
   });
 });

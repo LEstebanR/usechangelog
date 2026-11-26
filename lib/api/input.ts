@@ -26,15 +26,19 @@ const isObject = (value: unknown): value is Record<string, unknown> =>
 
 // Only these fields are read: anything else (a status, a date, a type, a project) is ignored,
 // so a request can never publish a post or pick another project.
+export const isJsonObject = isObject;
+
 export function parseDraftInput(json: unknown): { ok: true; value: DraftInput } | { ok: false; errors: FieldErrors } {
-  if (!isObject(json)) return { ok: false, errors: { title: "Send a JSON object." } };
+  // The route answers a non-object itself; no field is to blame.
+  if (!isObject(json)) return { ok: false, errors: {} };
   const errors: FieldErrors = {};
 
   const title = typeof json.title === "string" ? json.title.trim() : "";
   if (!title) errors.title = "Add a title.";
   else if (title.length > TITLE_MAX) errors.title = `Keep it under ${TITLE_MAX} characters.`;
 
-  const body = json.body === undefined || json.body === null ? "" : json.body;
+  const raw = json.body === undefined || json.body === null ? "" : json.body;
+  const body = typeof raw === "string" ? raw.trim() : raw;
   if (typeof body !== "string") errors.body = "The body must be a string.";
   else if (body.length > BODY_MAX) errors.body = `Keep it under ${BODY_MAX.toLocaleString("en-US")} characters.`;
 
@@ -51,6 +55,6 @@ export function parseDraftInput(json: unknown): { ok: true; value: DraftInput } 
   if (Object.keys(errors).length || !category || typeof body !== "string") return { ok: false, errors };
   return {
     ok: true,
-    value: { title, body: body.trim(), category, sourceRef: `github:${repo.toLowerCase()}#${pr}` },
+    value: { title, body, category, sourceRef: `github:${repo.toLowerCase()}#${pr}` },
   };
 }

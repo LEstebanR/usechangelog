@@ -78,8 +78,8 @@ Content-Type: application/json
 | Status | Body | When |
 | --- | --- | --- |
 | `201` | `{ id, status: "draft", created: true }` | Draft created |
-| `200` | `{ id, status: "draft", created: false }` | That pull request already has a post |
-| `400` | `{ error: "invalid_json" \| "invalid_request", message, fields? }` | Not JSON, or invalid fields (one message per field) |
+| `200` | `{ id, status: "draft" \| "published", created: false }` | That pull request already has a post (its current status) |
+| `400` | `{ error: "invalid_json" \| "invalid_request", message, fields? }` | Not JSON, not a JSON object, or invalid fields (one message per field) |
 | `401` | `{ error: "unauthorized", message }` | Missing, malformed, unknown or revoked key |
 | `413` | `{ error: "too_large", message }` | Request over 64 KB |
 | `429` | `{ error: "rate_limited", message }`, `Retry-After` | Over 60 drafts in the last hour for the project |

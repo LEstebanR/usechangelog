@@ -27,10 +27,11 @@ describe("insertDraftSql (#86)", () => {
   });
 });
 
-test("afterInsertSql finds the pull request's post in the same project", () => {
+test("afterInsertSql finds the pull request's post, and its status, in the same project", () => {
   const { sql, params } = dialect.sqlToQuery(afterInsertSql(workspaceId, draft.sourceRef));
   expect(sql).toContain('"posts"."workspace_id" = $1 and "posts"."source_ref" = $2');
-  expect(params.slice(0, 2)).toEqual([workspaceId, draft.sourceRef]);
+  expect(params.slice(0, 4)).toEqual([workspaceId, draft.sourceRef, workspaceId, draft.sourceRef]);
+  expect(sql).toContain('as existing_status');
 });
 
 test("touchApiKey looks the key up by hash and marks it used", () => {

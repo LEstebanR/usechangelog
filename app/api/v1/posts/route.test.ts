@@ -50,11 +50,11 @@ describe("POST /api/v1/posts (#86)", () => {
     ]);
   });
 
-  test("the same pull request again answers 200 with the same post", async () => {
-    result = { kind: "exists", id: "post-1" };
+  test("the same pull request again answers 200 with the same post and its current status", async () => {
+    result = { kind: "exists", id: "post-1", status: "published" };
     const response = await post(body);
     expect(response.status).toBe(200);
-    expect(await response.json()).toEqual({ id: "post-1", status: "draft", created: false });
+    expect(await response.json()).toEqual({ id: "post-1", status: "published", created: false });
   });
 
   test("a missing, malformed, unknown or revoked key: 401, nothing created", async () => {
@@ -65,6 +65,28 @@ describe("POST /api/v1/posts (#86)", () => {
       expect(await response.json()).toMatchObject({ error: "unauthorized" });
     }
     expect(created).toEqual([]);
+  });
+
+  test("JSON that isn't an object: 400 with no field errors", async () => {
+    const response = await post([]);
+    expect(response.status).toBe(400);
+    expect(await response.json()).toEqual({ error: "invalid_request", message: "Send a JSON object." });
+  });
+
+  test("a chunked body over the limit, with no Content-Length: 413", async () => {
+    const chunk = new TextEncoder().encode("x".repeat(16 * 1024));
+    let sent = 0;
+    const stream = new ReadableStream({
+      pull(controller) {
+        if (sent++ < 100) controller.enqueue(chunk);
+        else controller.close();
+      },
+    });
+    const response = await POST(
+      new Request("https://www.usechangelog.com/api/v1/posts", { method: "POST", headers: { authorization: `Bearer ${key}` }, body: stream, duplex: "half" } as RequestInit),
+    );
+    expect(response.status).toBe(413);
+    expect(sent).toBeLessThan(10);
   });
 
   test("invalid JSON: 400 invalid_json", async () => {

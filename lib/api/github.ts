@@ -15,7 +15,8 @@ Category: improved
 `;
 
 // Reads the "Changelog" section of a pull request description: null when there is none or
-// its title is empty (the workflow skips it), { error } when the category isn't valid.
+// its title is empty (the workflow skips it), { error } when the category isn't valid. The
+// section ends at the next heading of its level or higher, outside code fences.
 // Plain JavaScript in a string, because the workflow runs it with Node; the tests run the same text.
 export const CHANGELOG_PARSER = String.raw`function changelogEntry(description) {
   const lines = String(description || "").replace(/<!--[\s\S]*?-->/g, "").split(/\r?\n/);
@@ -24,8 +25,13 @@ export const CHANGELOG_PARSER = String.raw`function changelogEntry(description) 
   const level = lines[start].trim().match(/^#+/)[0].length;
   const fields = {};
   const body = [];
+  let fence = null;
   for (const line of lines.slice(start + 1)) {
-    const heading = line.trim().match(/^(#{1,6})\s/);
+    // Inside a code fence, a "# comment" is code, not a heading that ends the section.
+    const marker = line.trim().match(/^(\x60{3,}|~{3,})/);
+    if (marker && !fence) fence = marker[1][0];
+    else if (marker && marker[1][0] === fence) fence = null;
+    const heading = !fence && !marker && line.trim().match(/^(#{1,6})\s/);
     if (heading && heading[1].length <= level) break;
     const field = line.match(/^\s*(title|category)\s*:(.*)$/i);
     if (field && !(field[1].toLowerCase() in fields)) fields[field[1].toLowerCase()] = field[2].trim();

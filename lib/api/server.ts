@@ -35,11 +35,13 @@ export const insertDraftSql = (workspaceId: string, d: DraftInput) => sql`
 export const afterInsertSql = (workspaceId: string, sourceRef: string) => sql`
   select
     (select ${posts.id} from ${posts} where ${posts.workspaceId} = ${workspaceId} and ${posts.sourceRef} = ${sourceRef}) as existing,
+    (select ${posts.status} from ${posts} where ${posts.workspaceId} = ${workspaceId} and ${posts.sourceRef} = ${sourceRef}) as existing_status,
     greatest(1, ceil(extract(epoch from (select min(${posts.createdAt}) from ${posts} where ${recent(workspaceId)}) + interval '1 hour' - now())))::int as retry_after`;
 
 export type DraftResult =
   | { kind: "created"; id: string }
-  | { kind: "exists"; id: string }
+  // The post may have been published since: its status is the real one.
+  | { kind: "exists"; id: string; status: "draft" | "published" }
   | { kind: "limited"; retryAfter: number };
 
 // Creates the draft in one transaction (#86). A lock per project first, so parallel
@@ -54,8 +56,12 @@ export async function createDraft(workspaceId: string, draft: DraftInput): Promi
   ]);
   const created = inserted.rows[0] as { id: string } | undefined;
   if (created) return { kind: "created", id: created.id };
-  const { existing, retry_after } = after.rows[0] as { existing: string | null; retry_after: number | null };
-  if (existing) return { kind: "exists", id: existing };
+  const { existing, existing_status, retry_after } = after.rows[0] as {
+    existing: string | null;
+    existing_status: "draft" | "published" | null;
+    retry_after: number | null;
+  };
+  if (existing) return { kind: "exists", id: existing, status: existing_status ?? "draft" };
   return { kind: "limited", retryAfter: retry_after ?? 3600 };
 }
 

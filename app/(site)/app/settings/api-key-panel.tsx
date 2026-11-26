@@ -8,8 +8,8 @@ import { CopyButton } from "../copy-button";
 
 const small = "py-2 text-sm";
 
-// The project's API key (#86): create it, rotate it (after a confirmation, since the current
-// key stops at once) or revoke it. The new key shows only this once: we keep its hash, never
+// The project's API key (#86): create it, rotate it or revoke it. Rotating and revoking ask
+// first, since the current key stops at once. The new key shows only this once: we keep its hash, never
 // the key. Hidden once the key is revoked, so a dead key isn't offered.
 export function ApiKeyPanel({
   create,
@@ -23,10 +23,10 @@ export function ApiKeyPanel({
   // What the server knows of the current key: its prefix and dates.
   children: React.ReactNode;
 }) {
-  const [confirming, setConfirming] = useState(false);
+  const [confirming, setConfirming] = useState<"rotate" | "revoke" | null>(null);
   const [state, formAction] = useActionState(async (prev: ApiKeyState, formData: FormData) => {
     const next = await create(prev, formData);
-    setConfirming(false);
+    setConfirming(null);
     return next;
   }, {});
 
@@ -37,30 +37,37 @@ export function ApiKeyPanel({
         {confirming ? (
           <div className="flex basis-full flex-col gap-3">
             <p className="text-sm">
-              Rotating stops the current key at once. Your workflow fails until you replace the{" "}
-              <code className="font-mono">USECHANGELOG_API_KEY</code> secret with the new key.
+              {confirming === "rotate" ? "Rotating" : "Revoking"} stops the current key at once. Your workflow fails
+              until you {confirming === "rotate" ? "replace" : "create a new key and replace"} the{" "}
+              <code className="font-mono">USECHANGELOG_API_KEY</code> secret{confirming === "rotate" && " with the new key"}.
             </p>
             <div className="flex gap-2">
-              <form action={formAction}>
-                <SubmitButton pendingLabel="Rotating…" className={`${dangerButtonClass} ${small}`}>
-                  Rotate key
-                </SubmitButton>
-              </form>
-              <button type="button" onClick={() => setConfirming(false)} className={`${secondaryButtonClass} ${small}`}>
+              {confirming === "rotate" ? (
+                <form action={formAction}>
+                  <SubmitButton pendingLabel="Rotating…" className={`${dangerButtonClass} ${small}`}>
+                    Rotate key
+                  </SubmitButton>
+                </form>
+              ) : (
+                <form action={async () => (await revoke(), setConfirming(null))}>
+                  <SubmitButton pendingLabel="Revoking…" className={`${dangerButtonClass} ${small}`}>
+                    Revoke key
+                  </SubmitButton>
+                </form>
+              )}
+              <button type="button" onClick={() => setConfirming(null)} className={`${secondaryButtonClass} ${small}`}>
                 Cancel
               </button>
             </div>
           </div>
         ) : hasKey ? (
           <div className="flex gap-2">
-            <button type="button" onClick={() => setConfirming(true)} className={`${secondaryButtonClass} ${small}`}>
+            <button type="button" onClick={() => setConfirming("rotate")} className={`${secondaryButtonClass} ${small}`}>
               Rotate key
             </button>
-            <form action={revoke}>
-              <SubmitButton pendingLabel="Revoking…" className={`${secondaryButtonClass} ${small}`}>
-                Revoke
-              </SubmitButton>
-            </form>
+            <button type="button" onClick={() => setConfirming("revoke")} className={`${secondaryButtonClass} ${small}`}>
+              Revoke
+            </button>
           </div>
         ) : (
           <form action={formAction}>
