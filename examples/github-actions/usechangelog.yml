@@ -1,0 +1,85 @@
+# Sends the "Changelog" section of each merged pull request to UseChangelog as a draft.
+# Setup: add your project's API key as the USECHANGELOG_API_KEY secret
+# (Settings → Secrets and variables → Actions → New repository secret).
+name: UseChangelog
+
+on:
+  # Runs this file as it is on your default branch and never checks out the pull request's
+  # code, so pull requests from forks work too without running their code.
+  pull_request_target:
+    types: [closed]
+
+permissions: {}
+
+jobs:
+  draft:
+    if: github.event.pull_request.merged && github.event.pull_request.base.ref == github.event.repository.default_branch
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Send the changelog entry as a draft
+        env:
+          USECHANGELOG_API_KEY: ${{ secrets.USECHANGELOG_API_KEY }}
+          USECHANGELOG_URL: https://www.usechangelog.com/api/v1/posts
+        run: |
+          node <<'SCRIPT'
+          function changelogEntry(description) {
+            const lines = String(description || "").replace(/<!--[\s\S]*?-->/g, "").split(/\r?\n/);
+            const start = lines.findIndex((line) => /^#{1,6}\s+changelog\s*$/i.test(line.trim()));
+            if (start === -1) return null;
+            const level = lines[start].trim().match(/^#+/)[0].length;
+            const fields = {};
+            const body = [];
+            for (const line of lines.slice(start + 1)) {
+              const heading = line.trim().match(/^(#{1,6})\s/);
+              if (heading && heading[1].length <= level) break;
+              const field = line.match(/^\s*(title|category)\s*:(.*)$/i);
+              if (field && !(field[1].toLowerCase() in fields)) fields[field[1].toLowerCase()] = field[2].trim();
+              else body.push(line);
+            }
+            if (!fields.title) return null;
+            const category = (fields.category || "").toLowerCase();
+            if (!["new", "improved", "fixed"].includes(category)) {
+              return { error: "Set the changelog Category to new, improved or fixed." };
+            }
+            return { title: fields.title, category, body: body.join("\n").trim() };
+          }
+
+          const fs = require("node:fs");
+
+          (async () => {
+            const pr = JSON.parse(fs.readFileSync(process.env.GITHUB_EVENT_PATH, "utf8")).pull_request;
+            const entry = changelogEntry(pr.body);
+            const fail = (message) => {
+              console.log("::error::" + message);
+              process.exitCode = 1;
+            };
+            if (!entry) return console.log("No changelog title in this pull request: skipped.");
+            if (entry.error) return fail(entry.error);
+            if (!process.env.USECHANGELOG_API_KEY) return fail("Add the USECHANGELOG_API_KEY secret to this repository.");
+
+            const request = {
+              title: entry.title,
+              body: entry.body,
+              category: entry.category,
+              source: { repo: process.env.GITHUB_REPOSITORY, pr: pr.number },
+            };
+            for (let attempt = 1; attempt <= 3; attempt++) {
+              const response = await fetch(process.env.USECHANGELOG_URL, {
+                method: "POST",
+                headers: { authorization: "Bearer " + process.env.USECHANGELOG_API_KEY, "content-type": "application/json" },
+                body: JSON.stringify(request),
+              }).catch(() => null);
+              if (response && response.status < 500) {
+                const result = await response.json().catch(() => ({}));
+                if (response.ok) {
+                  return console.log(result.created ? "Draft created in UseChangelog." : "This pull request already has a post in UseChangelog.");
+                }
+                const fields = Object.values(result.fields || {}).join(" ");
+                return fail("UseChangelog answered " + response.status + ": " + (result.message || "no message") + (fields ? " " + fields : ""));
+              }
+              if (attempt < 3) await new Promise((resolve) => setTimeout(resolve, 5000 * attempt));
+            }
+            fail("UseChangelog couldn't be reached. Re-run this job to try again.");
+          })();
+          SCRIPT

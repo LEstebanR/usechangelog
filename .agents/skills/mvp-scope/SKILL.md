@@ -14,6 +14,7 @@ The product rules and the out-of-scope list live in `AGENTS.md` → **Product ru
   - Title and a Markdown body.
   - A category (New, Improved or Fixed) and a type (Shipped, or Coming for what's on the way).
   - States `draft` and `published`. Drafts are never public. The publish date is set on the first publish and can be edited.
+- **Drafts from GitHub (#86):** one API key per project and `POST /api/v1/posts`, which only creates drafts; a GitHub Actions workflow sends the "Changelog" section of merged pull requests. No GitHub App, no auto-publishing, no other Git providers.
 - **Public page:** `usechangelog.com/{slug}` lists the project's published posts, newest first.
 - **Widget:** one script tag that shows the latest published posts in a "What's new" panel.
 - **Billing:** Free publishes 1 project, Pro (monthly, through Polar, with an optional free trial set in Polar) up to 3. The plan is the account's and decides which projects publish, the page and the widget (see `polar-billing`).
