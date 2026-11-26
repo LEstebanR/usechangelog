@@ -7,7 +7,7 @@ import { SubmitButton } from "../../submit-button";
 import { CopyButton } from "../copy-button";
 
 // Creates or rotates the project's API key (#86) and shows the new key, only this once:
-// we keep its hash, never the key.
+// we keep its hash, never the key. Hidden once the key is revoked, so a dead key isn't offered.
 export function ApiKeyForm({
   action,
   hasKey,
@@ -18,7 +18,7 @@ export function ApiKeyForm({
   const [state, formAction] = useActionState(action, {});
   return (
     <>
-      {state.key && (
+      {state.key && hasKey && (
         <div role="status" className="mt-4 border border-green bg-wash p-4">
           <p className="text-sm font-medium">Your new API key. Copy it now: you won&rsquo;t see it again.</p>
           <div className="mt-2 flex items-start gap-3">
