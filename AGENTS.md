@@ -55,6 +55,10 @@ This list is the source of truth. The skills in `.agents/skills/` add implementa
 - One branch and one PR per issue, opened from an up-to-date `main`.
 - PRs are ready for review, never draft. Don't merge; the owner merges.
 - Fill in `.github/pull_request_template.md`: the Vercel preview URL and `Closes #<issue>` for every issue it resolves, so GitHub closes them on merge.
+- **The Changelog section is our own changelog:** on merge, `.github/workflows/usechangelog.yml` sends it as a draft to `/usechangelog`, and the owner reviews and publishes it.
+  - Fill in `Title:` only for a change customers notice (a feature, an improvement or a fix they'd see), with the matching `Category:` (`new`, `improved` or `fixed`). Leave it empty for anything internal (refactors, docs, CI, skills, tests): the pull request is then skipped.
+  - Write it for customers, in English: a title under 120 characters and a body of one to three short sentences. No issue numbers, file names, table names or other internals.
+  - No headings in the body: the section ends at the next heading. Keep the section where the template puts it, before `## Checklist`, so the attribution line at the end of the description is never sent.
 - Issues follow `.github/ISSUE_TEMPLATE/` and the `write-issue` skill.
 - To develop an issue, follow the `develop-issue` skill. It covers the plan checkpoint, the preview verification, the code review (the project's `review-pr` skill, not the generic `code-review`) and the README update.
 
