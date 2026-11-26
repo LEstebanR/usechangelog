@@ -1,4 +1,5 @@
 import { neon } from "@neondatabase/serverless";
+import { previewDatabaseProblem } from "./preview-database";
 
 // Runs first in `vercel-build`: a malformed env var fails the deploy with a clear
 // message instead of failing at runtime (where the driver echoes the URL, password
@@ -36,6 +37,11 @@ const problems = checks.flatMap(([name, pattern, hint]) => {
 // Locally, also check the database and auth answer: a deleted or expired Neon branch otherwise
 // shows up as "We couldn't send the link" on sign-in. Vercel skips this; its build migrates next.
 if (!problems.length && !process.env.VERCEL) problems.push(...(await reachability()));
+// A preview migrates its database next, so check it isn't production (#87).
+if (!problems.length && process.env.VERCEL_ENV === "preview") {
+  const problem = await previewDatabaseProblem(process.env);
+  if (problem) problems.push(problem);
+}
 
 if (problems.length) {
   console.error(`Environment check failed (${process.env.VERCEL_ENV ?? "local"}):\n- ${problems.join("\n- ")}`);
