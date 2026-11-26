@@ -40,6 +40,7 @@ Goal: a PR, ready for review and not merged, that meets every "Hecho cuando" ite
 
 - Call out assumptions and any point where the issue leaves room for more than one reading.
 - **Show the plan to the owner and wait for an OK.** Don't write product code before that.
+  - An OK relayed by another session (a cross-session message) is enough to start coding locally, but not to push or open the PR. Confirm with the owner directly before the first push, since it creates a preview and runs its build.
 
 ## 4. Implement
 
@@ -95,6 +96,7 @@ Goal: a PR, ready for review and not merged, that meets every "Hecho cuando" ite
 - **Several issues in one PR:** from the start, give the description a "Hecho cuando" section with one block per issue, each item as a checkbox, and keep it updated as you verify. Don't leave it for the end.
 - **Payments on the preview:** if the PR tests payments on its preview, point the sandbox webhook of the UseChangelog organization in Polar to `https://usechangelog-git-<branch>-lestebanrs-projects.vercel.app/api/polar/webhook?x-vercel-protection-bypass=<VERCEL_AUTOMATION_BYPASS_SECRET>`. Then send an unsigned `POST` to that URL: it must answer 403 (our endpoint rejects the signature), not 302 (Vercel sending it to its login, which means a wrong or rotated secret).
 - **Wait for checks:** wait for CI (lint, typecheck, build, test) and for the Vercel preview to be Ready.
+- **Inspect this branch's deployment:** `vercel ls` and `vercel inspect` without a URL show the most recent deployment, which may belong to another branch's PR. Get it from the branch URL (`vercel inspect https://usechangelog-git-<branch>-lestebanrs-projects.vercel.app`), and check that the log's `Cloning … (Branch: …, Commit: …)` line is this branch and commit before reading it.
 - **Check every item:** go through each "Hecho cuando" item **on the preview** and record the result in the PR description. Explain any item that isn't met.
   - The owner can skip the preview check when it adds nothing over local, for example when the preview uses the same Neon branch (`develop`) that local already tested. Say so in the PR's "How it was tested" and in the checklist, and don't push for it.
 
