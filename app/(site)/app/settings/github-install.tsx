@@ -1,10 +1,8 @@
 import { createApiKey, revokeApiKey } from "@/lib/api/actions";
 import { githubWorkflow, PR_TEMPLATE_SECTION } from "@/lib/api/github";
 import { formatDay, toDay } from "@/lib/posts/form";
-import { secondaryButtonClass } from "../../form-styles";
-import { SubmitButton } from "../../submit-button";
 import { CopyButton } from "../copy-button";
-import { ApiKeyForm } from "./api-key-form";
+import { ApiKeyPanel } from "./api-key-panel";
 
 const code = "font-mono text-ink";
 const day = (date: Date) => formatDay(toDay(date));
@@ -23,7 +21,11 @@ export function GithubInstall({ origin, workspaceId, apiKey }: { origin: string;
       </p>
 
       <h3 className="mt-6 text-sm font-medium">1. API key</h3>
-      <div className="mt-2 flex flex-wrap items-center justify-between gap-4 border border-hairline bg-wash p-4">
+      <ApiKeyPanel
+        create={createApiKey.bind(null, workspaceId)}
+        revoke={revokeApiKey.bind(null, workspaceId)}
+        hasKey={Boolean(apiKey)}
+      >
         {apiKey ? (
           <p className="text-sm">
             <code className={code} translate="no">
@@ -37,17 +39,7 @@ export function GithubInstall({ origin, workspaceId, apiKey }: { origin: string;
         ) : (
           <p className="text-sm text-graphite">No API key yet.</p>
         )}
-        <div className="flex gap-2">
-          <ApiKeyForm action={createApiKey.bind(null, workspaceId)} hasKey={Boolean(apiKey)} />
-          {apiKey && (
-            <form action={revokeApiKey.bind(null, workspaceId)}>
-              <SubmitButton pendingLabel="Revoking…" className={`${secondaryButtonClass} py-2 text-sm`}>
-                Revoke
-              </SubmitButton>
-            </form>
-          )}
-        </div>
-      </div>
+      </ApiKeyPanel>
       <p className="mt-2 text-sm text-graphite">
         Rotating or revoking stops the current key at once. Add the key to your repository as the{" "}
         <code className={code}>USECHANGELOG_API_KEY</code> secret (Settings → Secrets and variables → Actions).
