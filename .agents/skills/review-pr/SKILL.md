@@ -36,6 +36,7 @@ Review a change against `AGENTS.md` → Product rules and Code conventions. Thos
   - Unescaped Markdown or HTML on the public page or the widget.
   - A `mailto:` or `href` built from user input without validating it.
   - A new public endpoint without the same limits as its neighbours (rate limit, size).
+  - A `fetch` to an outside API in a build or a script (`check-env`, `vercel-build`) without a timeout (`AbortSignal.timeout`): a hung API holds the build until Vercel's own limit.
   - A user's personal data (email, name) in a log line, including a vendor's error message that may echo it back. Log an id instead, or redact it.
 
 ### Should fix
