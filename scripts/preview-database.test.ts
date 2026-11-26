@@ -30,6 +30,11 @@ describe("endpointId", () => {
     expect(endpointId("postgresql://u:p@ep-flat-salad-b4pzn1fv-pooler.c-6.us-east-2.aws.neon.tech/db")).toBe("ep-flat-salad-b4pzn1fv");
   });
 
+  test("an @ in the password doesn't confuse it", () => {
+    expect(endpointId("postgresql://u:p%40ss@ep-flat-salad-b4pzn1fv.c-6.us-east-2.aws.neon.tech/db")).toBe("ep-flat-salad-b4pzn1fv");
+    expect(endpointId("postgresql://u:p@ep-fake.x@db.example.com/db")).toBeUndefined();
+  });
+
   test("anything that isn't a Neon host has none", () => {
     expect(endpointId("postgresql://u:p@localhost:5432/db")).toBeUndefined();
     expect(endpointId("")).toBeUndefined();

@@ -7,8 +7,13 @@ const API = "https://console.neon.tech/api/v2";
 
 /** The endpoint id (ep-…) in a Neon connection string's host, pooled or direct. */
 export function endpointId(url: string): string | undefined {
-  const host = url.match(/@([^/:?]+)/)?.[1];
-  return host?.match(/^(ep-[a-z0-9-]+?)(-pooler)?\./)?.[1];
+  let host: string;
+  try {
+    host = new URL(url).hostname;
+  } catch {
+    return undefined;
+  }
+  return host.match(/^(ep-[a-z0-9-]+?)(-pooler)?\./)?.[1];
 }
 
 export async function previewDatabaseProblem(env: Env): Promise<string | undefined> {
@@ -18,6 +23,8 @@ export async function previewDatabaseProblem(env: Env): Promise<string | undefin
   const get = async (path: string) => {
     const res = await fetch(`${API}/projects/${env.NEON_PROJECT_ID}${path}`, {
       headers: { Authorization: `Bearer ${env.NEON_API_KEY}`, Accept: "application/json" },
+      // A hung API would otherwise hold the build until Vercel's own timeout.
+      signal: AbortSignal.timeout(10_000),
     });
     if (!res.ok) throw new Error(`Neon API ${path.split("/")[1]} answered HTTP ${res.status}`);
     return res.json();
