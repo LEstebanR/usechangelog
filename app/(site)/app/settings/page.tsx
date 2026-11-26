@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { requireUser } from "@/lib/auth/server";
 import { deleteAccount } from "@/lib/account/actions";
+import { getApiKey } from "@/lib/api/server";
 import { deleteWorkspace, setWidgetEnabled, updateWorkspace } from "@/lib/workspace/actions";
 import { listWorkspaces, requireWorkspace } from "@/lib/workspace/server";
 import { getOrigin, publicUrl } from "@/lib/site";
@@ -8,6 +9,7 @@ import { secondaryButtonClass } from "../../form-styles";
 import { SubmitButton } from "../../submit-button";
 import { WorkspaceForm } from "../workspace-form";
 import { ConfirmDeleteForm } from "./confirm-delete-form";
+import { GithubInstall } from "./github-install";
 import { WidgetInstall } from "./widget-install";
 
 export const metadata: Metadata = { title: "Settings — UseChangelog" };
@@ -15,10 +17,11 @@ export const metadata: Metadata = { title: "Settings — UseChangelog" };
 export default async function SettingsPage() {
   // The open project's settings. Its actions are bound to its id, not the cookie (#65).
   const [user, workspace, projects] = await Promise.all([requireUser(), requireWorkspace(), listWorkspaces()]);
-  const [origin, url, urls] = await Promise.all([
+  const [origin, url, urls, apiKey] = await Promise.all([
     getOrigin(),
     publicUrl(workspace.slug),
     Promise.all(projects.map((p) => publicUrl(p.slug))),
+    getApiKey(workspace.id),
   ]);
 
   return (
@@ -73,6 +76,11 @@ export default async function SettingsPage() {
           </SubmitButton>
         </form>
         <WidgetInstall origin={origin} widgetKey={workspace.widgetKey} />
+      </section>
+
+      <section className="border border-hairline bg-canvas p-8">
+        <h2 className="font-display text-xl font-medium">Drafts from GitHub</h2>
+        <GithubInstall origin={origin} workspaceId={workspace.id} apiKey={apiKey} />
       </section>
 
       <section aria-labelledby="delete-project" className="border border-clay/40 bg-canvas p-8">
