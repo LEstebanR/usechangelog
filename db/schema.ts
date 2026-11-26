@@ -1,5 +1,5 @@
 import { randomBytes } from "node:crypto";
-import { boolean, date, index, pgEnum, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
+import { boolean, date, index, pgEnum, pgTable, text, timestamp, uniqueIndex, uuid } from "drizzle-orm/pg-core";
 import { SUBSCRIPTION_STATUSES } from "@/lib/billing/status";
 import { FEEDBACK_KINDS, FEEDBACK_STATUSES } from "@/lib/feedback/form";
 import { CATEGORIES, TYPES } from "@/lib/posts/form";
@@ -90,14 +90,36 @@ export const posts = pgTable(
     // A day ("YYYY-MM-DD"), not a moment: set on the first publish, editable by hand,
     // kept when going back to draft.
     publishedOn: date("published_on", { mode: "string" }),
+    // Where a post sent through the API came from (#86), e.g. "github:owner/repo#123": the
+    // same pull request never creates two posts. Null for posts written in the app.
+    sourceRef: text("source_ref"),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp("updated_at", { withTimezone: true })
       .notNull()
       .defaultNow()
       .$onUpdate(() => new Date()),
   },
-  (t) => [index("posts_workspace_status_published_idx").on(t.workspaceId, t.status, t.publishedOn.desc())],
+  (t) => [
+    index("posts_workspace_status_published_idx").on(t.workspaceId, t.status, t.publishedOn.desc()),
+    // Nulls never collide, so posts written in the app are unaffected.
+    uniqueIndex("posts_workspace_source_ref_unique").on(t.workspaceId, t.sourceRef),
+  ],
 );
+
+// A project's API key (#86), for creating drafts from CI. One per project: rotating replaces
+// it, revoking deletes it. Only its SHA-256 is stored; the key itself is shown once.
+export const apiKeys = pgTable("api_keys", {
+  id: uuid().primaryKey().defaultRandom(),
+  workspaceId: uuid("workspace_id")
+    .notNull()
+    .unique("api_keys_workspace_id_unique")
+    .references(() => workspaces.id, { onDelete: "cascade" }),
+  hash: text().notNull().unique("api_keys_hash_unique"),
+  // The key's first characters, to tell keys apart in settings.
+  prefix: text().notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  lastUsedAt: timestamp("last_used_at", { withTimezone: true }),
+});
 
 export const feedbackKind = pgEnum("feedback_kind", FEEDBACK_KINDS);
 export const feedbackStatus = pgEnum("feedback_status", FEEDBACK_STATUSES);
