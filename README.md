@@ -391,7 +391,7 @@ The issue tracker is the backlog. Each issue carries a number in its title, in b
 | 32 | Admin: mark feedback as resolved | [#75](https://github.com/LEstebanR/usechangelog/issues/75) | ✅ Done |
 | 33 | Email: welcome when the first project is created | [#76](https://github.com/LEstebanR/usechangelog/issues/76) | ✅ Done |
 | 34 | Email: magic link in our own design | [#83](https://github.com/LEstebanR/usechangelog/issues/83) | ✅ Done |
-| 35 | Drafts from merged GitHub pull requests | [#86](https://github.com/LEstebanR/usechangelog/issues/86) | 🚧 In review |
+| 35 | Drafts from merged GitHub pull requests | [#86](https://github.com/LEstebanR/usechangelog/issues/86) | ✅ Done |
 
 ### Out of scope
 
