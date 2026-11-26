@@ -80,4 +80,10 @@ describe("githubWorkflow (#86)", () => {
     expect(readFileSync("examples/github-actions/usechangelog.yml", "utf8")).toBe(workflow);
     expect(readFileSync("examples/github-actions/pull_request_template.md", "utf8")).toBe(PR_TEMPLATE_SECTION);
   });
+
+  // We use it ourselves: our merged pull requests become drafts in /usechangelog.
+  test("this repo runs the same workflow and template section", () => {
+    expect(readFileSync(".github/workflows/usechangelog.yml", "utf8")).toBe(workflow);
+    expect(readFileSync(".github/pull_request_template.md", "utf8").endsWith(PR_TEMPLATE_SECTION)).toBe(true);
+  });
 });

@@ -159,6 +159,7 @@ db/
 proxy.ts                Redirects /app to /sign-in without a session
 examples/github-actions/  The workflow and PR template section for drafts from GitHub (#86), kept equal to settings' by a test
 .github/workflows/ci.yml  CI: lint, typecheck, build
+.github/workflows/usechangelog.yml  Our own merged pull requests with a "Changelog" title become drafts in /usechangelog (#86)
 AGENTS.md               Product rules and conventions (read by AI agents and humans)
 .agents/skills/         Project skills for AI agents (symlinked in .claude/skills)
 .cursor/agents/         Verifier agent (symlinked in .claude/agents)
