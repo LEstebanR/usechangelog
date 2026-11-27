@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Script from "next/script";
 import { PLANS } from "@/lib/billing/plans";
 import { readPlan } from "@/lib/billing/polar";
-import { audience, brand, closing, example, footer, hero, how, ownChangelog, posts, problem, publicPath, shippedPosts, signIn, widget } from "./content";
+import { audience, brand, closing, example, footer, github, hero, how, ownChangelog, posts, problem, publicPath, shippedPosts, signIn, widget } from "./content";
 import { Latest } from "./latest";
 import { pageMetadata, siteDescription, siteTitle } from "./metadata";
 import { Reveal } from "./reveal";
@@ -29,6 +29,7 @@ const navLinks = [
   { href: "#how", label: "How it works" },
   { href: "#changelog", label: "Example" },
   { href: "#widget", label: "Widget" },
+  { href: "#github", label: "GitHub" },
 ];
 
 // Places content on columns 4–12 of the 12-column grid, like section headings.
@@ -393,6 +394,67 @@ export default async function Home() {
               </div>
             </div>
             <p className="mt-6 text-sm text-graphite">{widget.note}</p>
+          </Indented>
+        </Section>
+
+        <Section
+          id="github"
+          label={github.label}
+          title={github.title}
+          aside={github.text}
+        >
+          <Indented className="mt-14">
+            <div className="grid grid-cols-1 gap-6 lg:grid-cols-9">
+              <figure
+                data-reveal
+                className="border border-hairline bg-wash lg:col-span-5"
+              >
+                <figcaption className="flex items-center justify-between gap-4 border-b border-hairline px-5 py-3 text-sm text-graphite">
+                  <span>Pull request description</span>
+                  <span translate="no">
+                    {github.repo}#{github.pr}
+                  </span>
+                </figcaption>
+                <pre
+                  tabIndex={0}
+                  aria-label="Changelog section of a pull request description"
+                  className="overflow-x-auto p-5 font-mono text-[0.82rem] leading-relaxed"
+                >
+                  <code translate="no">{github.description}</code>
+                </pre>
+              </figure>
+
+              <div
+                role="img"
+                aria-label="Mock of the draft created in UseChangelog when the pull request is merged"
+                data-reveal="open"
+                style={delay(250)}
+                className="border border-ink bg-canvas lg:col-span-4"
+              >
+                <div className="flex items-baseline justify-between gap-3 border-b border-ink px-4 py-3">
+                  <span className="font-display font-medium">Drafts</span>
+                  <span className="text-sm text-graphite">Merged, just now</span>
+                </div>
+                <div className="px-4 py-5">
+                  <div className="flex flex-wrap items-center gap-3">
+                    <Tag tag={github.draft.tag} />
+                    <span className="text-sm text-graphite" translate="no">
+                      {github.repo}#{github.pr}
+                    </span>
+                  </div>
+                  <p className="mt-4 font-display text-xl font-medium tracking-tight">
+                    {github.draft.title}
+                  </p>
+                  <p className="mt-2 text-sm leading-relaxed text-graphite">
+                    {github.draft.body}
+                  </p>
+                </div>
+                <p className="border-t border-hairline px-4 py-3 text-sm text-blue">
+                  Review and publish
+                </p>
+              </div>
+            </div>
+            <p className="mt-6 text-sm text-graphite">{github.note}</p>
           </Indented>
         </Section>
 
