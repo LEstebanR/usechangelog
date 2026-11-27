@@ -126,6 +126,29 @@ export const widget = {
   note: "Your key, and the snippet for HTML, Next.js and Vite, are in Settings once you sign up.",
 };
 
+// Drafts from merged pull requests (#86): the PR template's Changelog section, sent by the
+// GitHub Actions workflow in examples/github-actions/ to POST /api/v1/posts.
+export const github = {
+  label: "From GitHub",
+  title: "Merge the PR. The draft writes itself.",
+  text: "Add a short Changelog section to your pull requests. When one is merged into your default branch, a GitHub Action sends it to UseChangelog as a draft, ready to review and publish.",
+  repo: "acme/web",
+  pr: 128,
+  description: `## Changelog
+
+Title: CSV export
+Category: new
+
+Export any report to CSV from the Share menu.
+The columns match what you see on screen.`,
+  draft: {
+    tag: "New" as PostTag,
+    title: "CSV export",
+    body: "Export any report to CSV from the Share menu. The columns match what you see on screen.",
+  },
+  note: "The workflow and your API key are in Settings. Pull requests with an empty title, like refactors or docs, are skipped.",
+};
+
 export const audience = {
   label: "Who it’s for",
   title: "Made for teams of one to twenty.",
