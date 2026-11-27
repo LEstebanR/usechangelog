@@ -152,6 +152,7 @@ public/opengraph-image.png  Shared social image (1200×630) of the marketing sit
 assets/fonts/           TTF fonts (OFL) for the share image
 scripts/smoke-app.ts    Signed-in smoke test (`bun run smoke`)
 scripts/widget-test.ts  Host pages to try the widget from another origin (`bun run widget-test`)
+scripts/api-test.ts     End-to-end check of the API (`bun run api-test`)
 db/
   schema.ts             Our tables (public schema): accounts (billing), workspaces (projects), posts, api_keys, feedback, user_roles
   neon-auth.ts          Read-only view of Neon's user table, for foreign keys
@@ -196,6 +197,7 @@ Open http://localhost:3000.
 | `bun run hooks:install` | Once per clone: new worktrees get `.env.local` as a link to the main checkout's |
 | `bun run polar:state <slug>` | Read only: the subscription of a project's account in our database next to what Polar has, and what differs. Uses `.env.local` (develop + sandbox); for production, see below |
 | `bun run widget-test <widget-key> [base-url] [port]` | Host pages on another origin (`localhost:5050`) that load the widget: floating button, trigger + Spanish, hostile CSS, invalid key. For a protected preview, set `VERCEL_AUTOMATION_BYPASS_SECRET` |
+| `bun run api-test [base-url]` | End-to-end check of `POST /api/v1/posts` (#86): a throwaway project and key in `.env.local`'s database (develop), every answer checked (201, 200, 400, 401, 413, 429, revoked), then deleted. Refuses production. For a protected preview, set `VERCEL_AUTOMATION_BYPASS_SECRET` |
 | `bun run smoke <email> [base-url]` | Signed-in smoke test of `/app`. Reuses the last session (`.smoke-session-*.json`, git-ignored), so it only sends a magic link when that expires; `SMOKE_LINK=<link>` skips the request. Never writes data, and refuses production URLs unless `SMOKE_ALLOW_PRODUCTION=1` |
 
 ### Environment variables
@@ -215,7 +217,7 @@ Every variable the code reads is in `.env.example`, by name only. `bun run check
 | `POLAR_ALLOW_DISCOUNT_CODES` | Optional and temporary: discount field in the checkout during Polar's account review | — | Only during the review | Set by hand, delete after |
 | `NEXT_PUBLIC_SITE_URL` | Canonical URL for metadata (`metadataBase`, `og:url`) | Unset: the preview's own URL (`VERCEL_URL`) | `https://www.usechangelog.com` | Fixed |
 | `RESEND_API_KEY` | The welcome email (#76) and the magic link (#83). Without it nothing is sent, and a branch whose `send.magic_link` webhook is on can't sign in by email | Optional, the same key to try it | Required (`check-env`) | Resend → API Keys: `usechangelog-production`, *Sending access*, domain `usechangelog.com` |
-| `VERCEL_AUTOMATION_BYPASS_SECRET` | Optional, local only: `widget-test` and `smoke` against a protected preview | — | — | Vercel → Deployment Protection → Protection Bypass for Automation |
+| `VERCEL_AUTOMATION_BYPASS_SECRET` | Optional, local only: `widget-test`, `api-test` and `smoke` against a protected preview | — | — | Vercel → Deployment Protection → Protection Bypass for Automation |
 | `SMOKE_LINK`, `SMOKE_ALLOW_PRODUCTION` | Optional, local only: `bun run smoke` | — | — | You |
 | `VERCEL`, `VERCEL_ENV`, `VERCEL_URL` | Which environment this is | Set by Vercel | Set by Vercel | Never set them yourself |
 
@@ -424,7 +426,7 @@ Lighthouse on the production build: **98 / 100 / 100 / 100** on mobile and **100
 
 ## Contributing
 
-- **One issue, one branch, one PR,** opened from an up-to-date `main`. PRs are ready for review, never draft; the owner merges.
+- **One issue, one branch, one PR,** opened from an up-to-date `main`. PRs are ready for review, never draft; the owner merges, or asks an agent to.
 - **The PR description** carries the Vercel preview URL and `Closes #<issue>`, so GitHub closes the issue on merge. Issue and PR templates live in `.github/`.
 - **Our changelog comes from the PRs:** a PR whose "Changelog" section has a title becomes a draft at `/usechangelog` when it's merged. Write it for customers, short, and leave the title empty for internal changes. The rules are in [`AGENTS.md`](AGENTS.md#pull-requests).
 - **Language:** code, commits, UI copy and PRs are in English; issues are in Spanish.

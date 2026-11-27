@@ -36,6 +36,7 @@ Review a change against `AGENTS.md` → Product rules and Code conventions. Thos
   - Unescaped Markdown or HTML on the public page or the widget.
   - A `mailto:` or `href` built from user input without validating it.
   - A new public endpoint without the same limits as its neighbours (rate limit, size).
+  - A public endpoint that reads the whole body (`request.text()`, `request.json()`) before checking its size: a chunked request has no `Content-Length`, so read it with a cap, as `app/api/v1/posts/route.ts` does.
   - A `fetch` to an outside API in a build or a script (`check-env`, `vercel-build`) without a timeout (`AbortSignal.timeout`): a hung API holds the build until Vercel's own limit.
   - A user's personal data (email, name) in a log line, including a vendor's error message that may echo it back. Log an id instead, or redact it.
 
@@ -52,6 +53,7 @@ Review a change against `AGENTS.md` → Product rules and Code conventions. Thos
   - Post content is never translated.
 - **Tests:**
   - New pure logic (a parser, a label table, a rule) has a co-located `*.test.ts`.
+  - A parser of Markdown that looks for headings or fields line by line skips code fences (``` and ~~~): a `# comment` in a code block is not a heading. Test it with one.
   - Queries are tested from their SQL (`.toSQL()`), with no database (see `lib/posts/server.test.ts`).
   - A test that the types already guarantee adds nothing.
 - **Reuse:** before accepting a new helper, grep for the existing one: `oneOf` (`lib/posts/form.ts`), `UUID` (`lib/uuid.ts`), `redirectWithNotice` (`lib/notice.ts`), `dateTime` (`lib/admin/format.ts`), `requireAdmin` (`lib/auth/roles.ts`).

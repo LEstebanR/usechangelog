@@ -53,7 +53,7 @@ This list is the source of truth. The skills in `.agents/skills/` add implementa
 ## Pull requests
 
 - One branch and one PR per issue, opened from an up-to-date `main`.
-- PRs are ready for review, never draft. Don't merge; the owner merges.
+- PRs are ready for review, never draft. The owner merges. An agent merges only when the owner asks for it in the conversation, for that PR, and only with CI green on the PR's last commit (`gh pr merge <n> --merge --match-head-commit <sha>`).
 - Fill in `.github/pull_request_template.md`: the Vercel preview URL and `Closes #<issue>` for every issue it resolves, so GitHub closes them on merge.
 - **The Changelog section is our own changelog:** on merge, `.github/workflows/usechangelog.yml` sends it as a draft to `/usechangelog`, and the owner reviews and publishes it.
   - Fill in `Title:` only for a change customers notice (a feature, an improvement or a fix they'd see), with the matching `Category:` (`new`, `improved` or `fixed`). Leave it empty for anything internal (refactors, docs, CI, skills, tests): the pull request is then skipped.
