@@ -16,6 +16,7 @@
     "vercel-build": "bun run check-env && bun run db:migrate && next build",
     "smoke": "bun scripts/smoke-app.ts",
     "widget-test": "bun scripts/widget-test.ts",
+    "api-test": "bun scripts/api-test.ts",
     "check-env": "bun scripts/check-env.ts",
     "polar:state": "bun scripts/polar-state.ts",
     "admin:grant": "bun scripts/admin-grant.ts",

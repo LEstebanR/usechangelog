@@ -18,6 +18,7 @@ Goal: a PR, ready for review and not merged, that meets every "Hecho cuando" ite
 - **Auth on the preview.** If the PR touches sign-in or `/app` and will be checked on its preview, add an owner step to the plan: in Neon, on the branch previews use, Better Auth → Domains → `https://usechangelog-git-<branch>-lestebanrs-projects.vercel.app`. Neon has no wildcard that covers preview URLs. Then, before checking anything behind sign-in on the preview, ask the owner to sign in there in the browser you'll use; never sign in for them. If the owner skips the preview check (step 6), drop both steps.
 - **Ask whether the preview check is needed.** In the plan, ask the owner whether to verify on the preview or skip it (step 6). If they skip it, verify against `develop` and locally instead.
 - **Resuming:** if a branch or PR for this issue already exists, continue there; don't start over.
+  - **The worktree is gone** (someone removed `.claude/worktrees/<issue>` mid-work): commit and push often, so nothing lives only there. Recreate it from the branch with `git worktree add .claude/worktrees/<issue> <branch>` from the main checkout, then `bun install`; the `post-checkout` hook links `.env.local` again.
 
 ## 2. Read before writing code
 
@@ -85,6 +86,7 @@ Goal: a PR, ready for review and not merged, that meets every "Hecho cuando" ite
 - **Phone widths:** the Chrome window may not shrink below the screen's width (it stayed at 1600px). Instead, load the page in a same-origin `<iframe>` of the target width (320, 375, 400), wait for it to load, and measure through `iframe.contentDocument`: `getBoundingClientRect()`, `scrollWidth > clientWidth` for truncation, and `documentElement.scrollWidth > width` for sideways scroll. To find what causes a sideways scroll, ignore elements inside an `overflow-x-auto` container; they scroll on their own and don't widen the page.
 - A check that only asks a vendor (for example, revoking a Polar subscription by its customer) doesn't need that vendor's webhook. Run `polar listen` only when the check needs our database to follow Polar.
 - To try the widget from another origin, `bun run widget-test <widget-key> [base-url]` serves host pages on `localhost:5050`. For a protected preview, export `VERCEL_AUTOMATION_BYPASS_SECRET` first.
+- For the API (`POST /api/v1/posts`), `bun run api-test [base-url]` creates a throwaway project and key on `develop`, checks every answer (201, 200, 400, 401, 413, 429, revoked) and deletes them. It refuses production.
 - For anything behind sign-in, `bun run smoke <email> [base-url]` signs in with a real magic link (you paste it from the email) and checks `/app` and onboarding. It reuses the saved session, so it only spends a Neon email when the session has expired; don't sign in by hand for each check. It never writes to the database.
 
 ## 6. Open the PR and verify on the preview
@@ -133,7 +135,7 @@ Tell the owner:
 - what the review (and simplify, if it ran) changed;
 - any deviation from the issue, and why.
 
-**Never merge:** the owner merges.
+**Don't merge on your own:** the owner merges. Merge only when the owner asks for it, for this PR, with CI green on its last commit (`AGENTS.md` → Pull requests), then check the production deploy.
 
 ## 10. Improvements → checkpoint
 
